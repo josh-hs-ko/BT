@@ -1,3 +1,5 @@
+{-# OPTIONS --safe --large-indices --no-forced-argument-recursion #-}
+
 module BT where
 
 open import Function renaming (_$_ to infixr 5 _$_)
