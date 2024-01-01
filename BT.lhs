@@ -1,4 +1,4 @@
-\documentclass[acmsmall,screen,review]{acmart}
+\documentclass[acmsmall,fleqn,screen,review]{acmart}
 
 \settopmatter{printccs=false, printacmref=false}
 \setcopyright{none}
@@ -19,13 +19,17 @@
 %\fi
 
 \usepackage[capitalise,noabbrev]{cleveref}
+\citestyle{acmauthoryear}
 
 \usepackage{mathtools}
 
 \usepackage{listings}
-\lstset{language=Haskell, basicstyle=\ttfamily, basewidth=0.5em, xleftmargin=2\parindent}
+\lstset{basicstyle=\ttfamily, basewidth=0.5em, xleftmargin=2\parindent, morekeywords={data, where}}
 
-\usepackage{mdframed}
+%\usepackage{mdframed}
+%\newenvironment{temp}{\begin{mdframed}[backgroundcolor=red!10, linewidth=0, skipabove=1ex, leftmargin=1ex, rightmargin=0, innerleftmargin=0, innerrightmargin=0, innertopmargin=0, innerbottommargin=0]}{\end{mdframed}}
+%\definecolor{SkyBlue}{HTML}{D9F6FF}
+%\newenvironment{final}{\begin{mdframed}[backgroundcolor=SkyBlue, linewidth=0, skipabove=1ex, leftmargin=1ex, rightmargin=0, innerleftmargin=0, innerrightmargin=0, innertopmargin=0, innerbottommargin=0]}{\end{mdframed}}
 
 \usepackage{xifthen}
 \newcommand{\varcitet}[3][]{\citeauthor{#2}#3~[\ifthenelse{\isempty{#1}}{\citeyear{#2}}{\citeyear[#1]{#2}}]}
@@ -35,24 +39,38 @@
 \setlength{\marginparwidth}{1.25cm}
 \usepackage[obeyFinal,color=yellow,textsize=scriptsize]{todonotes}
 
+\newcommand{\equals}{\enskip=\enskip}
+
 \let\Bbbk\relax
 %include agda.fmt
 
 %format →' = "\kern-.345em\mathrlap{\to}"
 %format ∘ = "{\cdot}"
+%format ≡ = "{\equiv}"
+%format ∈ = "{\in}"
+%format [ = "[\kern-2pt"
+%format ] = "\kern-2pt]"
+%format Σ[ = Σ [
 
-%format tipₙ = tip "_{\Conid n}"
+%format (BT'(n)(k)) = BT "^{" n "}_{" k "}"
+%format TipZ = Tip "_{\Conid z}"
+%format TipS = Tip "_{\Conid s}"
 
 \newcommand{\Var}[1]{\mathit{#1}}
 
-%format A = "\Var A"
-%format P = "\Var P"
-
-%format n = "\Var n"
+%format a = "\Var a"
+%format b = "\Var b"
+%format c = "\Var c"
+%format h = "\Var h"
 %format k = "\Var k"
+%format n = "\Var n"
+%format p = "\Var p"
 %format x = "\Var x"
 %format xs = "\Var xs"
 %format ys = "\Var ys"
+%format z = "\Var z"
+
+%format sk = 1+ k
 
 \begin{document}
 
@@ -64,8 +82,9 @@
 \author{Shin-Cheng Mu}
 \email{scm@@iis.sinica.edu.tw}
 \orcid{0000-0002-4755-601X}
-\affiliation{%
+\affiliation{
   \institution{Academia Sinica}
+  \department{Institute of Information Science}
   \streetaddress{128 Academia Road}
   \city{Taipei}
   \country{Taiwan}
@@ -74,8 +93,9 @@
 \author{Jeremy Gibbons}
 \email{jeremy.gibbons@@cs.ox.ac.uk}
 \orcid{0000-0002-8426-9917}
-\affiliation{%
+\affiliation{
   \institution{University of Oxford}
+  \department{Department of Computer Science}
   \streetaddress{Wolfson Building, Parks Road}
   \city{Oxford}
   \country{UK}
@@ -85,6 +105,7 @@
 \title{Binomial Tabulation: A Short Story (Functional Pearl)}
 
 \begin{abstract}
+\todo[inline]{Abstract: a demonstration of dependent types and string diagrams for the mathematically inclined functional programmer}
 \end{abstract}
 
 %\begin{CCSXML}
@@ -121,6 +142,12 @@
 
 \maketitle
 
+\todo[inline]{Including the sections to see the overall structure; may consider omitting the sections altogether when the manuscript is finished}
+
+\tableofcontents
+
+\section{Teaser}
+
 `What on earth is this function doing?'
 
 I stared at the late Richard Bird's `Zippy Tabulations of Recursive Functions'~\citeyearpar{Bird-zippy-tabulations}, frowning.
@@ -128,37 +155,157 @@ I stared at the late Richard Bird's `Zippy Tabulations of Recursive Functions'~\
 \begin{lstlisting}
 cd                        :: B a -> B (L a)
 cd (Bin (Tip a) (Tip b))  =  Tip [a, b]
-cd (Bin u (Tip b))        =  Bin (cd u) (B (: [b]) u)
+cd (Bin u (Tip b))        =  Bin (cd u) (mapB (: [b]) u)
 cd (Bin (Tip a) v)        =  Tip (a : as) where Tip as = cd v
 cd (Bin u v)              =  Bin (cd u) (zipBWith (:) u (cd v))
 \end{lstlisting}
 
-I knew \lstinline{B} was this datatype of trees
+I knew \lstinline{B} was this Haskell datatype of trees,
 \begin{lstlisting}
 data B a = Tip a || Bin (B a) (B a)
 \end{lstlisting}
-and \lstinline{L} was the usual list datatype, but how did Richard come up with such a complicated function definition?
+\lstinline{mapB} and \lstinline{zipBWith} were the usual \lstinline{map} and \lstinline{zipWith} functions for these trees, and \lstinline{L} was the standard data type of lists, but how did Richard come up with such an incomprehensible function definition?
 And he didn't bother to explain it in the paper.
 
-\todo[inline]{Monologue of a dependently typed programmer, highlighting what they think about (in an intuitive and colloquial style) when solving the problem/mystery (cf~the beginning of the science fiction novel \textit{Project Hail Mary})}
+\section{Simply Typed Algorithms}
 
-\begin{mdframed}[backgroundcolor=red!7, linewidth=0, skipabove=1ex, leftmargin=1ex, rightmargin=0, innerleftmargin=0, innerrightmargin=0, innertopmargin=0, innerbottommargin=0]
-\begin{code}
-data BT (A : Set) : ℕ → ℕ → Set where
-  tip₀  :   A                → BT A       n     0
-  tipₙ  :   A                → BT A (1 +  n) (  1 + n)
-  bin   :   BT A n (1 +  k)
-        →'  BT A n       k   → BT A (1 +  n) (  1 + k)
-\end{code}
-\end{mdframed}
+Based on what I’d read in the paper, I could make a pretty good guess at what \lstinline{cd} was doing at a high level.
+
+\todo[inline]{Recap of what Richard's paper wanted to do: transforming a top-down algorithm (which acts as a specification) to a bottom-up algorithm, which `I' (Shin) had already worked out a simplified version; explain why the base cases have to be singleton lists; the role of \lstinline{cd} in the bottom-up algorithm, intuitively; relationship to binomial cofficients}
+
+But I still couldn’t see, \emph{formally}, how to make sense of the definition of \lstinline{cd} or get from the definition to a correctness proof of \lstinline{bu}.%
+\todo{Main question; even suggest there's a lot of proving ahead (actually not)}
+
+\section{Indexed Data Types of Binomial Trees}
+
+\todo[inline]{Starting with the legitimacy of \lstinline{zipBWith}, which is now a standard application of length/shape indexing of datatypes --- nothing surprising; opening my favourite editor and switching to Agda}
 
 \begin{code}
-data BT : (n k : ℕ) → (Vec A k → Set) → Vec A n → Set where
-  tip₀  :   P []                             → BT       n     0       P xs
-  tipₙ  :   P xs                             → BT (1 +  n) (  1 + n)  P xs
-  bin   :   BT n (1 +  k)   P            xs
-        →'  BT n       k (  P ∘ (x ∷_))  xs  → BT (1 + n) (1 + k) P (x ∷ xs)
+data B (a : Set) : ℕ → ℕ → Set where
+  TipZ  :   a               → B a       n     0
+  TipS  :   a               → B a (1 +  n) (  1 + n)
+  Bin   :   B a n (1 +  k)
+        →'  B a n       k   → B a (1 +  n) (  1 + k)
 \end{code}
+
+\begin{code}
+zipBWith : (a → b → c) → B a n k → B b n k → B c n k
+\end{code}
+
+\begin{code}
+cd : B a n k → B (Vec a (1 + k)) n (1 + k)
+\end{code}
+
+\todo[inline]{Use even richer dependent types to say more and prove less}
+
+\todo[inline]{What to say? Need a spec: the equational one using \lstinline{choose} (marking the element positions with sub-lists and specifying where the elements should go); but requires a lot of proving}
+
+\begin{lstlisting}
+choose               :: Int -> L a -> B (L a)
+choose    0  xs      =  Tip []
+choose (k+1) xs      ||  length xs == k+1  =  Tip xs
+choose (k+1) (x:xs)  =  Bin (choose (k+1) xs) (mapB (x:) (choose k xs))
+\end{lstlisting}
+
+\[ \text{\lstinline{cd (choose k xs)}} \equals \text{\lstinline{mapB (choose k) (choose (k+1) xs)}} \]
+
+\todo[inline]{Maybe find some indexing scheme that enforces the elements of a binomial tree to be \lstinline{mapB h (choose k xs)} with equality proofs about the elements, and then write a function between such trees?
+Might be able to turn a large number of equalities into judgemental ones so that the Agda type checker can do the rewriting for us, in the same spirit as \varcitet{McBride-ornaments}{'s} compiler for Hutton's razor; ad~hoc and not very clean however (trees scattered with proofs)}
+
+\todo[inline]{Revelation (before attempting to write down the ad hoc data type): make better use of the dependently typed language by putting the sub-lists in the indices of the element type!}
+
+\begin{code}
+data BT {a : Set} : (n k : ℕ) → (Vec a k → Set) → Vec a n → Set where
+  TipZ  :   p []                             → BT       n     0       p xs
+  TipS  :   p xs                             → BT (1 +  n) (  1 + n)  p xs
+  Bin   :   BT n (1 +  k)   p            xs
+        →'  BT n       k (  p ∘ (x ∷_))  xs  → BT (1 +  n) (  1 + k)  p (x ∷ xs)
+\end{code}
+
+\todo[inline]{The `T' in |BT| stands for `tree' or `table'.
+Sometimes write |BT n k| as |(BT' n k)|, mirroring the traditional mathematical notation $C^\mathit{n}_\mathit{k}$ for the number of $k$-combinations of $n$~elements.
+Extensionally, |(BT' n k) p xs| means that the predicate |p : Vec a k → Set| holds for all the length-|k| sub-lists of |xs : Vec a n|, or more precisely, a proof of |(BT' n k) p xs| is a table of proofs of |p ys| where |ys| ranges over the length-|k| sub-lists of |xs|.
+Both the plain shape-indexed trees and the trees with equality proofs become special cases by specialising |p| to |const a| and |λ ys → Σ[ z ∈ b ] z ≡ h ys| (given |b : Set| and |h : Vec a k → b|).}
+
+\todo[inline]{Apparently there's a design pattern transforming non-deterministic computations into indexed data types to be abstracted and formulated (and a paper to be written).
+The continuation-passing-style indexing is also intriguing.
+The familiar |All| data type, for example, becomes a special case.}
+
+\todo[inline]{Think of |BT| as a new definition of the notion of combination, and I can now say in terms of |BT| what I wanted to say with the equation involving \lstinline{choose}.
+The list in the type of \lstinline{cd}, which is renamed to |retabulate| here, is actually a particular kind of binomial tree.}
+
+\begin{code}
+retabulate : n > k → (BT' n k) p xs → (BT' n sk) ((BT' sk k) p) xs
+\end{code}
+which is parametrically polymorphic in |a : Set| and |p : Vec a k → Set|.
+
+\todo[inline]{First climax: The definition of \lstinline{cd} can be ported to |retabulate| without essential change, meaning that the definition has been verified just by finding a right type for it!
+(Changes include a couple more cases than \lstinline{cd} (foreshadowing the generalisation about base cases) and some inequality proofs for the |n > k| argument.)
+There's actually no need to understand the definition of \lstinline{cd}/|retabulate|, but I can still work out a case or two to see how well type-directed programming works.
+}
+
+\todo[inline]{Conjecture: the behaviour of |retabulate| is uniquely determined by its type (which works as a tight specification).
+The proof may be similar to \varcitet{Voigtlander-BX-for-free}{'s} (and generalised with parametricity for dependent types~\citep{Bernardy-proofs-for-free} and datatype-generic lookup~\citep{Diehl-InfIR}).}
+
+\section{Dependently Typed Algorithms}
+
+\todo[inline]{Do dependent types help us prove that \lstinline{bu} equals \lstinline{td} too?}
+
+\todo[inline]{Starting with the assumptions:
+The input to~\lstinline{g} is actually a binomial tree too.
+Solutions should be indexed by the input list.
+Dependent types allow~|g| to subsume the base cases encoded by~\lstinline{f}.
+Arrive at an \emph{induction principle} with induction hypotheses for immediate sub-lists.}
+
+\todo[inline]{Conjecture: the (extensional) behaviour of |td| and |bu| is uniquely determined by their type.
+If the conjecture is true, then we are done.
+I don't immediately see how to prove the conjecture, however; moreover, I'd like to compare what |td| and |bu| do \emph{intensionally} --- need more tools to see through the complexity.}
+
+\section{Categories of Families of Types and Functions}
+
+\todo[inline]{One source of complexity is the indices, which are getting annoying and need a bit of management.
+In a sense, |retabulate| is still a familiar functional program that transforms a tree of~|p|'s to a tree of trees of~|p|'s, parametrically in~|p|.
+Category theory helps us see that and make it precise.
+Functional programmers are familiar with types and functions; abstract them as objects and morphisms so that we can specialise them to something new (in this case families of types and functions, or (proof-relevant) predicates and pointwise implications) and work with the new stuff using the same notation and intuition.}
+
+\section{String-Diagrammatic Algorithms}
+
+\todo[inline]{Richard already pointed out that naturality is the key; try string diagrams!}
+
+\todo[inline]{Recap of string diagrams for 2-categories, i.e., layered type structure (composition of functors); layers may be transformed independently of others, and this intuition is captured by the definition of natural transformations.
+The two sides of a traditional naturality equation look rather different, whereas in a diagrammatic equation the two sides are `the same picture', allowing us to change perspectives effortlessly.}
+
+\todo[inline]{Specialised cases (with a concrete size) only; production and consumption parts, which can be separated by naturality.
+The production parts build the same nested tables but in different orders, and the order used by bottom-up algorithm allows production and consumption to be interleaved.}
+
+\todo[inline]{Algorithmically:
+Overlapping sub-problems occur in two layers of tables.
+After creating deeply nested and empty tables, the top-down algorithm invokes |g| to solve the resulting overlapping sub-problems multiple times.
+The bottom-up algorithm avoids that by computing one table of sub-solutions at a time; more than one layers of table only appear due to |retabulate|, which only duplicates and redistributes already computed sub-solutions.}
+
+\todo[inline]{To prove the equality between |td| and |bu| along this direction:
+The consumption parts of the two algorithms are the same.
+The production parts are left- and right-leaning trees; use the |retabulate|-|choose| equation, which is diagrammatically some kind of rotation?
+(Looks like co-associativity; maybe |BT| is some kind of graded comonad?)
+The rotation proof is not difficult but not trivial either, and the |retabulate|-|choose| equation still needs to be established by delving into the definitions\ldots}
+
+\todo[inline]{Second climax: the types have already proved the equality between the production parts for us!}
+
+\todo[inline]{Sketch inductive diagrammatic definitions and Agda formalisation}
+
+\section*{Afterword}
+
+\todo[inline]{Largely follows the actual development, which we realise makes a nice story, going from the concrete to the abstract (`based on a true story')}
+
+\todo[inline]{Monologue of a dependently typed programmer, going through what they think about (in an intuitive and colloquial style) when solving the problem/mystery (cf~the beginning of the science fiction novel \textit{Project Hail Mary}) rather than reporting a piece of already finished work; the format is more effective for presenting thought processes and focusing on ideas (people don't usually hurry to work out all the technical detail when first solving a problem)}
+
+\todo[inline]{Resist the temptation to generalise, and keep the material simple and self-contained (but not a detailed tutorial); loose ends here and there to point out generality and future work (exercises and papers)}
+
+\todo[inline]{Compare with \varcitet{Mu-sublists}{'s} treatment of the problem using simple types and equational reasoning}
+
+\todo[inline]{Why should dependent types, category theory, and string diagrams be in the (mathematically inclined) functional programmer's toolbox?
+Proving by writing things down in the right languages.
+Specifically: fancy types can replace traditional specs, and are a still under-explored methodology (except length/shape indexing); category theory offers useful abstraction (for sometimes comprehending indexed definitions as if they were simply typed); in particular, the categorical abstraction enables the use of string diagrams to make reasoning with naturality transparent (and in this case the main proof is entirely about naturality and rendered trivial)}
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{bib}
