@@ -61,6 +61,8 @@
 %format a = "\Var a"
 %format b = "\Var b"
 %format c = "\Var c"
+%format e = "\Var e"
+%format g = "\Var g"
 %format h = "\Var h"
 %format k = "\Var k"
 %format n = "\Var n"
@@ -258,8 +260,11 @@ Dependent types allow~|g| to subsume the base cases encoded by~\lstinline{f}.
 Arrive at an \emph{induction principle} with induction hypotheses for immediate sub-lists.}
 
 \todo[inline]{Conjecture: the (extensional) behaviour of |td| and |bu| is uniquely determined by their type.
-If the conjecture is true, then we are done.
-I don't immediately see how to prove the conjecture, however; moreover, I'd like to compare what |td| and |bu| do \emph{intensionally} --- need more tools to see through the complexity.}
+(The induction principle for natural numbers is a simpler example to think about.)
+If the conjecture is true, then immediately |td| equals |bu|.
+But it's probably going to require a more involved proof using parametricity, which I don't immediately see how to do.
+Moreover, I'd like to compare what |td| and |bu| do \emph{intensionally}, an aspect which would be overlooked from the parametricity perspective.
+Need more tools to see through the complexity.}
 
 \section{Categories of Families of Types and Functions}
 
@@ -278,11 +283,6 @@ The two sides of a traditional naturality equation look rather different, wherea
 \todo[inline]{Specialised cases (with a concrete size) only; production and consumption parts, which can be separated by naturality.
 The production parts build the same nested tables but in different orders, and the order used by bottom-up algorithm allows production and consumption to be interleaved.}
 
-\todo[inline]{Algorithmically:
-Overlapping sub-problems occur in two layers of tables.
-After creating deeply nested and empty tables, the top-down algorithm invokes |g| to solve the resulting overlapping sub-problems multiple times.
-The bottom-up algorithm avoids that by computing one table of sub-solutions at a time; more than one layers of table only appear due to |retabulate|, which only duplicates and redistributes already computed sub-solutions.}
-
 \todo[inline]{To prove the equality between |td| and |bu| along this direction:
 The consumption parts of the two algorithms are the same.
 The production parts are left- and right-leaning trees; use the |retabulate|-|choose| equation, which is diagrammatically some kind of rotation?
@@ -290,6 +290,11 @@ The production parts are left- and right-leaning trees; use the |retabulate|-|ch
 The rotation proof is not difficult but not trivial either, and the |retabulate|-|choose| equation still needs to be established by delving into the definitions\ldots}
 
 \todo[inline]{Second climax: the types have already proved the equality between the production parts for us!}
+
+\todo[inline]{Algorithmically:
+Overlapping sub-problems occur in two layers of tables, and they are solved repetitively when |g|~is used to produce two or more layers of tables, which is what the top-down algorithm does after creating deeply nested tables.
+The bottom-up algorithm avoids the repetitive computation because it always uses~|g| to produce only one layer of table.
+(Two layers of tables only appear due to |retabulate|, which only duplicates and redistributes already computed solutions and doesn't recompute them.)}
 
 \todo[inline]{Sketch inductive diagrammatic definitions and Agda formalisation}
 
