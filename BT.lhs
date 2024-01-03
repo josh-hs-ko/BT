@@ -241,11 +241,10 @@ retabulate : n > k → (BT' n k) p xs → (BT' n sk) ((BT' sk k) p) xs
 \end{code}
 which is parametrically polymorphic in |a : Set| and |p : Vec a k → Set|.
 
-\todo[inline]{First climax: The definition of \lstinline{cd} can be ported to |retabulate| without essential change, meaning that the definition has been verified just by finding a right type for it!
-(Changes include a couple more cases than \lstinline{cd} (foreshadowing the generalisation about base cases) and some inequality proofs for the |n > k| argument.)
+\todo[inline]{First climax: The definition of \lstinline{cd} can be quite straightforwardly ported to to Agda as |retabulate|, meaning that the definition has been verified just by finding a right type for it!
+(Need a comparison between \lstinline{cd} and |retabulate|: including more cases than \lstinline{cd} (foreshadowing the generalisation about base cases), generalising a couple of cases, and handling some inequality proofs for the |n > k| argument.)
 There's actually no need to understand the definition of \lstinline{cd}/|retabulate|, but I can still work out a case or two to see how well type-directed programming works.
-A coherence commuting diagram (in the sense of data refinement) between |retabulate| and \lstinline{cd} to understand one in terms of the other?
-}
+A coherence commuting diagram (in the sense of data refinement) between |retabulate| and \lstinline{cd} to understand one in terms of the other?}
 
 \todo[inline]{Conjecture: the behaviour of |retabulate| is uniquely determined by its type (which works as a tight specification).
 The proof may be similar to \varcitet{Voigtlander-BX-for-free}{'s} (and generalised with parametricity for dependent types~\citep{Bernardy-proofs-for-free} and datatype-generic lookup~\citep{Diehl-InfIR}).}
