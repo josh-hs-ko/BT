@@ -122,7 +122,7 @@ blanks (suc n) (suc k) (≤′-step n≥1+k) {_ ∷ _} = Bin (blanks n (suc k) n
   where n≥k = ≤′-trans (≤′-step ≤′-refl) n≥1+k
 
 blanks↑ : (n k : ℕ) → n ≥′ k → ∀⟨ Vec A n ⟩[ const ⊤ ⇉ BT n k (const ⊤) ]
-blanks↑ n k n≥k _ = blanks n k n≥k
+blanks↑ n k n≥k = const (blanks n k n≥k)
 
 IsProp-≤ : {m n : ℕ} → IsProp (m ≤ n)
 IsProp-≤  z≤n       z≤n       = refl
@@ -155,7 +155,7 @@ module Algorithms
   where
 
   e↑ : ∀⟨ Vec A 0 ⟩[ const ⊤ ⇉ S ]
-  e↑ {[]} _ = e
+  e↑ {[]} = const e
 
   td : (n : ℕ) → ∀⟨ Vec A n ⟩[ const ⊤ ⇉ S ]
   td  zero   = e↑
@@ -169,6 +169,7 @@ module Algorithms
   bu : (n : ℕ) → ∀⟨ Vec A n ⟩[ const ⊤ ⇉ S ]
   bu n = unTip ∘ bu-loop (≤⇒≤‴ z≤n) ∘ mapBT e↑ ∘ blanks↑ n 0 (≤⇒≤′ z≤n)
   -- bu _ = unTip (bu-loop (≤⇒≤‴ z≤n) (TipZ e))
+
 
 --------
 -- Correctness: separating both algorithms into production and consumption phases
@@ -358,21 +359,21 @@ module Consumption-and-Correctness
     → bu-consume' n r ≡ bu-consume n r
   bu-consume-equiv n = bu-consume-loop-equiv (≤⇒≤‴ z≤n) e↑
 
-  td≡bu-consume :
+  td≗bu-consume :
       (n≥k : n ≥‴ k) {xs : Vec A n}
     → ((Σ[ X ∈ Set ] (X → S xs))
       ∋ (tdRec n xs             , td-consume n))
       ≡ (buRec n≥k (tdRec k) xs , bu-consume-loop' n≥k (td-consume k))
-  td≡bu-consume  ≤‴-refl        = refl
-  td≡bu-consume (≤‴-step n≥1+k) = td≡bu-consume n≥1+k
+  td≗bu-consume  ≤‴-refl        = refl
+  td≗bu-consume (≤‴-step n≥1+k) = td≗bu-consume n≥1+k
 
-  td≡bu : (n : ℕ) {xs : Vec A n} → td n {xs} $ tt ≡ bu n $ tt
-  td≡bu n =
+  td≗bu : (n : ℕ) {xs : Vec A n} → td n {xs} $ tt ≡ bu n $ tt
+  td≗bu n =
     begin
       td n                         $ tt
         ≡⟨ td-separation n ⟩
       td-consume n ∘ td-produce n  $ tt
-        ≡⟨ overall (td-consume n) (bu-consume-loop' n≥0 e↑) (td≡bu-consume n≥0)
+        ≡⟨ overall (td-consume n) (bu-consume-loop' n≥0 e↑) (td≗bu-consume n≥0)
              (IsProp-tdRec n) (td-produce n tt) (bu-produce n tt) ⟩
       bu-consume' n ∘ bu-produce n $ tt
         ≡⟨ bu-consume-equiv n _ ⟩

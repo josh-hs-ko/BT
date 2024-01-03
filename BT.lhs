@@ -244,6 +244,7 @@ which is parametrically polymorphic in |a : Set| and |p : Vec a k → Set|.
 \todo[inline]{First climax: The definition of \lstinline{cd} can be ported to |retabulate| without essential change, meaning that the definition has been verified just by finding a right type for it!
 (Changes include a couple more cases than \lstinline{cd} (foreshadowing the generalisation about base cases) and some inequality proofs for the |n > k| argument.)
 There's actually no need to understand the definition of \lstinline{cd}/|retabulate|, but I can still work out a case or two to see how well type-directed programming works.
+A coherence commuting diagram (in the sense of data refinement) between |retabulate| and \lstinline{cd} to understand one in terms of the other?
 }
 
 \todo[inline]{Conjecture: the behaviour of |retabulate| is uniquely determined by its type (which works as a tight specification).
@@ -309,8 +310,10 @@ The bottom-up algorithm avoids the repetitive computation because it always uses
 \todo[inline]{Compare with \varcitet{Mu-sublists}{'s} treatment of the problem using simple types and equational reasoning}
 
 \todo[inline]{Why should dependent types, category theory, and string diagrams be in the (mathematically inclined) functional programmer's toolbox?
-Proving by writing things down in the right languages.
-Specifically: fancy types can replace traditional specs, and are a still under-explored methodology (except length/shape indexing); category theory offers useful abstraction (for sometimes comprehending indexed definitions as if they were simply typed); in particular, the categorical abstraction enables the use of string diagrams to make reasoning with naturality transparent (and in this case the main proof is entirely about naturality and rendered trivial)}
+Explaining, discovering, and proving by writing things down in the right languages.
+Specifically:
+Fancy types can replace traditional specs and proofs (for example, equality between programs can be proved simply by showing that they have the same, uniquely inhabited type), and are a still under-explored methodology (going beyond length/shape indexing) --- can work on, e.g., more algorithmic problems (dynamic programming in general)?
+Category theory offers useful abstraction (for sometimes comprehending indexed definitions as if they were simply typed); in particular, the categorical abstraction enables the use of string diagrams to make reasoning with naturality transparent (and in this case the main proof is entirely about naturality and rendered trivial).}
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{bib}
