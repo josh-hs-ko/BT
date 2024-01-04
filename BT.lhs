@@ -173,6 +173,24 @@ And he didn't bother to explain it in the paper.
 
 Based on what I’d read in the paper, I could make a pretty good guess at what \lstinline{cd} was doing at a high level.
 
+One of the purposes of \citet{Bird-zippy-tabulations} is to study the relationship between top-down and bottom-up algorithms. A generic top-down algorithm is specified by:
+\begin{lstlisting}
+td :: L X -> Y
+td [x]  = f x
+td xs   = g . mapF td . dc $ xs
+\end{lstlisting}
+The input is a list of |X|'s (in \citet{Bird-zippy-tabulations} |L| can be more general, but for our purpose we talk about lists only), and the output is of type |Y|. Singleton lists form the base cases, processed by a function |f :: X -> Y|.
+Otherwise, a list can be decomposed into subproblems by a function |dc :: L a -> F (L a)|.
+Each |L a| in the |F|-structure is recursively processed by |td|, before |g :: F Y -> Y| combines the results. ...
+
+(in progress...)
+\begin{lstlisting}
+bu :: L X -> Y
+bu = loop . map f
+loop [y] = y
+loop ys  = loop . map g . cd $ ys
+\end{lstlisting}
+
 \todo[inline]{Recap of what Richard's paper wanted to do: transforming a top-down algorithm (which acts as a specification) to a bottom-up algorithm, which `I' (Shin) had already worked out a simplified version; explain why the base cases have to be singleton lists; the role of \lstinline{cd} in the bottom-up algorithm, intuitively; relationship to binomial cofficients}
 
 But I still couldn’t see, \emph{formally}, how to make sense of the definition of \lstinline{cd} or get from the definition to a correctness proof of \lstinline{bu}.%
