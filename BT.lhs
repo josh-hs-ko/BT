@@ -172,24 +172,57 @@ And he didn't bother to explain it in the paper.
 \section{Simply Typed Algorithms}
 
 Based on what I’d read in the paper, I could make a pretty good guess at what \lstinline{cd} was doing at a high level.
-
-One of the purposes of \citet{Bird-zippy-tabulations} is to study the relationship between top-down and bottom-up algorithms. A generic top-down algorithm is specified by:
+%
+\citet{Bird-zippy-tabulations} is a study of the relationship between top-down and bottom-up algorithms. A generic top-down algorithm is specified by:
 \begin{lstlisting}
 td :: L X -> Y
 td [x]  = f x
 td xs   = g . mapF td . dc $ xs
 \end{lstlisting}
-The input is a list of |X|'s (in \citet{Bird-zippy-tabulations} |L| can be more general, but for our purpose we talk about lists only), and the output is of type |Y|. Singleton lists form the base cases, processed by a function |f :: X -> Y|.
-Otherwise, a list can be decomposed into subproblems by a function |dc :: L a -> F (L a)|.
-Each |L a| in the |F|-structure is recursively processed by |td|, before |g :: F Y -> Y| combines the results. ...
+The input is a list of \lstinline{X}'s (in \citet{Bird-zippy-tabulations} \lstinline{L} can be more general, but for our purpose we talk about lists only), and the output is of type \lstinline{Y}. Singleton lists form the base cases, processed by a function \lstinline{f :: X -> Y}.
+An non-empty list can be decomposed into subproblems by a function \lstinline{dc :: L a -> F (L a)}.
+Each \lstinline{L a} in the \lstinline{F}-structure is recursively processed by \lstinline{td}, before \lstinline{g :: F Y -> Y} combines the results.
 
-(in progress...)
+In the last, and the most difficult example in \citet{Bird-zippy-tabulations},
+\lstinline{F = L}, and \lstinline{dc :: L a -> L (L a)} computes all the \emph{immediate sublists} of the given list, that is, all the lists with exactly one element missing.
+To compute \lstinline{td "abcd"}, for example, we need to compute \lstinline{td "abc"}, \lstinline{td "abd"}, \lstinline{td "acd"}, and \lstinline{td "bcd"}.
+To compute \lstinline{td "abc"}, in turns, we need \lstinline{td "ab"}, \lstinline{td "ac"}, and \lstinline{td "bc"}.
+Notice that \lstinline{td "ab"} will also be invoked when computing \lstinline{td "abd"} --- proceeding in this top-down manner, many sub-computation are repeated.
+
+One would instead wish to proceed in a bottom-up manner, depicted in Figure TODO.
+The $n$th layer consists of values of \lstinline{td} at lists of length $n$.
+We wish to start from layer $1$, and compute layer $n+1$ from layer $n$ by reusing the values stored in the latter, until we reach a layer consisting of only one value.
+Assuming, for now, that each layer is represented by lists.
+Layer $2$ would be
 \begin{lstlisting}
-bu :: L X -> Y
-bu = loop . map f
-loop [y] = y
-loop ys  = loop . map g . cd $ ys
+  [td "ab", td "ac", td "bc", td "ad" ...]
 \end{lstlisting}
+To construct layer $3$ from layer $2$, we wish to have a function \lstinline{cd :: L a -> L (L a)} that, given layer $2$, brings related elements together:
+\begin{lstlisting}
+  [[td "ab", td "ac", td "bc"], [td "ab", td "ad", td "bd"] ... ]
+\end{lstlisting}
+such that if we apply \lstinline{map g} to the result of \lstinline{cd}, we get layer $3$:
+\begin{lstlisting}
+  [td "abc", td "abd", td "acd", td "bcd" ...]
+\end{lstlisting}
+If such a function \lstinline{cd} can be constructed, an alternative bottom-up algorithm is given by:
+\begin{lstlisting}
+bu :: L X -> Y                loop [y] = y
+bu = loop . map f             loop ys  = loop . map g . cd $ ys
+\end{lstlisting}
+That is, we start with applying \lstinline{f} to each element of the list to form layer $1$, keep applying \lstinline{map g . cd} to get the next level, until we get a layer with only one element, which will be our result.
+
+All these, however, are merely for giving us some intuition.
+Richard must have realized at some point that it is difficult to construct \lstinline{cd} using lists, and decided to represent each level using the \lstinline{B} datatype mentioned before.
+Therefore \lstinline{cd} has type \lstinline{L a -> B (L a)}, and \lstinline{loop} is defined by
+\begin{lstlisting}
+loop (Tip y) = y
+loop ys      = loop . mapB g . cd $ ys
+\end{lstlisting}
+where \lstinline{mapB :: (a -> b) -> B a -> B b} is the map function for \lstinline{B}.
+
+A lot remain unanswered: why does \lstinline{cd} do want we wish it to do (which does not even have for formal specification yet)?
+Can we 
 
 \todo[inline]{Recap of what Richard's paper wanted to do: transforming a top-down algorithm (which acts as a specification) to a bottom-up algorithm, which `I' (Shin) had already worked out a simplified version; explain why the base cases have to be singleton lists; the role of \lstinline{cd} in the bottom-up algorithm, intuitively; relationship to binomial cofficients}
 
