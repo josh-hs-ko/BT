@@ -27,8 +27,8 @@ module Nat where
     → (ps : ∀ {n} → P n → P (suc n)) → (∀ {n} {p : P n} → Q p → Q (ps p))
     → (n : ℕ) → Q (f P pz ps n)
 
-  check : Ind-unary-parametricity ind
-  check P Q pz qz ps qs = ind (Q ∘ ind P pz ps) qz qs
+  ind-parametric : Ind-unary-parametricity ind
+  ind-parametric P Q pz qz ps qs = ind (Q ∘ ind P pz ps) qz qs
 
   uniqueness :
       (f : Ind) → Ind-unary-parametricity f
@@ -99,15 +99,15 @@ module ImmediateSublists where
   revcat []       ys = ys
   revcat (x ∷ xs) ys = revcat xs (x ∷ ys)
 
-  check : Ind-unary-parametricity td
-  check {A} S T e e' g g' = td (T ∘ td S e g _) e' (g' ∘ see-below [] (td S e g _))
+  td-parametric : Ind-unary-parametricity td
+  td-parametric {A} S T e e' g g' = td (T ∘ td S e g _) e' (g' ∘ see-below [] (td S e g _))
     where
-      see-below : ∀ {m n xs} (ys : Vec A m) (f : (zs : Vec A n) → S (revcat ys zs))
-                → BT (suc n) n (T ∘ f) xs
-                → BT' T {xs} (mapBT (λ {zs} → const (f zs)) (blanks n))
-      see-below ys f (tipZ t)           = t
-      see-below ys f (bin (tipS t) ts)  = t , see-below (_ ∷ ys) (f ∘ (_ ∷_)) ts
-      see-below ys f (bin (bin ts _) _) = ⊥-elim (unbounded ts)
+      see-below : ∀ {m n xs} (ys : Vec A m) (h : (zs : Vec A n) → S (revcat ys zs))
+                → BT (suc n) n (T ∘ h) xs
+                → BT' T {xs} (mapBT (λ {zs} _ → h zs) (blanks n))
+      see-below ys h (tipZ t)           = t
+      see-below ys h (bin (tipS t) ts)  = t , see-below (_ ∷ ys) (h ∘ (_ ∷_)) ts
+      see-below ys h (bin (bin ts _) _) = ⊥-elim (unbounded ts)
 
   uniqueness :
       (f : Ind) → Ind-unary-parametricity f

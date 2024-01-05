@@ -128,14 +128,18 @@ IsProp-≤ : {m n : ℕ} → IsProp (m ≤ n)
 IsProp-≤  z≤n       z≤n       = refl
 IsProp-≤ (s≤s m≤n) (s≤s m≤n') = cong s≤s (IsProp-≤ m≤n m≤n')
 
+-- _∷ᴮᵀ_ : ∀[ P ⇉ BT (suc k) k (P ∘ (x ∷_)) ⇉ BT (suc (suc k)) (suc k) P ∘ (x ∷_) ]
+_∷ᴮᵀ_ : P xs → BT (1 + k) k (P ∘ (x ∷_)) xs → BT (2 + k) (1 + k) P (x ∷ xs)
+p ∷ᴮᵀ t = Bin (TipS p) t
+
 retabulate : n > k → ∀[ BT n k P ⇉ BT n (suc k) (BT (suc k) k P) ]
 retabulate 1+n>1+n       (TipS p)                       = ⊥-elim (<-irrefl refl 1+n>1+n)
 retabulate _ {_ ∷ []   } (TipZ p)                       = TipS (TipZ p)
 retabulate _ {_ ∷ _ ∷ _} (TipZ p)                       = Bin (retabulate 1+n>0 (TipZ p)) (TipZ (TipZ p)) where 1+n>0 = s≤s z≤n
-retabulate _             (Bin   (TipS p)   u)           = TipS (Bin (TipS p) u)
-retabulate _             (Bin t@(Bin t' _)   (TipZ q))  = Bin (retabulate 1+n>1 t) (mapBT (λ p → Bin (TipS p) (TipZ q)) t) where 1+n>1 = s≤s (bounded t')
+retabulate _             (Bin t@(Bin t' _)   (TipZ q))  = Bin (retabulate 1+n>1 t) (mapBT (_∷ᴮᵀ (TipZ q)) t) where 1+n>1 = s≤s (bounded t')
 retabulate _             (Bin t@(Bin _  _)   (TipS q))  = ⊥-elim (unbounded t)
-retabulate (s≤s 1+n>1+k) (Bin t@(Bin t' _) u@(Bin _ _)) = Bin (retabulate 1+n>2+k t) (zipBTWith (λ p → Bin (TipS p)) t (retabulate 1+n>1+k u)) where 1+n>2+k = s≤s (bounded t')
+retabulate _             (Bin   (TipS p)   u)           = TipS (p ∷ᴮᵀ u)
+retabulate (s≤s 1+n>1+k) (Bin t@(Bin t' _) u@(Bin _ _)) = Bin (retabulate 1+n>2+k t) (zipBTWith _∷ᴮᵀ_ t (retabulate 1+n>1+k u)) where 1+n>2+k = s≤s (bounded t')
 
 retabulate-natural : (n>k : n > k) {xs : Vec A n} (h : ∀[ P ⇉ Q ]) (t : BT n k P xs)
                    → mapBT (mapBT h) ∘ retabulate n>k $ t ≡ retabulate n>k ∘ mapBT h $ t

@@ -41,23 +41,54 @@
 
 \newcommand{\equals}{\enskip=\enskip}
 
+\usepackage{tikzit}
+\input{string.tikzstyles}
+
 \let\Bbbk\relax
 %include agda.fmt
 
+\definecolor{suppressed}{RGB}{225,225,225}
+\newcommand{\highlight}[2]{\smash{\text{\colorbox{#1}{\kern-.1em\vphantom{\vrule height 1.2ex depth 0.1ex}\smash{\ensuremath{#2}}\kern-.1em}}}}
+
+%format (SUPPRESSED(t)) = "\highlight{suppressed}{" t "}"
+
+\newcommand{\ignorenext}[1]{}
+
+%format (sub(x)) = "\unskip_{" x "}"
+%format (C(n)(k)) = "\unskip^{" n "}_{" k "}"
+
+%format =' = "\unskip=\ignorenext"
 %format →' = "\kern-.345em\mathrlap{\to}"
+%format ⇉ = "\unskip\rightrightarrows\ignorenext"
 %format ∘ = "{\cdot}"
 %format ≡ = "{\equiv}"
 %format ∈ = "{\in}"
 %format [ = "[\kern-2pt"
 %format ] = "\kern-2pt]"
 %format Σ[ = Σ [
+%format ∀[ = ∀ [
+%format ∷_ = ∷ _
+%format ᴮᵀ = "_{\Conid{BT}}"
+%format ∷ᴮᵀ = ∷ ᴮᵀ
+%format _∷ᴮᵀ_ = _ ∷ᴮᵀ _
+%format _∷ᴮᵀ = _ ∷ᴮᵀ
 
-%format (BT'(n)(k)) = BT "^{" n "}_{" k "}"
+%format mapBT = map ᴮᵀ
 %format TipZ = Tip "_{\Conid z}"
 %format TipS = Tip "_{\Conid s}"
+%format zipBTWith = zip ᴮᵀ With
+
+%format 0 = "\mathrm 0"
+%format 1 = "\mathrm 1"
+%format 2 = "\mathrm 2"
+%format 3 = "\mathrm 3"
 
 \newcommand{\Var}[1]{\mathit{#1}}
 
+%format F = "\Var F"
+%format G = "\Var G"
+%format H = "\Var H"
+%format K = "\Var K"
 %format a = "\Var a"
 %format b = "\Var b"
 %format c = "\Var c"
@@ -67,12 +98,19 @@
 %format k = "\Var k"
 %format n = "\Var n"
 %format p = "\Var p"
+%format q = "\Var q"
+%format s = "\Var s"
+%format t = "\Var t"
+%format u = "\Var u"
 %format x = "\Var x"
 %format xs = "\Var xs"
+%format y = "\Var y"
 %format ys = "\Var ys"
 %format z = "\Var z"
+%format α = "\alpha"
 
-%format sk = 1+ k
+%format sk = 1 + k
+%format ssk = 2 + k
 
 \begin{document}
 
@@ -276,8 +314,8 @@ data BT {a : Set} : (n k : ℕ) → (Vec a k → Set) → Vec a n → Set where
 \end{code}
 
 \todo[inline]{The `T' in |BT| stands for `tree' or `table'.
-Sometimes write |BT n k| as |(BT' n k)|, mirroring the traditional mathematical notation $C^\mathit{n}_\mathit{k}$ for the number of $k$-combinations of $n$~elements.
-Extensionally, |(BT' n k) p xs| means that the predicate |p : Vec a k → Set| holds for all the length-|k| sub-lists of |xs : Vec a n|, or more precisely, a proof of |(BT' n k) p xs| is a table of proofs of |p ys| where |ys| ranges over the length-|k| sub-lists of |xs|.
+Sometimes write |BT n k| as |BT(C n k)|, mirroring the traditional mathematical notation $C^\mathit{n}_\mathit{k}$ for the number of $k$-combinations of $n$~elements.
+Extensionally, |BT(C n k) p xs| means that the predicate |p : Vec a k → Set| holds for all the length-|k| sub-lists of |xs : Vec a n|, or more precisely, a proof of |BT(C n k) p xs| is a table of proofs of |p ys| where |ys| ranges over the length-|k| sub-lists of |xs|.
 Both the plain shape-indexed trees and the trees with equality proofs become special cases by specialising |p| to |const a| and |λ ys → Σ[ z ∈ b ] z ≡ h ys| (given |b : Set| and |h : Vec a k → b|).}
 
 \todo[inline]{Apparently there's a design pattern transforming non-deterministic computations into indexed data types to be abstracted and formulated (and a paper to be written).
@@ -288,9 +326,24 @@ The familiar |All| data type, for example, becomes a special case.}
 The list in the type of \lstinline{cd}, which is renamed to |retabulate| here, is actually a particular kind of binomial tree.}
 
 \begin{code}
-retabulate : n > k → (BT' n k) p xs → (BT' n sk) ((BT' sk k) p) xs
+_∷ᴮᵀ_ : p xs → BT(C sk k) (p ∘ (x ∷_)) xs → BT(C ssk sk) p (x ∷ xs)
+y ∷ᴮᵀ t = Bin (TipS y) t
+\end{code}
+
+\begin{code}
+retabulate : (SUPPRESSED(n > k)) → BT(C n k) p xs → BT(C n sk) (BT(C sk k) p) xs
+retabulate {xs =' _ ∷ []     }  (TipZ y)  =  TipS  (TipZ y)
+retabulate {xs =' _ ∷ _ ∷ _  }  (TipZ y)  =  Bin   (retabulate (TipZ y)) (TipZ (TipZ y))
+retabulate (Bin t         (TipZ y)  )     =  Bin   (retabulate t) (mapBT (_∷ᴮᵀ (TipZ y)) t)
+retabulate (Bin (TipS y)  u         )     =  TipS  (y ∷ᴮᵀ u)
+retabulate (Bin t         u         )     =  Bin   (retabulate t)
+                                                   (zipBTWith _∷ᴮᵀ_ t (retabulate u))
+
 \end{code}
 which is parametrically polymorphic in |a : Set| and |p : Vec a k → Set|.
+
+\todo[inline]{The |n > k| argument is `greyed out', meaning that it's in the actual code but omitted in the presentation (for comparing with \lstinline{cd} more easily).
+Also omitted are a couple of impossible cases that actually have to be listed and proved to be impossible.}
 
 \todo[inline]{First climax: The definition of \lstinline{cd} can be quite straightforwardly ported to to Agda as |retabulate|, meaning that the definition has been verified just by finding a right type for it!
 (Need a comparison between \lstinline{cd} and |retabulate|: including more cases than \lstinline{cd} (foreshadowing the generalisation about base cases), generalising a couple of cases, and handling some inequality proofs for the |n > k| argument.)
@@ -310,11 +363,9 @@ Solutions should be indexed by the input list.
 Dependent types allow~|g| to subsume the base cases encoded by~\lstinline{f}.
 Arrive at an \emph{induction principle} with induction hypotheses for immediate sub-lists.}
 
-\todo[inline]{Conjecture: the (extensional) behaviour of |td| and |bu| is uniquely determined by their type.
+\todo[inline]{The (extensional) behaviour of |td| and |bu| is uniquely determined by their type due to parametricity, so |td| equals |bu| simply because they have the same, uniquely inhabited type.
 (The induction principle for natural numbers is a simpler example to think about.)
-If the conjecture is true, then immediately |td| equals |bu|.
-But it's probably going to require a more involved proof using parametricity, which I don't immediately see how to do.
-Moreover, I'd like to compare what |td| and |bu| do \emph{intensionally}, an aspect which would be overlooked from the parametricity perspective.
+However, I'd like to compare what |td| and |bu| do \emph{intensionally}, an aspect which would be overlooked from the parametricity perspective.
 Need more tools to see through the complexity.}
 
 \section{Categories of Families of Types and Functions}
@@ -331,14 +382,58 @@ Functional programmers are familiar with types and functions; abstract them as o
 \todo[inline]{Recap of string diagrams for 2-categories, i.e., layered type structure (composition of functors); layers may be transformed independently of others, and this intuition is captured by the definition of natural transformations.
 The two sides of a traditional naturality equation look rather different, whereas in a diagrammatic equation the two sides are `the same picture', allowing us to change perspectives effortlessly.}
 
+\begingroup
+\noindent
+\begin{minipage}{.55\textwidth}
+\begin{code}
+td s e g 3 =  g ∘
+              mapBT  (  g ∘
+                        mapBT  (  g ∘
+                                  mapBT e ∘
+                                  blanks(C 1 0)) ∘
+                        blanks(C 2 1)) ∘
+              blanks(C 3 2)
+\end{code}
+\end{minipage}%
+\begin{minipage}{.45\textwidth}
+\[ \tikzfig{td} \]
+\end{minipage}
+\endgroup
+
+\begingroup
+\noindent
+\begin{minipage}{.45\textwidth}
+\begin{code}
+bu s e g 3 =  unTip ∘
+
+                id          ∘
+                
+                mapBT g     ∘
+                retabulate  ∘
+                
+                mapBT g     ∘
+                retabulate  ∘
+                
+                mapBT g     ∘
+                retabulate  ∘
+                
+              mapBT e ∘
+              blanks(C 3 0)
+\end{code}
+\end{minipage}%
+\begin{minipage}{.55\textwidth}
+\[ \tikzfig{bu} \]
+\end{minipage}
+\endgroup
+
 \todo[inline]{Specialised cases (with a concrete size) only; production and consumption parts, which can be separated by naturality.
 The production parts build the same nested tables but in different orders, and the order used by bottom-up algorithm allows production and consumption to be interleaved.}
 
 \todo[inline]{To prove the equality between |td| and |bu| along this direction:
 The consumption parts of the two algorithms are the same.
-The production parts are left- and right-leaning trees; use the |retabulate|-|choose| equation, which is diagrammatically some kind of rotation?
+The production parts are left- and right-leaning trees; use the |retabulate|-|blanks| equation (\lstinline{cd}–\lstinline{choose} in Haskell), which is diagrammatically some kind of rotation?
 (Looks like co-associativity; maybe |BT| is some kind of graded comonad?)
-The rotation proof is not difficult but not trivial either, and the |retabulate|-|choose| equation still needs to be established by delving into the definitions\ldots}
+The rotation proof is not difficult but not trivial either, and the |retabulate|-|blanks| equation still needs to be established by delving into the definitions\ldots}
 
 \todo[inline]{Second climax: the types have already proved the equality between the production parts for us!}
 
