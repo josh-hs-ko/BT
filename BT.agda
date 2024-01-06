@@ -151,6 +151,27 @@ retabulate-natural _             h (Bin t@(Bin t' _)   (TipZ q))  = cong₂ Bin 
 retabulate-natural _             h (Bin t@(Bin _  _)   (TipS q))  = ⊥-elim (unbounded t)
 retabulate-natural (s≤s 1+n>1+k) h (Bin t@(Bin t' _) u@(Bin _ _)) = cong₂ Bin (trans (retabulate-natural 1+n>2+k h t) (cong (λ ineq → retabulate ineq (mapBT h t)) (IsProp-≤ _ _))) (trans (zipBTWith-natural h (mapBT h) (mapBT h) (λ p → Bin (TipS p)) (λ p → Bin (TipS p)) refl t (retabulate 1+n>1+k u)) (cong (zipBTWith (λ p → Bin (TipS p)) (mapBT h t)) (retabulate-natural 1+n>1+k h u))) where 1+n>2+k = s≤s (bounded t')
 
+module Test where
+
+  pattern 1+ n = suc n
+
+  ImmediateSublistInduction : Set₁
+  ImmediateSublistInduction =
+    {a : Set} (s : ∀ {k} → Vec a k → Set)
+    (e : {xs : Vec a 0} → ⊤ → s xs) (g : ∀ {k xs} → BT (1 + k) k s xs → s xs)
+    (n : ℕ) {xs : Vec a n} → ⊤ → s xs
+
+  td : ImmediateSublistInduction
+  td s e g  0     = e
+  td s e g (1+ n) = g ∘ mapBT (td s e g n) ∘ blanks↑ (1 + n) n (≤′-step ≤′-refl)
+
+  bu : ImmediateSublistInduction
+  bu s e g n = unTip ∘ loop 0 (≤⇒≤‴ z≤n) ∘ mapBT e ∘ blanks↑ n 0 (≤⇒≤′ z≤n)
+    where
+      loop : (k : ℕ) → k ≤‴ n → BT n k s xs → BT n n s xs
+      loop n  ≤‴-refl        = id
+      loop k (≤‴-step n≥1+k) = loop (1 + k) n≥1+k ∘ mapBT g ∘ retabulate (≤‴⇒≤ n≥1+k)
+
 module Algorithms
   {A : Set} (S : {k : ℕ} → Vec A k → Set)
   (e : S []) (g : {k : ℕ} → ∀[ BT (suc k) k S ⇉ S ])

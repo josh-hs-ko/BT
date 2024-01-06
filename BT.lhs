@@ -72,11 +72,13 @@
 %format ∷ᴮᵀ = ∷ ᴮᵀ
 %format _∷ᴮᵀ_ = _ ∷ᴮᵀ _
 %format _∷ᴮᵀ = _ ∷ᴮᵀ
+%format GEQ = "\unskip\geq\ignorenext"
 
 %format mapBT = map ᴮᵀ
 %format TipZ = Tip "_{\Conid z}"
 %format TipS = Tip "_{\Conid s}"
 %format zipBTWith = zip ᴮᵀ With
+%format blanks' = blanks "^\prime"
 
 %format 0 = "\mathrm 0"
 %format 1 = "\mathrm 1"
@@ -109,6 +111,7 @@
 %format z = "\Var z"
 %format α = "\alpha"
 
+%format sn = 1 + n
 %format sk = 1 + k
 %format ssk = 2 + k
 
@@ -363,7 +366,41 @@ Solutions should be indexed by the input list.
 Dependent types allow~|g| to subsume the base cases encoded by~\lstinline{f}.
 Arrive at an \emph{induction principle} with induction hypotheses for immediate sub-lists.}
 
-\todo[inline]{The (extensional) behaviour of |td| and |bu| is uniquely determined by their type due to parametricity, so |td| equals |bu| simply because they have the same, uniquely inhabited type.
+\begin{code}
+blanks' : (n k : ℕ) → (SUPPRESSED(n GEQ k)) → BT(C n k) (const ⊤) xs
+blanks' _          0       = TipZ tt
+blanks' (1 + k) (  1 + k)  = TipS tt
+blanks' (1 + n) (  1 + k)  = Bin (blanks' n (1 + k)) (blanks' n k)
+
+blanks : (n k : ℕ) → (SUPPRESSED(n GEQ k)) → ⊤ → BT(C n k) (const ⊤) xs
+blanks(C n k) = const (blanks' n k)
+\end{code}
+
+\begin{code}
+ImmediateSublistInduction : Set₁
+ImmediateSublistInduction =
+  {  a : Set} (s : {k : ℕ} → Vec a k → Set)
+  (  e : {xs : Vec a 0} → ⊤ → s xs)
+  (  g : {k : ℕ} {xs : Vec a (1 + k)} → BT(C sk k) s xs → s xs)
+  (  n : ℕ) {xs : Vec a n} → ⊤ → s xs
+\end{code}
+
+\begin{code}
+td : ImmediateSublistInduction
+td s e g    0      = e
+td s e g (  1+ n)  = g ∘ mapBT (td s e g n) ∘ blanks(C sn n)
+\end{code}
+
+\begin{code}
+bu : ImmediateSublistInduction
+bu s e g n = unTip ∘ loop 0 ∘ mapBT e ∘ blanks(C n 0)
+  where
+    loop : (k : ℕ) → (SUPPRESSED(k ≤ n)) → BT n k s xs → BT n n s xs
+    loop n  = id
+    loop k  = loop (1 + k) ∘ mapBT g ∘ retabulate
+\end{code}
+
+\todo[inline]{Any two inhabitants of |ImmediateSublistInduction| are equal (up to extensional equality) due to parametricity, so |td| equals |bu| simply because they have the same, uniquely inhabited type.
 (The induction principle for natural numbers is a simpler example to think about.)
 However, I'd like to compare what |td| and |bu| do \emph{intensionally}, an aspect which would be overlooked from the parametricity perspective.
 Need more tools to see through the complexity.}
