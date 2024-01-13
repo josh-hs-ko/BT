@@ -95,6 +95,8 @@
 %format b = "\Var b"
 %format c = "\Var c"
 %format e = "\Var e"
+%format f = "\Var f"
+%format f' = "\Var f^\prime"
 %format g = "\Var g"
 %format h = "\Var h"
 %format k = "\Var k"
@@ -114,6 +116,11 @@
 %format sn = 1 + n
 %format sk = 1 + k
 %format ssk = 2 + k
+
+%format n>k = n > k
+%format nGEQk = n "{\geq}" k
+%format skGEQk = sk "{\geq}" k
+%format nGEQsk = n "{\geq}" sk
 
 \begin{document}
 
@@ -193,7 +200,7 @@
 
 `What on earth is this function doing?'
 
-I stared at the late Richard Bird's `Zippy Tabulations of Recursive Functions'~\citeyearpar{Bird-zippy-tabulations}, frowning.
+I stare at the late Richard Bird's `Zippy Tabulations of Recursive Functions'~\citeyearpar{Bird-zippy-tabulations}, frowning.
 
 \begin{lstlisting}
 cd                        :: B a -> B (L a)
@@ -203,16 +210,16 @@ cd (Bin (Tip a) v)        =  Tip (a : as) where Tip as = cd v
 cd (Bin u v)              =  Bin (cd u) (zipBWith (:) u (cd v))
 \end{lstlisting}
 
-I knew \lstinline{B} was this Haskell datatype of trees,
+I know \lstinline{B} is this Haskell datatype of trees,
 \begin{lstlisting}
 data B a = Tip a || Bin (B a) (B a)
 \end{lstlisting}
-\lstinline{mapB} and \lstinline{zipBWith} were the usual \lstinline{map} and \lstinline{zipWith} functions for these trees, and \lstinline{L} was the standard data type of lists, but how did Richard come up with such an incomprehensible function definition?
+\lstinline{mapB} and \lstinline{zipBWith} are the usual \lstinline{map} and \lstinline{zipWith} functions for these trees, and \lstinline{L} is the standard data type of lists, but how did Richard come up with such an incomprehensible function definition?
 And he didn't bother to explain it in the paper.
 
 \section{Simply Typed Algorithms}
 
-Based on what I’d read in the paper, I could make a pretty good guess at what \lstinline{cd} was doing at a high level.
+Based on what I’ve read in the paper, I can make a pretty good guess at what \lstinline{cd} is doing at a high level.
 %
 \citet{Bird-zippy-tabulations} is a study of the relationship between top-down and bottom-up algorithms. A generic top-down algorithm is specified by:
 \begin{lstlisting}
@@ -419,7 +426,11 @@ Functional programmers are familiar with types and functions; abstract them as o
 \todo[inline]{Recap of string diagrams for 2-categories, i.e., layered type structure (composition of functors); layers may be transformed independently of others, and this intuition is captured by the definition of natural transformations.
 The two sides of a traditional naturality equation look rather different, whereas in a diagrammatic equation the two sides are `the same picture', allowing us to change perspectives effortlessly.}
 
-\begingroup
+If naturality is the key, then drawing the two algorithms as string diagrams should save me the trouble of naturality rewriting.
+
+Not confident enough to work with the recursive definitions straight away, I take the special case |td s e g 3| of the top-down computation and unfolds it into a deeply nested expression.
+Translating that into a string diagram is basically writing down all the intermediate type information and laying out the nested type structures horizontally (whereas function composition is laid out vertically).
+
 \noindent
 \begin{minipage}{.55\textwidth}
 \begin{code}
@@ -435,9 +446,24 @@ td s e g 3 =  g ∘
 \begin{minipage}{.45\textwidth}
 \[ \tikzfig{td} \]
 \end{minipage}
-\endgroup
 
-\begingroup
+All the |mapBT|'s are gone in the diagram, because I can directly apply a function to the intended layers/wires, rather than count awkwardly how many outer layers I want to skip using |mapBT|, one layer at a time.
+Functoriality (|mapBT (f ∘ f') =' mapBT f ∘ mapBT f'|) is also transparent in the diagram, so now it's slightly easier to see that |td| has two phases (between which I draw a dashed line):
+The first phase constructs deeply nested blank tables, and the second phase fills and demolishes the tables inside out.
+
+It doesn't seem that the string diagram helps much though.
+Functoriality is already more or less transparent in the traditional expression (thanks to the infix notation of function composition), so I don't really need the string diagram to see that |td| has two phases.
+Moreover, there's nothing I can move around in the diagram --- nothing in the diagram is a real natural transformation.
+
+Somewhat suspiciously, I turn to the bottom-up computation |bu s e g 3|.
+The loop in the expression unfolds into a sequence of functions, alternating between table construction using |retabulate| and demolition using |mapBT g|.
+
+`A sequence\ldots'
+I mutter.
+I don't expect anything else from unfolding a loop, but the sequential structure is so different from the deeply nested structure of |td|.
+
+And then, something unexpected yet familiar appears in the translated diagram.
+
 \noindent
 \begin{minipage}{.45\textwidth}
 \begin{code}
@@ -461,25 +487,119 @@ bu s e g 3 =  unTip ∘
 \begin{minipage}{.55\textwidth}
 \[ \tikzfig{bu} \]
 \end{minipage}
-\endgroup
 
-\todo[inline]{Specialised cases (with a concrete size) only; production and consumption parts, which can be separated by naturality.
-The production parts build the same nested tables but in different orders, and the order used by bottom-up algorithm allows production and consumption to be interleaved.}
+There are also two phases for table construction and demolition, and the demolition phase is \emph{exactly the same} as the one in |td|!
 
-\todo[inline]{To prove the equality between |td| and |bu| along this direction:
-The consumption parts of the two algorithms are the same.
-The production parts are left- and right-leaning trees; use the |retabulate|-|blanks| equation (\lstinline{cd}–\lstinline{choose} in Haskell), which is diagrammatically some kind of rotation?
-(Looks like co-associativity; maybe |BT| is some kind of graded comonad?)
-The rotation proof is not difficult but not trivial either, and the |retabulate|-|blanks| equation still needs to be established by delving into the definitions\ldots}
+The string diagram is truly helpful this time.
+Now I see that, as Richard hinted, I could rewrite the traditional expression using the naturality of |unTip| and |retabulate| to push |g|~and~|e| to the left of the sequence and separate the two phases.
+But on the string diagram, all those rewritings amount to nothing more than gently pulling the two phases apart from each other (making the dashed line horizontal).
+In fact I don't even want or bother to pull, because on this diagram I can already see both the sequence (the dots appearing one by one along the vertical direction) and the result of rewriting the sequence using naturality at the same time.
 
-\todo[inline]{Second climax: the types have already proved the equality between the production parts for us!}
+%\todo[inline]{Specialised cases (with a concrete size) only; production and consumption parts, which can be separated by naturality.}
 
-\todo[inline]{Algorithmically:
-Overlapping sub-problems occur in two layers of tables, and they are solved repetitively when |g|~is used to produce two or more layers of tables, which is what the top-down algorithm does after creating deeply nested tables.
-The bottom-up algorithm avoids the repetitive computation because it always uses~|g| to produce only one layer of table.
-(Two layers of tables only appear due to |retabulate|, which only duplicates and redistributes already computed solutions and doesn't recompute them.)}
+So, modulo naturality, the two algorithms have the same table demolition phase but different table construction phases.
+If I can prove that their table construction phases are equal, then (in addition to the parametricity-based proof) I will have another proof that the two algorithms are equal.
+For |td|, the construction phase is a right-leaning tree on the diagram, whereas for |bu| it's a left-leaning tree.
+Maybe what I need is an equation about |blanks| and |retabulate| that can help me rotate a tree\ldots?
 
-\todo[inline]{Sketch inductive diagrammatic definitions and Agda formalisation}
+\[ \text{\lstinline{cd (choose k xs)}} \equals \text{\lstinline{mapB (choose k) (choose (k+1) xs)}} \]
+
+The equation flashes through my mind.
+Of course it has to be this equation --- I used it as a specification for \lstinline{cd}, the Haskell predecessor of |retabulate|.
+How else would I introduce |retabulate| into the picture?
+But first let me update this to a dependently typed string diagram.
+
+\[ \tikzfig{rotation} \qquad\text{if |n > k|} \]
+
+That's a tree rotation all right.
+So I should do an induction that uses this equation to rotate the right-leaning tree in |td| and obtain the left-leaning tree in |bu|.
+And then I'll need to prove the equation, meaning that I'll need to go through the definitions of |retabulate| and |blanks|\ldots
+Oh hell, that's a lot of work.
+
+%\todo[inline]{To prove the equality between |td| and |bu| along this direction:
+%The consumption parts of the two algorithms are the same.
+%The production parts are left- and right-leaning trees; use the |retabulate|-|blanks| equation (\lstinline{cd}–\lstinline{choose} in Haskell), which is diagrammatically some kind of rotation?
+%(Looks like co-associativity; maybe |BT| is some kind of graded comonad?)
+%The rotation proof is not difficult but not trivial either, and the |retabulate|-|blanks| equation still needs to be established by delving into the definitions\ldots}
+
+But do I need to?
+
+The three functors at the top of the diagrams catch my attention.
+In Agda, they expand to the type |BT(C n sk) (BT(C sk k) (const ⊤)) xs|.
+An inhabitant of this type is a table of \emph{blank} tables, and the structures of all the tables are completely determined by the indices --- the type has a unique inhabitant!
+So the equation is actually trivial to prove, because, forced by the type, the two sides have to construct the same table, and I don't need to look into the definitions of |retabulate| and |blanks|!
+
+Relieved, I start to work on the proof.
+The precise notion I need here is (mere) propositions.
+\begin{code}
+isProp : Set → Set
+isProp a = {x y : a} → x ≡ y
+\end{code}
+The type |BT(C n k) p xs| is propositional if the payload~|p| is pointwise propositional --- this is easy to prove by a straightforward double induction.
+\begin{code}
+BT-isProp : ({ys : Vec a k} → isProp (p ys)) → isProp (BT(C n k) p xs)
+\end{code}
+And then the |rotation| equation can be proved trivially by invoking |BT-isProp| twice.
+\begin{code}
+rotation :
+  retabulate (SUPPRESSED n>k) (blanks(C n k) (SUPPRESSED nGEQk) tt) ≡ mapBT (blanks(C sk k) (SUPPRESSED(skGEQk))) (blanks(C n sk) (SUPPRESSED nGEQsk) tt)
+rotation = BT-isProp (BT-isProp refl)
+\end{code}
+All the inequality arguments are universally quantified, but they don't make the proof any more complex, because the proof doesn't look into any of the function definitions.
+As long as the type is blank nested tables, the two sides of an equation can be arbitrarily complicated, and I can still prove them equal just by using |BT-isProp|.
+
+Wait, blank nested tables --- aren't those what the construction phases of both algorithms produce?
+
+I face-palm.
+It was a waste of time proving the |rotation| equation.
+The construction phases of both algorithms produce blank nested tables of the same type --- |BT(C 3 2) (BT(C 2 1) (BT(C 1 0) (const ⊤))) xs| in the concrete examples I tried (|td s e g 3| and |bu s e g 3|).
+So I can directly prove them equal using |BT-isProp| three times.
+There's no need to do any rotation.
+
+%\todo[inline]{Second climax: the types have already proved the equality between the production parts for us!}
+
+Oh well, at least |rotation| helps to check that the proof idea works before I embark on the general proof that |td| equals |bu|.
+Conceptually I’ve figured it all out:
+Both algorithms have two phases modulo naturality; their table demolition phases are exactly the same, and their table construction phases are equal due to the |BT-isProp| reasoning.
+But the general proof is still going to take some work:
+If I want to stick to string diagrams, I’ll need to translate the algorithms to inductively defined diagrams.
+Moreover, the |BT-isProp| reasoning is formally an induction (on the length of the input list), which needs to be worked out.
+And actually, compared with a diagrammatic but unformalised proof, I prefer a full Agda formalisation.
+That means I’ll need to spell out a lot of detail, including naturality rewriting.
+Whining, I finish the entire proof in Agda, but as usual, in the end it's satisfying to see everything checked.
+
+%\todo[inline]{Sketch inductive diagrammatic definitions and Agda formalisation}
+
+Still, I can't help feeling that I’ve neglected a fundamental aspect of the problem: why the bottom-up algorithm is more efficient.
+After making all the effort adopting dependent types and string diagrams, do these state-of-the-art languages help me say something about efficiency too?
+
+String diagrams make it easier for me to see that the table construction phases of both algorithms produce the same layers of tables but in opposite orders.
+Only the order used by the bottom-up algorithm allows table construction and demolition to be interleaved, and consequently the algorithm keeps no more than two layers of tables at any time.
+That's the crucial difference between the two algorithms.
+Now I need to figure out what the difference means algorithmically.
+
+More specifically, why is it good to keep \emph{two} layers of tables and not more?
+
+When there are multiple layers of tables of type |BT(C n k)| with |n > k|, meaning that the input list is split into proper sub-lists multiple times, all the final sub-lists will appear (as indices in the element types) in the entire nested table multiple times --- that is, overlapping sub-problems will appear.
+Therefore, when I use~|g| to fill in a nested table, I'm invoking~|g| to compute solutions for overlapping sub-problems repetitively, which is what I want to avoid.
+More precisely, `using~|g| to fill in a nested table' means something like |mapBT (mapBT g) : BT(C 3 2) (BT(C 2 1) (BT(C 1 0) s)) xs → BT(C 3 2) (BT(C 2 1) s) xs|, where the result is at least two layers of tables, so there should be at least \emph{three} layers of tables for the solving of overlapping sub-problems to happen.
+The bottom-up algorithm doesn't get to three layers of tables, and therefore avoids solving overlapping sub-problems.
+
+That reasoning doesn't sound too bad, although it's clear that there's much more to be done.
+The whole reasoning is still too informal and lacks detail.
+It's easy to poke holes in the reasoning --- for example, if the input list has duplicate elements, then the bottom-up algorithm won't be able to avoid solving overlapping sub-problems entirely.
+To fix this, the algorithm will need a redesign.
+And of course it's tempting to explore more problem-splitting strategies other than immediate sub-lists, maybe eventually arriving at something general about dynamic programming.
+All these are for another day, however.%
+\todo{need a better ending}
+
+%\todo[inline]{Algorithmically:
+%The production parts build the same nested tables but in different orders, and the order used by bottom-up algorithm allows production and consumption to be interleaved.
+%Overlapping sub-problems occur in two layers of tables, and they are solved repetitively when |g|~is used to produce two or more layers of tables, which is what the top-down algorithm does after creating deeply nested tables.
+%The bottom-up algorithm avoids the repetitive computation because it always uses~|g| to produce only one layer of table.
+%(Two layers of tables only appear due to |retabulate|, which only duplicates and redistributes already computed solutions and doesn't recompute them.)}
+
+
 
 \section*{Afterword}
 

@@ -1,0 +1,55 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (0, 0) {$=$};
+		\node [style=Natural transformation] (1) at (-3.5, -2) {};
+		\node [style=none] (2) at (-2, -0.5) {};
+		\node [style=none] (3) at (-5, -0.5) {};
+		\node [style=none] (4) at (-5, 0.5) {};
+		\node [style=Natural transformation] (5) at (-5, 1) {};
+		\node [style=none] (6) at (-6, 2) {};
+		\node [style=none] (7) at (-4, 2) {};
+		\node [style=none] (8) at (-3.5, -3) {};
+		\node [style=none] (10) at (-5, 0) {$\mathsf{BT}{\smash{^n_k}}$};
+		\node [style=none] (11) at (-3.5, -3.5) {$\top$};
+		\node [style=none] (12) at (-2, 2.5) {$\top$};
+		\node [style=none] (13) at (-3.75, 2.5) {$\mathsf{BT}^{1+k}_k$};
+		\node [style=none] (14) at (-6, 2.5) {$\mathsf{BT}^n_{1+k}$};
+		\node [style=none] (15) at (-2, 2) {};
+		\node [style=none] (17) at (-8, 1) {$\mathsf{retabulate}$};
+		\node [style=none] (18) at (-6.5, -2) {$\mathsf{blanks}^n_k$};
+		\node [style=Natural transformation] (19) at (3.5, -2) {};
+		\node [style=none] (20) at (5, -0.5) {};
+		\node [style=none] (21) at (2, -0.5) {};
+		\node [style=none] (22) at (3.5, -3) {};
+		\node [style=none] (23) at (2, 2.5) {$\mathsf{BT}^n_{1+k}$};
+		\node [style=none] (24) at (3.5, -3.5) {$\top$};
+		\node [style=none] (25) at (5, 0) {$\top$};
+		\node [style=none] (26) at (6.75, -2) {$\mathsf{blanks}^n_{1+k}$};
+		\node [style=Natural transformation] (27) at (5, 1) {};
+		\node [style=none] (28) at (5, 0.5) {};
+		\node [style=none] (29) at (4, 2) {};
+		\node [style=none] (30) at (6, 2) {};
+		\node [style=none] (31) at (2, 2) {};
+		\node [style=none] (32) at (8, 1) {$\mathsf{blanks}^{1+k}_k$};
+		\node [style=none] (33) at (4.25, 2.5) {$\mathsf{BT}^{1+k}_k$};
+		\node [style=none] (34) at (6, 2.5) {$\top$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=Wire, bend right=45] (6.center) to (5);
+		\draw [style=Wire, bend left=45] (7.center) to (5);
+		\draw [style=Wire] (15.center)
+			 to (2.center)
+			 to [bend left=45] (1);
+		\draw [style=Wire] (5) to (4.center);
+		\draw [style=Wire, bend right=45] (3.center) to (1);
+		\draw [style=Wire] (1) to (8.center);
+		\draw [style=Wire, bend left=45] (20.center) to (19);
+		\draw [style=Wire] (19)
+			 to [bend left=45] (21.center)
+			 to (31.center);
+		\draw [style=Wire] (19) to (22.center);
+		\draw [style=Wire, bend right=45] (29.center) to (27);
+		\draw [style=Wire, bend right=45] (27) to (30.center);
+		\draw [style=Wire] (27) to (28.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
