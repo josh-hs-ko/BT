@@ -220,9 +220,11 @@ td :: L X -> Y
 td [x]  = f x
 td xs   = g . mapF td . dc $ xs
 \end{lstlisting}
-The input is a list of \lstinline{X}'s (in \citet{Bird-zippy-tabulations} \lstinline{L} can be more general, but for our purpose we talk about lists only), and the output is of type \lstinline{Y}. Singleton lists form the base cases, processed by a function \lstinline{f :: X -> Y}.
-An non-empty list can be decomposed into subproblems by a function \lstinline{dc :: L a -> F (L a)}.
-Each \lstinline{L a} in the \lstinline{F}-structure is recursively processed by \lstinline{td}, before \lstinline{g :: F Y -> Y} combines the results.
+In \citet{Bird-zippy-tabulations} \lstinline{L} can be more general, but for our purpose we talk about lists only.
+Therefore, the input is a list of \lstinline{X}'s and the output is of type \lstinline{Y}.
+Singleton lists form the base cases, processed by a function \lstinline{f :: X -> Y}.
+A non-empty list is decomposed into an \lstinline{F}-structure of lists by  \lstinline{dc :: L a -> F (L a)}.
+Each \lstinline{L a} is then recursively processed by \lstinline{td}, before \lstinline{g :: F Y -> Y} combines the results.
 
 In the last, and the most difficult example in \citet{Bird-zippy-tabulations},
 \lstinline{F = L}, and \lstinline{dc :: L a -> L (L a)} computes all the \emph{immediate sublists} of the given list, that is, all the lists with exactly one element missing.
@@ -238,11 +240,11 @@ Layer $2$ would be
 \begin{lstlisting}
   [td "ab", td "ac", td "bc", td "ad" ...]
 \end{lstlisting}
-To construct layer $3$ from layer $2$, we wish to have a function \lstinline{cd :: L a -> L (L a)} that, given layer $2$, brings related elements together:
+To construct layer $3$ from layer $2$, we wish to have a function \lstinline{cd :: L a -> L (L a)} that, given layer $2$, copies and rearranges its elements such that immediate sublists of the same list are brought together:
 \begin{lstlisting}
   [[td "ab", td "ac", td "bc"], [td "ab", td "ad", td "bd"] ... ]
 \end{lstlisting}
-such that if we apply \lstinline{map g} to the result of \lstinline{cd}, we get layer $3$:
+Applying \lstinline{map g} to the list above, we get layer $3$:
 \begin{lstlisting}
   [td "abc", td "abd", td "acd", td "bcd" ...]
 \end{lstlisting}
@@ -251,7 +253,7 @@ If such a function \lstinline{cd} can be constructed, an alternative bottom-up a
 bu :: L X -> Y                loop [y] = y
 bu = loop . map f             loop ys  = loop . map g . cd $ ys
 \end{lstlisting}
-That is, we start with applying \lstinline{f} to each element of the list to form layer $1$, keep applying \lstinline{map g . cd} to get the next level, until we get a layer with only one element, which will be our result.
+That is, layer $1$ is constructed by applying \lstinline{f} to each element of the input list. Afterwards, we keep applying \lstinline{map g . cd} to get the next level, until we get a layer with only one element, which will be our result.
 
 All these, however, are merely for giving us some intuition.
 Richard must have realized at some point that it is difficult to construct \lstinline{cd} using lists, and decided to represent each level using the \lstinline{B} datatype mentioned before.
@@ -260,10 +262,12 @@ Therefore \lstinline{cd} has type \lstinline{L a -> B (L a)}, and \lstinline{loo
 loop (Tip y) = y
 loop ys      = loop . mapB g . cd $ ys
 \end{lstlisting}
-where \lstinline{mapB :: (a -> b) -> B a -> B b} is the map function for \lstinline{B}.
 
-A lot remain unanswered: why does \lstinline{cd} do want we wish it to do (which does not even have for formal specification yet)?
-Can we 
+A lot remain unanswered.
+How do we know that \lstinline{cd}, whose definition was given by Richard without explanation, indeed does the job --- bringing related immediate sublists together?
+How do we even write down ``bringing related immediate sublists together'' as a formal specification?
+The datatype \lstinline{B} is more than it seems: \lstinline{cd} does not generate all trees, but only those meeting certain constraints.
+What are the constraints, and how does \lstinline{cd} exploit them to do its job?
 
 \todo[inline]{Recap of what Richard's paper wanted to do: transforming a top-down algorithm (which acts as a specification) to a bottom-up algorithm, which `I' (Shin) had already worked out a simplified version; explain why the base cases have to be singleton lists; the role of \lstinline{cd} in the bottom-up algorithm, intuitively; relationship to binomial cofficients}
 
@@ -444,16 +448,16 @@ td s e g 3 =  g ∘
 bu s e g 3 =  unTip ∘
 
                 id          ∘
-                
+
                 mapBT g     ∘
                 retabulate  ∘
-                
+
                 mapBT g     ∘
                 retabulate  ∘
-                
+
                 mapBT g     ∘
                 retabulate  ∘
-                
+
               mapBT e ∘
               blanks(C 3 0)
 \end{code}
