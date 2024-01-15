@@ -60,9 +60,10 @@
 %format =' = "\unskip=\ignorenext"
 %format →' = "\kern-.345em\mathrlap{\to}"
 %format ⇉ = "\unskip\rightrightarrows\ignorenext"
-%format ∘ = "{\cdot}"
-%format ≡ = "{\equiv}"
-%format ∈ = "{\in}"
+%format ∘ = "\unskip\mathrel\cdot\ignorenext"
+%format ⊗ = "\unskip\otimes\ignorenext"
+%format ≡ = "\unskip\equiv\ignorenext"
+%format ∈ = "\unskip\in\ignorenext"
 %format [ = "[\kern-2pt"
 %format ] = "\kern-2pt]"
 %format Σ[ = Σ [
@@ -72,12 +73,11 @@
 %format ∷ᴮᵀ = ∷ ᴮᵀ
 %format _∷ᴮᵀ_ = _ ∷ᴮᵀ _
 %format _∷ᴮᵀ = _ ∷ᴮᵀ
+%format > = "\unskip>\ignorenext"
 %format GEQ = "\unskip\geq\ignorenext"
 
 %format mapBT = map ᴮᵀ
-%format TipZ = Tip "_{\Conid z}"
-%format TipS = Tip "_{\Conid s}"
-%format zipBTWith = zip ᴮᵀ With
+%format zipBTWith = zip ᴮᵀ "\kern-1pt" ith
 %format blanks' = blanks "^\prime"
 
 %format 0 = "\mathrm 0"
@@ -85,10 +85,20 @@
 %format 2 = "\mathrm 2"
 %format 3 = "\mathrm 3"
 
+\newcommand{\Con}[1]{\mathbf{#1}}
+
+%format bin = "\Con{bin}"
+%format refl = "\Con{refl}"
+%format tipZ = "\Con{tip_z}"
+%format tipS = "\Con{tip_s}"
+%format tt = "\Con{tt}"
+
 \newcommand{\Var}[1]{\mathit{#1}}
 
 %format F = "\Var F"
+%format F' = "\Var F^\prime"
 %format G = "\Var G"
+%format G' = "\Var G^\prime"
 %format H = "\Var H"
 %format K = "\Var K"
 %format a = "\Var a"
@@ -112,6 +122,10 @@
 %format ys = "\Var ys"
 %format z = "\Var z"
 %format α = "\alpha"
+%format α' = "\alpha^\prime"
+%format β = "\beta"
+%format γ = "\gamma"
+%format δ = "\delta"
 
 %format sn = 1 + n
 %format sk = 1 + k
@@ -227,11 +241,9 @@ td :: L X -> Y
 td [x]  = f x
 td xs   = g . mapF td . dc $ xs
 \end{lstlisting}
-In \citet{Bird-zippy-tabulations} \lstinline{L} can be more general, but for our purpose we talk about lists only.
-Therefore, the input of \lstinline{td} is a list of \lstinline{X}'s and the output is of type \lstinline{Y}.
-Singleton lists form the base cases, processed by a function \lstinline{f :: X -> Y}.
-A non-singleton list is decomposed into an \lstinline{F}-structure of lists by  \lstinline{dc :: L a -> F (L a)}.
-Each \lstinline{L a} is then recursively processed by \lstinline{td}, before \lstinline{g :: F Y -> Y} combines the results.
+The input is a list of \lstinline{X}'s (in \citet{Bird-zippy-tabulations} \lstinline{L} can be more general, but for our purpose we talk about lists only), and the output is of type \lstinline{Y}. Singleton lists form the base cases, processed by a function \lstinline{f :: X -> Y}.
+An non-empty list can be decomposed into subproblems by a function \lstinline{dc :: L a -> F (L a)}.
+Each \lstinline{L a} in the \lstinline{F}-structure is recursively processed by \lstinline{td}, before \lstinline{g :: F Y -> Y} combines the results.
 
 In the last, and the most difficult example in \citet{Bird-zippy-tabulations},
 \lstinline{F = L}, and \lstinline{dc :: L a -> L (L a)} computes all the \emph{immediate sublists} of the given list, that is, all the lists with exactly one element missing.
@@ -239,82 +251,44 @@ To compute \lstinline{td "abcd"}, for example, we need to compute \lstinline{td 
 To compute \lstinline{td "abc"}, in turns, we need \lstinline{td "ab"}, \lstinline{td "ac"}, and \lstinline{td "bc"}.
 Notice that \lstinline{td "ab"} will also be invoked when computing \lstinline{td "abd"} --- proceeding in this top-down manner, many sub-computation are repeated.
 
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.5\textwidth]{pics/sublists-lattice.pdf}
-\caption{Computing \lstinline{td "abcde"} bottom-up.%
-To sace space we omitted the \lstinline{td}s.}
-\label{fig:sublists-lattice}
-\end{figure}
-
-One would instead wish to proceed in a bottom-up manner, depicted in Figure~\ref{fig:sublists-lattice}.
+One would instead wish to proceed in a bottom-up manner, depicted in Figure TODO.
 The $n$th layer consists of values of \lstinline{td} at lists of length $n$.
-We start from layer $1$, and compute each layer $n+1$ from layer $n$ by reusing the values stored in the latter, until we reach a layer consisting of only one value.
-Assuming, for now, that each layer is represented by lists,
-layer $2$ would be
+We wish to start from layer $1$, and compute layer $n+1$ from layer $n$ by reusing the values stored in the latter, until we reach a layer consisting of only one value.
+Assuming, for now, that each layer is represented by lists.
+Layer $2$ would be
 \begin{lstlisting}
   [td "ab", td "ac", td "bc", td "ad" ...]
 \end{lstlisting}
-To construct layer $3$ from layer $2$, we wish to have a function \lstinline{cd :: L a -> L (L a)} that, given layer $2$, copies and rearranges its elements such that immediate sublists of the same list are brought together:
+To construct layer $3$ from layer $2$, we wish to have a function \lstinline{cd :: L a -> L (L a)} that, given layer $2$, brings related elements together:
 \begin{lstlisting}
   [[td "ab", td "ac", td "bc"], [td "ab", td "ad", td "bd"] ... ]
 \end{lstlisting}
-Applying \lstinline{map g} to the list above, we get layer $3$:
+such that if we apply \lstinline{map g} to the result of \lstinline{cd}, we get layer $3$:
 \begin{lstlisting}
   [td "abc", td "abd", td "acd", td "bcd" ...]
 \end{lstlisting}
-If such a function \lstinline{cd} can be constructed, a bottom-up algorithm computing the same value as \lstinline{td} is given by:
+If such a function \lstinline{cd} can be constructed, an alternative bottom-up algorithm is given by:
 \begin{lstlisting}
 bu :: L X -> Y                loop [y] = y
 bu = loop . map f             loop ys  = loop . map g . cd $ ys
 \end{lstlisting}
-That is, layer $1$ is constructed by applying \lstinline{f} to each element of the input list. Afterwards, we keep applying \lstinline{map g . cd} to get the next level, until we get a layer with only one element, which will be our result.
+That is, we start with applying \lstinline{f} to each element of the list to form layer $1$, keep applying \lstinline{map g . cd} to get the next level, until we get a layer with only one element, which will be our result.
 
-The \lstinline{bu} given above is much simpler than that of Richard's who, to cope with more general problems, had to store not just values but tables of values in each level. Note that we have to start from singleton lists, not the empty list, as the first layer --- otherwise we would not know what the elements are .
-
-All these, however, are merely a first attempt.
+All these, however, are merely for giving us some intuition.
 Richard must have realized at some point that it is difficult to construct \lstinline{cd} using lists, and decided to represent each level using the \lstinline{B} datatype mentioned before.
-Therefore \lstinline{cd} has type \lstinline{L a -> B (L a)}, and \lstinline{bu} and \lstinline{loop} are defined by
+Therefore \lstinline{cd} has type \lstinline{L a -> B (L a)}, and \lstinline{loop} is defined by
 \begin{lstlisting}
-bu :: L X -> Y                loop (Tip y) = y
-bu = loop . cvt . map f       loop ys      = loop . mapB g . cd $ ys
+loop (Tip y) = y
+loop ys      = loop . mapB g . cd $ ys
 \end{lstlisting}
-where \lstinline{loop :: B Y -> B Y}.
-The function \lstinline{cvt : L a -> B a} prepares the first level.
+where \lstinline{mapB :: (a -> b) -> B a -> B b} is the map function for \lstinline{B}.
 
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.8\textwidth]{pics/map_g_cd.pdf}
-\caption{How \lstinline{mapB g . cd} constructs a new level.}
-\label{fig:map_g_cd}
-\end{figure}
-
-I tried to trace Richard's \lstinline{cd} to find out how it works.
-Given input \lstinline{"abcde"}, the function \lstinline{cvt} yields a tree that is slanted to the left as level $1$:
-\begin{lstlisting}
-Bin (Bin (Bin (Bin (Tip 'a') (Tip 'b')) (Tip 'c')) (Tip 'd')) (Tip 'e')
-\end{lstlisting}
-Following Richard's convention, I drew a \lstinline{Tip x} as \lstinline{x}, and drew \lstinline{Bin t u} by a dot with \lstinline{t} to its left and \lstinline{u} to its the bottom, resulting in the tree labelled $1$ in Figure~\ref{fig:map_g_cd}.
-Applying \lstinline{mapB g . cd} to it, I got level $2$, labelled $2$ in the figure.
-For a closer look, I applied \lstinline{cd} to level $2$.
-Indeed, with its clever mapping and zipping, \lstinline{cd} managed to bring together the right elements ($2.5$ in Figure~\ref{fig:map_g_cd}), such that when we apply \lstinline{mapB g}, we get level $3$.
-
-This still did not give me much intuition why \lstinline{cd} works.
-Clearly, \lstinline{cd} does not work on all inputs, but only the trees built by \lstinline{cvt} and \lstinline{cd} itself.
-What are the constraints of these trees, and how does \lstinline{cd} exploit them?
-Richard did gave some hint: if we compute the sizes of subtrees alone the left spines (see the red numbers in Figure~\ref{fig:map_g_cd}),
-|[1,2,3,4,5]|, |[1, 3, 6, 10]|, and |[1,4,10]| are the first three diagonals of Pascal's triangle --- the trees are related to binomial coefficients (hence the name \lstinline{B})!
-
-Given these clues, how do we prove that \lstinline{cd} indeed does the job --- bringing related immediate sublists together?
-In fact, how do we even write down ``bringing related immediate sublists together'' as a formal specification?
-
-I felt that there would be plenty of complex proof waiting ahead.
+A lot remain unanswered: why does \lstinline{cd} do want we wish it to do (which does not even have for formal specification yet)?
+Can we 
 
 \todo[inline]{Recap of what Richard's paper wanted to do: transforming a top-down algorithm (which acts as a specification) to a bottom-up algorithm, which `I' (Shin) had already worked out a simplified version; explain why the base cases have to be singleton lists; the role of \lstinline{cd} in the bottom-up algorithm, intuitively; relationship to binomial cofficients}
 
-%But I still couldn’t see, \emph{formally}, how to make sense of the definition of \lstinline{cd} or get from the definition to a correctness proof of \lstinline{bu}.%
+But I still couldn’t see, \emph{formally}, how to make sense of the definition of \lstinline{cd} or get from the definition to a correctness proof of \lstinline{bu}.%
 \todo{Main question; even suggest there's a lot of proving ahead (actually not)}
 
 \section{Indexed Data Types of Binomial Trees}
@@ -323,9 +297,9 @@ I felt that there would be plenty of complex proof waiting ahead.
 
 \begin{code}
 data B (a : Set) : ℕ → ℕ → Set where
-  TipZ  :   a               → B a       n     0
-  TipS  :   a               → B a (1 +  n) (  1 + n)
-  Bin   :   B a n (1 +  k)
+  tipZ  :   a               → B a       n     0
+  tipS  :   a               → B a (1 +  n) (  1 + n)
+  bin   :   B a n (1 +  k)
         →'  B a n       k   → B a (1 +  n) (  1 + k)
 \end{code}
 
@@ -357,9 +331,9 @@ Might be able to turn a large number of equalities into judgemental ones so that
 
 \begin{code}
 data BT {a : Set} : (n k : ℕ) → (Vec a k → Set) → Vec a n → Set where
-  TipZ  :   p []                             → BT       n     0       p xs
-  TipS  :   p xs                             → BT (1 +  n) (  1 + n)  p xs
-  Bin   :   BT n (1 +  k)   p            xs
+  tipZ  :   p []                             → BT       n     0       p xs
+  tipS  :   p xs                             → BT (1 +  n) (  1 + n)  p xs
+  bin   :   BT n (1 +  k)   p            xs
         →'  BT n       k (  p ∘ (x ∷_))  xs  → BT (1 +  n) (  1 + k)  p (x ∷ xs)
 \end{code}
 
@@ -377,16 +351,16 @@ The list in the type of \lstinline{cd}, which is renamed to |retabulate| here, i
 
 \begin{code}
 _∷ᴮᵀ_ : p xs → BT(C sk k) (p ∘ (x ∷_)) xs → BT(C ssk sk) p (x ∷ xs)
-y ∷ᴮᵀ t = Bin (TipS y) t
+y ∷ᴮᵀ t = bin (tipS y) t
 \end{code}
 
 \begin{code}
 retabulate : (SUPPRESSED(n > k)) → BT(C n k) p xs → BT(C n sk) (BT(C sk k) p) xs
-retabulate {xs =' _ ∷ []     }  (TipZ y)  =  TipS  (TipZ y)
-retabulate {xs =' _ ∷ _ ∷ _  }  (TipZ y)  =  Bin   (retabulate (TipZ y)) (TipZ (TipZ y))
-retabulate (Bin t         (TipZ y)  )     =  Bin   (retabulate t) (mapBT (_∷ᴮᵀ (TipZ y)) t)
-retabulate (Bin (TipS y)  u         )     =  TipS  (y ∷ᴮᵀ u)
-retabulate (Bin t         u         )     =  Bin   (retabulate t)
+retabulate {xs =' _ ∷ []     }  (tipZ y)  =  tipS  (tipZ y)
+retabulate {xs =' _ ∷ _ ∷ _  }  (tipZ y)  =  bin   (retabulate (tipZ y)) (tipZ (tipZ y))
+retabulate (bin t         (tipZ y)  )     =  bin   (retabulate t) (mapBT (_∷ᴮᵀ (tipZ y)) t)
+retabulate (bin (tipS y)  u         )     =  tipS  (y ∷ᴮᵀ u)
+retabulate (bin t         u         )     =  bin   (retabulate t)
                                                    (zipBTWith _∷ᴮᵀ_ t (retabulate u))
 
 \end{code}
@@ -415,9 +389,9 @@ Arrive at an \emph{induction principle} with induction hypotheses for immediate 
 
 \begin{code}
 blanks' : (n k : ℕ) → (SUPPRESSED(n GEQ k)) → BT(C n k) (const ⊤) xs
-blanks' _          0       = TipZ tt
-blanks' (1 + k) (  1 + k)  = TipS tt
-blanks' (1 + n) (  1 + k)  = Bin (blanks' n (1 + k)) (blanks' n k)
+blanks' _          0       = tipZ tt
+blanks' (1 + k) (  1 + k)  = tipS tt
+blanks' (1 + n) (  1 + k)  = bin (blanks' n (1 + k)) (blanks' n k)
 
 blanks : (n k : ℕ) → (SUPPRESSED(n GEQ k)) → ⊤ → BT(C n k) (const ⊤) xs
 blanks(C n k) = const (blanks' n k)
@@ -457,18 +431,65 @@ Need more tools to see through the complexity.}
 \todo[inline]{One source of complexity is the indices, which are getting annoying and need a bit of management.
 In a sense, |retabulate| is still a familiar functional program that transforms a tree of~|p|'s to a tree of trees of~|p|'s, parametrically in~|p|.
 Category theory helps us see that and make it precise.
-Functional programmers are familiar with types and functions; abstract them as objects and morphisms so that we can specialise them to something new (in this case families of types and functions, or (proof-relevant) predicates and pointwise implications) and work with the new stuff using the same notation and intuition.}
+Functional programmers are familiar with types and functions; abstract them as objects and morphisms so that we can specialise them to something new (in this case families of types and functions, or (proof-relevant) predicates and pointwise implications) and work with the new stuff using the same notation and intuition.
+In particular, |BT(C n k)| is a real functor, just in the new categories, and |mapBT| is the functorial map.}
 
 \section{String-Diagrammatic Algorithms}
 
-\todo[inline]{Richard already pointed out that naturality is the key; try string diagrams!}
+Now I see that I'm pretty much still writing ordinary functional programs, so there's a better chance that I can port what Richard did with his programs to my setting.
+An important clue left by Richard was \emph{naturality}, a categorical notion which he used a lot in his proofs.
+In functional programming, naturality usually stems from parametricity:
+All parametric functions (such as |retabulate| and |unTip|) are \emph{natural transformations}.
+Now I know in which categories I should talk about them.
 
-\todo[inline]{Recap of string diagrams for 2-categories, i.e., layered type structure (composition of functors); layers may be transformed independently of others, and this intuition is captured by the definition of natural transformations.
-The two sides of a traditional naturality equation look rather different, whereas in a diagrammatic equation the two sides are `the same picture', allowing us to change perspectives effortlessly.}
+And I know a new weapon that Richard didn't know: \emph{string diagrams}.
+I've seen how dramatically string diagrams simplify proofs about natural transformations, so it's probably worthwhile to take a look at the two algorithms from a string-diagrammatic perspective.
 
-If naturality is the key, then drawing the two algorithms as string diagrams should save me the trouble of naturality rewriting.
+But before that, I need to refresh my memory of string diagrams\ldots
 
-Not confident enough to work with the recursive definitions straight away, I take the special case |td s e g 3| of the top-down computation and unfolds it into a deeply nested expression.
+%\todo[inline]{Richard already pointed out that naturality is the key; try string diagrams!}
+
+At a higher abstraction level, what a natural transformation does is transform one functor into another.
+For example, |retabulate| transforms the functor |BT(C n k)| into the composition of functors |BT(C n sk) ∘ BT(C sk k)|, while |unTip| transforms the functor |BT(C n n)| into the identity functor.
+String diagrams reorganise such `type information' in two-dimensional pictures:
+Natural transformations are represented as dots with input wires attached below and output wires above, where the wires represent functors.
+(I learned string diagrams mainly from \citet{Coecke-PQP}, so my string diagrams go upwards from input to output.)
+\[ \tikzfig{retabulate-unTip} \]
+A composition of functors is represented as a bunch of wires spread horizontally, and the identity functor is omitted, so |retabulate| has two output wires and |unTip| has none.
+
+Any two natural transformations |α : ∀ {x} → F x → G x| and |β : ∀ {x} → G x → H x| can be composed \emph{sequentially} into |β ∘ α : ∀ {x} → F x → H x|, which is drawn on a string diagram as |α|~and~|β| connected by the middle wire with label~|G| (which obscures part of the wire);
+|α|~can also be composed \emph{in parallel} with |α' : ∀ {x} → F' x → G' x| into |α ⊗ α' : ∀ {x} → F (F' x) → G (G' x)|, which is drawn on a string diagram as, well, |α|~and~|α'| in parallel.
+\[ \tikzfig{vertical} \hspace{.15\textwidth} \tikzfig{horizontal} \]
+The two kinds of composition embody the two-dimensional structure of natural transformations:
+Natural transformations are laid out vertically in the order they are applied.
+Independent of that order/direction/dimension, the functors being transformed have a composite structure, which is intuitively layers of functors that can be transformed individually without affecting other layers --- that is, in parallel.
+These layers are laid out horizontally.
+
+To see why the two-dimensional layout is helpful, consider two ways of defining |α ⊗ α'|: either |map(sub G) α' ∘ α|, where the outer functor~|F| is transformed to~|G| first, or |α ∘ map(sub F) α'|, where the inner functor~|F'| is transformed to~|G'| first.
+The two definitions are equal (due to the naturality of~|α|), but the equality can be seen more directly with string diagrams:
+\[ \tikzfig{horizontal-definitions} \]
+On the diagrams, |α'|~is applied to the inner/right wire because |map α'| means skipping over the outer functor and transforming the inner functor using~|α'|.
+(The dashed lines are added to emphasise that both diagrams are constructed as the sequential composition of two transformations.)
+By laying out layers of functors in a separate dimension, it's much easier to see which layers are being transformed, and determine whether two sequentially composed transformations are in fact applied in parallel, so that their order of application can be swapped.
+This is abstracted as a graphical reasoning principle:
+Dots can be moved upwards or downwards, possibly changing their vertical positions relative to other dots, and the meaning of a diagram will remain the same (extensionally).
+
+There are many functions that are not natural transformations, but they can be lifted to natural transformations to fit into string diagrams:
+A function |f : a → b| can be lifted to have the type |∀ {x} → (const a) x → (const b) x| (where |x|~can range over any non-empty domain) and become a natural transformation from |const a| to |const b|.
+I prefer to leave the lifting implicit and just write |a|~and~|b| for wire labels, since it's usually clear that |a|~and~|b| are not functors and need to be lifted.
+For some concrete examples, here are the rest of the functions used in the two algorithms as string diagrams:
+\[ \tikzfig{g-e-blanks} \]
+(I write~|⊤| to abbreviate the predicate |const ⊤|, which is only an object in the categories of families, and needs to be lifted to |const (const ⊤)| to be a functor for those categories.)
+With the lifting, the usual naturality can also be reformulated diagrammatically:
+For any |f : a → b|,
+\[ |map(sub G) f ∘ α = α ∘ map(sub F) f| \hspace{.15\textwidth} \tikzfig{naturality} \]
+The reformulation makes it intuitive that the naturality of~|α| is about |α|~transforming only the outer functor, independently of whatever happening inside.
+
+%\todo[inline]{Recap of string diagrams for 2-categories, i.e., layered type structure (composition of functors); layers may be transformed independently of others, and this intuition is captured by the definition of natural transformations.
+%The two sides of a traditional naturality equation look rather different, whereas in a diagrammatic equation the two sides are `the same picture', allowing us to change perspectives effortlessly.}
+
+That's enough abstract nonsense --- time to get back to the two algorithms.
+I'm not confident enough to work with the recursive definitions straight away, so I take the special case |td s e g 3| of the top-down computation and unfolds it into a deeply nested expression.
 Translating that into a string diagram is basically writing down all the intermediate type information and laying out the nested type structures horizontally (whereas function composition is laid out vertically).
 
 \noindent
@@ -488,12 +509,12 @@ td s e g 3 =  g ∘
 \end{minipage}
 
 All the |mapBT|'s are gone in the diagram, because I can directly apply a function to the intended layers/wires, rather than count awkwardly how many outer layers I want to skip using |mapBT|, one layer at a time.
-Functoriality (|mapBT (f ∘ f') =' mapBT f ∘ mapBT f'|) is also transparent in the diagram, so now it's slightly easier to see that |td| has two phases (between which I draw a dashed line):
+Functoriality (|map(sub F) (f' ∘ f) = map(sub F) f' ∘ map(sub F) f|) is also transparent in the diagram, so it's slightly easier to see that |td| has two phases (between which I draw a dashed line):
 The first phase constructs deeply nested blank tables, and the second phase fills and demolishes the tables inside out.
 
 It doesn't seem that the string diagram helps much though.
-Functoriality is already more or less transparent in the traditional expression (thanks to the infix notation of function composition), so I don't really need the string diagram to see that |td| has two phases.
-Moreover, there's nothing I can move around in the diagram --- nothing in the diagram is a real natural transformation.
+Functoriality is already somewhat transparent in the traditional expression (thanks to the infix notation of function composition), so I don't really need the string diagram to see that |td| has two phases.
+Moreover, there's nothing I can meaningfully move in the diagram.
 
 Somewhat suspiciously, I turn to the bottom-up computation |bu s e g 3|.
 The loop in the expression unfolds into a sequence of functions, alternating between table construction using |retabulate| and demolition using |mapBT g|.
@@ -508,18 +529,16 @@ And then, something unexpected yet familiar appears in the translated diagram.
 \begin{minipage}{.45\textwidth}
 \begin{code}
 bu s e g 3 =  unTip ∘
-
-                id          ∘
-
+                
                 mapBT g     ∘
                 retabulate  ∘
-
+                
                 mapBT g     ∘
                 retabulate  ∘
-
+                
                 mapBT g     ∘
                 retabulate  ∘
-
+                
               mapBT e ∘
               blanks(C 3 0)
 \end{code}
@@ -533,7 +552,7 @@ There are also two phases for table construction and demolition, and the demolit
 The string diagram is truly helpful this time.
 Now I see that, as Richard hinted, I could rewrite the traditional expression using the naturality of |unTip| and |retabulate| to push |g|~and~|e| to the left of the sequence and separate the two phases.
 But on the string diagram, all those rewritings amount to nothing more than gently pulling the two phases apart from each other (making the dashed line horizontal).
-In fact I don't even want or bother to pull, because on this diagram I can already see both the sequence (the dots appearing one by one along the vertical direction) and the result of rewriting the sequence using naturality at the same time.
+In fact I don't even bother to pull, because on this diagram I can already see both the sequence (the dots appearing one by one vertically) and the result of rewriting the sequence using naturality at the same time.
 
 %\todo[inline]{Specialised cases (with a concrete size) only; production and consumption parts, which can be separated by naturality.}
 
@@ -598,7 +617,8 @@ There's no need to do any rotation.
 
 %\todo[inline]{Second climax: the types have already proved the equality between the production parts for us!}
 
-Oh well, at least |rotation| helps to check that the proof idea works before I embark on the general proof that |td| equals |bu|.
+Oh well, at least |rotation| helps to check that the proof idea works before I embark on the general proof that |td| equals |bu|.%
+\todo{|rotation| is also important for understanding the intensional difference between |td| and |bu|, which is a big reason that I try string diagrams despite having the parametricity-based proof}
 Conceptually I’ve figured it all out:
 Both algorithms have two phases modulo naturality; their table demolition phases are exactly the same, and their table construction phases are equal due to the |BT-isProp| reasoning.
 But the general proof is still going to take some work:
@@ -622,8 +642,8 @@ More specifically, why is it good to keep \emph{two} layers of tables and not mo
 
 When there are multiple layers of tables of type |BT(C n k)| with |n > k|, meaning that the input list is split into proper sub-lists multiple times, all the final sub-lists will appear (as indices in the element types) in the entire nested table multiple times --- that is, overlapping sub-problems will appear.
 Therefore, when I use~|g| to fill in a nested table, I'm invoking~|g| to compute solutions for overlapping sub-problems repetitively, which is what I want to avoid.
-More precisely, `using~|g| to fill in a nested table' means something like |mapBT (mapBT g) : BT(C 3 2) (BT(C 2 1) (BT(C 1 0) s)) xs → BT(C 3 2) (BT(C 2 1) s) xs|, where the result is at least two layers of tables, so there should be at least \emph{three} layers of tables for the solving of overlapping sub-problems to happen.
-The bottom-up algorithm doesn't get to three layers of tables, and therefore avoids solving overlapping sub-problems.
+More precisely, `using~|g| to fill in a nested table' means applying~|g| under at least two layers, for example |mapBT (mapBT g) : BT(C 3 2) (BT(C 2 1) (BT(C 1 0) s)) xs → BT(C 3 2) (BT(C 2 1) s) xs|, where the result is at least two layers of tables, so there should be at least \emph{three} layers of tables (to which |mapBT (mapBT g)| is applied) for the solving of overlapping sub-problems to happen.
+The bottom-up algorithm never gets to three layers of tables, and therefore avoids solving overlapping sub-problems.
 
 That reasoning doesn't sound too bad, although it's clear that there's much more to be done.
 The whole reasoning is still too informal and lacks detail.

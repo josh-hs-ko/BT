@@ -44,11 +44,25 @@ data BT : (n k : ℕ) → (Vec A k → Set) → Vec A n → Set where
   TipZ : P []                        → BT      n   0      P xs
   TipS : P xs                        → BT (1 + n) (1 + n) P xs
   Bin  : BT n (1 + k) P           xs
-       → BT n      k (P ∘ (x ∷_)) xs → BT (1 + n) (1 + k) P (x ∷ xs)
+       → BT n      k (λ ys → P (x ∷ ys)) xs → BT (1 + n) (1 + k) P (x ∷ xs)
 
--- testBT : BT 4 2 (0 ∷ 1 ∷ 2 ∷ 3 ∷ []) P
--- testBT = Bin (Bin (TipS {!   !}) (Bin (TipS {!   !}) (TipZ {!   !})))
---              (Bin (Bin (TipS {!   !}) (TipZ {!   !})) (TipZ {!   !}))
+-- testBT : (a b c d : A) → BT 4 2 P (a ∷ b ∷ c ∷ d ∷ [])
+-- testBT a b c d =
+--   Bin (Bin (TipS      {!   !})
+--            (Bin (TipS {!   !})
+--                 (TipZ {!   !})))
+--       (Bin (Bin (TipS {!   !})
+--                 (TipZ {!   !}))
+--            (TipZ      {!   !}))
+
+-- testBT² : (a b c : A) → BT 3 2 (BT 2 1 P) (a ∷ b ∷ c ∷ [])
+-- testBT² a b c =
+--   Bin (TipS      (Bin (TipS {!   !})
+--                       (TipZ {!   !})))
+--       (Bin (TipS (Bin (TipS {!   !})
+--                       (TipZ {!   !})))
+--            (TipZ (Bin (TipS {!   !})
+--                       (TipZ {!   !}))))
 
 bounded : BT n k P xs → n ≥ k
 bounded (TipZ _)  = z≤n
@@ -61,7 +75,7 @@ unbounded t = ≤⇒≯ (bounded t) ≤-refl
 IsProp : Set → Set
 IsProp A = (x y : A) → x ≡ y
 
-IsProp-BT : (∀ {x} → IsProp (P x)) → ∀ {xs} → IsProp (BT n k P xs)
+IsProp-BT : (∀ {ys} → IsProp (P ys)) → ∀ {xs} → IsProp (BT n k P xs)
 IsProp-BT IsProp-P (TipZ p)  (TipZ p')   = cong TipZ (IsProp-P p p')
 IsProp-BT IsProp-P (TipS p)  (TipS p')   = cong TipS (IsProp-P p p')
 IsProp-BT IsProp-P (Bin t u) (Bin t' u') = cong₂ Bin (IsProp-BT IsProp-P t t')
@@ -408,3 +422,17 @@ module Consumption-and-Correctness
     ∎
     where n≥0 = ≤⇒≤‴ z≤n
           open ≡-Reasoning
+
+IsProp' : Set → Set
+IsProp' a = {x y : a} → x ≡ y
+
+IsProp'-BT : ({ys : Vec A k} → IsProp' (P ys))
+           →  {xs : Vec A n} → IsProp' (BT n k P xs)
+IsProp'-BT isProp'-P = IsProp-BT (λ _ _ → isProp'-P) _ _
+
+retabulate-blanks :
+  ∀ {n>k n≥k 1+k≥k n≥1+k}
+  → retabulate n>k (blanks↑ n k n≥k {xs} tt)
+  ≡ mapBT (blanks↑ (1 + k) k 1+k≥k) (blanks↑ n (1 + k) n≥1+k tt)
+retabulate-blanks = IsProp'-BT (IsProp'-BT refl)
+
