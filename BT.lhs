@@ -241,9 +241,11 @@ td :: L X -> Y
 td [x]  = f x
 td xs   = g . mapF td . dc $ xs
 \end{lstlisting}
-The input is a list of \lstinline{X}'s (in \citet{Bird-zippy-tabulations} \lstinline{L} can be more general, but for our purpose we talk about lists only), and the output is of type \lstinline{Y}. Singleton lists form the base cases, processed by a function \lstinline{f :: X -> Y}.
-An non-empty list can be decomposed into subproblems by a function \lstinline{dc :: L a -> F (L a)}.
-Each \lstinline{L a} in the \lstinline{F}-structure is recursively processed by \lstinline{td}, before \lstinline{g :: F Y -> Y} combines the results.
+In \citet{Bird-zippy-tabulations} \lstinline{L} can be more general, but for our purpose we talk about lists only.
+Therefore, the input of \lstinline{td} is a list of \lstinline{X}'s and the output is of type \lstinline{Y}.
+Singleton lists form the base cases, processed by a function \lstinline{f :: X -> Y}.
+A non-singleton list is decomposed into an \lstinline{F}-structure of lists by  \lstinline{dc :: L a -> F (L a)}.
+Each \lstinline{L a} is then recursively processed by \lstinline{td}, before \lstinline{g :: F Y -> Y} combines the results.
 
 In the last, and the most difficult example in \citet{Bird-zippy-tabulations},
 \lstinline{F = L}, and \lstinline{dc :: L a -> L (L a)} computes all the \emph{immediate sublists} of the given list, that is, all the lists with exactly one element missing.
@@ -251,44 +253,80 @@ To compute \lstinline{td "abcd"}, for example, we need to compute \lstinline{td 
 To compute \lstinline{td "abc"}, in turns, we need \lstinline{td "ab"}, \lstinline{td "ac"}, and \lstinline{td "bc"}.
 Notice that \lstinline{td "ab"} will also be invoked when computing \lstinline{td "abd"} --- proceeding in this top-down manner, many sub-computation are repeated.
 
-One would instead wish to proceed in a bottom-up manner, depicted in Figure TODO.
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.5\textwidth]{pics/sublists-lattice.pdf}
+\caption{Computing \lstinline{td "abcde"} bottom-up.%
+To sace space we omitted the \lstinline{td}s.}
+\label{fig:sublists-lattice}
+\end{figure}
+
+One would instead wish to proceed in a bottom-up manner, depicted in Figure~\ref{fig:sublists-lattice}.
 The $n$th layer consists of values of \lstinline{td} at lists of length $n$.
-We wish to start from layer $1$, and compute layer $n+1$ from layer $n$ by reusing the values stored in the latter, until we reach a layer consisting of only one value.
-Assuming, for now, that each layer is represented by lists.
-Layer $2$ would be
+We start from layer $1$, and compute each layer $n+1$ from layer $n$ by reusing the values stored in the latter, until we reach a layer consisting of only one value.
+Assuming, for now, that each layer is represented by lists,
+layer $2$ would be
 \begin{lstlisting}
   [td "ab", td "ac", td "bc", td "ad" ...]
 \end{lstlisting}
-To construct layer $3$ from layer $2$, we wish to have a function \lstinline{cd :: L a -> L (L a)} that, given layer $2$, brings related elements together:
+To construct layer $3$ from layer $2$, we wish to have a function \lstinline{cd :: L a -> L (L a)} that, given layer $2$, copies and rearranges its elements such that immediate sublists of the same list are brought together:
 \begin{lstlisting}
   [[td "ab", td "ac", td "bc"], [td "ab", td "ad", td "bd"] ... ]
 \end{lstlisting}
-such that if we apply \lstinline{map g} to the result of \lstinline{cd}, we get layer $3$:
+Applying \lstinline{map g} to the list above, we get layer $3$:
 \begin{lstlisting}
   [td "abc", td "abd", td "acd", td "bcd" ...]
 \end{lstlisting}
-If such a function \lstinline{cd} can be constructed, an alternative bottom-up algorithm is given by:
+If such a function \lstinline{cd} can be constructed, a bottom-up algorithm computing the same value as \lstinline{td} is given by:
 \begin{lstlisting}
 bu :: L X -> Y                loop [y] = y
 bu = loop . map f             loop ys  = loop . map g . cd $ ys
 \end{lstlisting}
-That is, we start with applying \lstinline{f} to each element of the list to form layer $1$, keep applying \lstinline{map g . cd} to get the next level, until we get a layer with only one element, which will be our result.
+That is, layer $1$ is constructed by applying \lstinline{f} to each element of the input list. Afterwards, we keep applying \lstinline{map g . cd} to get the next level, until we get a layer with only one element, which will be our result.
 
-All these, however, are merely for giving us some intuition.
+The \lstinline{bu} given above is much simpler than that of Richard's who, to cope with more general problems, had to store not just values but tables of values in each level. Note that we have to start from singleton lists, not the empty list, as the first layer --- otherwise we would not know what the elements are .
+
+All these, however, are merely a first attempt.
 Richard must have realized at some point that it is difficult to construct \lstinline{cd} using lists, and decided to represent each level using the \lstinline{B} datatype mentioned before.
-Therefore \lstinline{cd} has type \lstinline{L a -> B (L a)}, and \lstinline{loop} is defined by
+Therefore \lstinline{cd} has type \lstinline{L a -> B (L a)}, and \lstinline{bu} and \lstinline{loop} are defined by
 \begin{lstlisting}
-loop (Tip y) = y
-loop ys      = loop . mapB g . cd $ ys
+bu :: L X -> Y                loop (Tip y) = y
+bu = loop . cvt . map f       loop ys      = loop . mapB g . cd $ ys
 \end{lstlisting}
-where \lstinline{mapB :: (a -> b) -> B a -> B b} is the map function for \lstinline{B}.
+where \lstinline{loop :: B Y -> B Y}.
+The function \lstinline{cvt : L a -> B a} prepares the first level.
 
-A lot remain unanswered: why does \lstinline{cd} do want we wish it to do (which does not even have for formal specification yet)?
-Can we 
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{pics/map_g_cd.pdf}
+\caption{How \lstinline{mapB g . cd} constructs a new level.}
+\label{fig:map_g_cd}
+\end{figure}
+
+I try to trace Richard's \lstinline{cd} to find out how it works.
+Given input \lstinline{"abcde"}, the function \lstinline{cvt} yields a tree that is slanted to the left as level $1$:
+\begin{lstlisting}
+Bin (Bin (Bin (Bin (Tip 'a') (Tip 'b')) (Tip 'c')) (Tip 'd')) (Tip 'e')
+\end{lstlisting}
+Following Richard's convention, I draw a \lstinline{Tip x} as \lstinline{x}, and draw \lstinline{Bin t u} by a dot with \lstinline{t} to its left and \lstinline{u} to its the bottom, resulting in the tree labelled $1$ in Figure~\ref{fig:map_g_cd}.
+Applying \lstinline{mapB g . cd} to it, I get level $2$, labelled $2$ in the figure.
+For a closer look, I apply \lstinline{cd} to level $2$.
+Indeed, with its clever mapping and zipping, \lstinline{cd} managed to bring together the right elements ($2.5$ in Figure~\ref{fig:map_g_cd}), such that when we apply \lstinline{mapB g}, we get level $3$.
+
+This still does not give me much intuition why \lstinline{cd} works.
+Clearly, \lstinline{cd} does not work on all inputs, but only the trees built by \lstinline{cvt} and \lstinline{cd} itself.
+What are the constraints of these trees, and how does \lstinline{cd} exploit them?
+Richard did gave some hint: if we compute the sizes of subtrees alone the left spines (see the red numbers in Figure~\ref{fig:map_g_cd}),
+|[1,2,3,4,5]|, |[1, 3, 6, 10]|, and |[1,4,10]| are the first three diagonals of Pascal's triangle --- the trees are related to binomial coefficients (hence the name \lstinline{B})!
+
+Given these clues, how do we prove that \lstinline{cd} indeed does the job --- bringing related immediate sublists together?
+In fact, how do we even write down ``bringing related immediate sublists together'' as a formal specification?
+
+I fear that there would be plenty of complex proof waiting ahead.
 
 \todo[inline]{Recap of what Richard's paper wanted to do: transforming a top-down algorithm (which acts as a specification) to a bottom-up algorithm, which `I' (Shin) had already worked out a simplified version; explain why the base cases have to be singleton lists; the role of \lstinline{cd} in the bottom-up algorithm, intuitively; relationship to binomial cofficients}
 
-But I still couldn’t see, \emph{formally}, how to make sense of the definition of \lstinline{cd} or get from the definition to a correctness proof of \lstinline{bu}.%
+%But I still couldn’t see, \emph{formally}, how to make sense of the definition of \lstinline{cd} or get from the definition to a correctness proof of \lstinline{bu}.%
 \todo{Main question; even suggest there's a lot of proving ahead (actually not)}
 
 \section{Indexed Data Types of Binomial Trees}
@@ -529,16 +567,16 @@ And then, something unexpected yet familiar appears in the translated diagram.
 \begin{minipage}{.45\textwidth}
 \begin{code}
 bu s e g 3 =  unTip ∘
-                
+
                 mapBT g     ∘
                 retabulate  ∘
-                
+
                 mapBT g     ∘
                 retabulate  ∘
-                
+
                 mapBT g     ∘
                 retabulate  ∘
-                
+
               mapBT e ∘
               blanks(C 3 0)
 \end{code}
