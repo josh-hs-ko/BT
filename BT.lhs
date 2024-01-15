@@ -492,12 +492,12 @@ For example, |retabulate| transforms the functor |BT(C n k)| into the compositio
 String diagrams reorganise such `type information' in two-dimensional pictures:
 Natural transformations are represented as dots with input wires attached below and output wires above, where the wires represent functors.
 (I learned string diagrams mainly from \citet{Coecke-PQP}, so my string diagrams go upwards from input to output.)
-\[ \tikzfig{retabulate-unTip} \]
+\[ \tikzfig{pics/retabulate-unTip} \]
 A composition of functors is represented as a bunch of wires spread horizontally, and the identity functor is omitted, so |retabulate| has two output wires and |unTip| has none.
 
 Any two natural transformations |α : ∀ {x} → F x → G x| and |β : ∀ {x} → G x → H x| can be composed \emph{sequentially} into |β ∘ α : ∀ {x} → F x → H x|, which is drawn on a string diagram as |α|~and~|β| connected by the middle wire with label~|G| (which obscures part of the wire);
 |α|~can also be composed \emph{in parallel} with |α' : ∀ {x} → F' x → G' x| into |α ⊗ α' : ∀ {x} → F (F' x) → G (G' x)|, which is drawn on a string diagram as, well, |α|~and~|α'| in parallel.
-\[ \tikzfig{vertical} \hspace{.15\textwidth} \tikzfig{horizontal} \]
+\[ \tikzfig{pics/vertical} \hspace{.15\textwidth} \tikzfig{pics/horizontal} \]
 The two kinds of composition embody the two-dimensional structure of natural transformations:
 Natural transformations are laid out vertically in the order they are applied.
 Independent of that order/direction/dimension, the functors being transformed have a composite structure, which is intuitively layers of functors that can be transformed individually without affecting other layers --- that is, in parallel.
@@ -505,7 +505,7 @@ These layers are laid out horizontally.
 
 To see why the two-dimensional layout is helpful, consider two ways of defining |α ⊗ α'|: either |map(sub G) α' ∘ α|, where the outer functor~|F| is transformed to~|G| first, or |α ∘ map(sub F) α'|, where the inner functor~|F'| is transformed to~|G'| first.
 The two definitions are equal (due to the naturality of~|α|), but the equality can be seen more directly with string diagrams:
-\[ \tikzfig{horizontal-definitions} \]
+\[ \tikzfig{pics/horizontal-definitions} \]
 On the diagrams, |α'|~is applied to the inner/right wire because |map α'| means skipping over the outer functor and transforming the inner functor using~|α'|.
 (The dashed lines are added to emphasise that both diagrams are constructed as the sequential composition of two transformations.)
 By laying out layers of functors in a separate dimension, it's much easier to see which layers are being transformed, and determine whether two sequentially composed transformations are in fact applied in parallel, so that their order of application can be swapped.
@@ -516,11 +516,11 @@ There are many functions that are not natural transformations, but they can be l
 A function |f : a → b| can be lifted to have the type |∀ {x} → (const a) x → (const b) x| (where |x|~can range over any non-empty domain) and become a natural transformation from |const a| to |const b|.
 I prefer to leave the lifting implicit and just write |a|~and~|b| for wire labels, since it's usually clear that |a|~and~|b| are not functors and need to be lifted.
 For some concrete examples, here are the rest of the functions used in the two algorithms as string diagrams:
-\[ \tikzfig{g-e-blanks} \]
+\[ \tikzfig{pics/g-e-blanks} \]
 (I write~|⊤| to abbreviate the predicate |const ⊤|, which is only an object in the categories of families, and needs to be lifted to |const (const ⊤)| to be a functor for those categories.)
 With the lifting, the usual naturality can also be reformulated diagrammatically:
 For any |f : a → b|,
-\[ |map(sub G) f ∘ α = α ∘ map(sub F) f| \hspace{.15\textwidth} \tikzfig{naturality} \]
+\[ |map(sub G) f ∘ α = α ∘ map(sub F) f| \hspace{.15\textwidth} \tikzfig{pics/naturality} \]
 The reformulation makes it intuitive that the naturality of~|α| is about |α|~transforming only the outer functor, independently of whatever happening inside.
 
 %\todo[inline]{Recap of string diagrams for 2-categories, i.e., layered type structure (composition of functors); layers may be transformed independently of others, and this intuition is captured by the definition of natural transformations.
@@ -543,7 +543,7 @@ td s e g 3 =  g ∘
 \end{code}
 \end{minipage}%
 \begin{minipage}{.45\textwidth}
-\[ \tikzfig{td} \]
+\[ \tikzfig{pics/td} \]
 \end{minipage}
 
 All the |mapBT|'s are gone in the diagram, because I can directly apply a function to the intended layers/wires, rather than count awkwardly how many outer layers I want to skip using |mapBT|, one layer at a time.
@@ -552,9 +552,10 @@ The first phase constructs deeply nested blank tables, and the second phase fill
 
 It doesn't seem that the string diagram helps much though.
 Functoriality is already somewhat transparent in the traditional expression (thanks to the infix notation of function composition), so I don't really need the string diagram to see that |td| has two phases.
-Moreover, there's nothing I can meaningfully move in the diagram.
+Moreover, there's nothing I can meaningfully move in the diagram --- all the transformations here are lifted after all.
+Maybe I'll have more luck with the bottom-up computation, which has real natural transformations?
 
-Somewhat suspiciously, I turn to the bottom-up computation |bu s e g 3|.
+I go on to expand |bu s e g 3|.
 The loop in the expression unfolds into a sequence of functions, alternating between table construction using |retabulate| and demolition using |mapBT g|.
 
 `A sequence\ldots'
@@ -582,7 +583,7 @@ bu s e g 3 =  unTip ∘
 \end{code}
 \end{minipage}%
 \begin{minipage}{.55\textwidth}
-\[ \tikzfig{bu} \]
+\[ \tikzfig{pics/bu} \]
 \end{minipage}
 
 There are also two phases for table construction and demolition, and the demolition phase is \emph{exactly the same} as the one in |td|!
@@ -606,7 +607,7 @@ Of course it has to be this equation --- I used it as a specification for \lstin
 How else would I introduce |retabulate| into the picture?
 But first let me update this to a dependently typed string diagram.
 
-\[ \tikzfig{rotation} \qquad\text{if |n > k|} \]
+\[ \tikzfig{pics/rotation} \qquad\text{if |n > k|} \]
 
 That's a tree rotation all right.
 So I should do an induction that uses this equation to rotate the right-leaning tree in |td| and obtain the left-leaning tree in |bu|.
