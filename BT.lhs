@@ -39,6 +39,10 @@
 \setlength{\marginparwidth}{1.25cm}
 \usepackage[obeyFinal,color=yellow,textsize=scriptsize]{todonotes}
 
+\newcommand{\Josh}[1]{\footnote{\color{blue}Josh: #1}}
+\newcommand{\Shin}[1]{\footnote{\color{blue}Shin: #1}}
+\newcommand{\Jeremy}[1]{\footnote{\color{blue}Jeremy: #1}}
+
 \newcommand{\equals}{\enskip=\enskip}
 
 \usepackage{tikzit}
@@ -235,7 +239,8 @@ And he didn't bother to explain it in the paper.
 
 Based on what I’ve read in the paper, I can make a pretty good guess at what \lstinline{cd} is doing at a high level.
 %
-\citet{Bird-zippy-tabulations} is a study of the relationship between top-down and bottom-up algorithms. A generic top-down algorithm is specified by:
+\citet{Bird-zippy-tabulations} is a study of the relationship between top-down and bottom-up algorithms. A generic top-down algorithm is specified by:%
+\Josh{Include |f| and |g| as arguments (like |foldr| etc)}
 \begin{lstlisting}
 td :: L X -> Y
 td [x]  = f x
@@ -245,13 +250,17 @@ In \citet{Bird-zippy-tabulations} \lstinline{L} can be more general, but for our
 Therefore, the input of \lstinline{td} is a list of \lstinline{X}'s and the output is of type \lstinline{Y}.
 Singleton lists form the base cases, processed by a function \lstinline{f :: X -> Y}.
 A non-singleton list is decomposed into an \lstinline{F}-structure of lists by  \lstinline{dc :: L a -> F (L a)}.
-Each \lstinline{L a} is then recursively processed by \lstinline{td}, before \lstinline{g :: F Y -> Y} combines the results.
+Each \lstinline{L a} is then recursively processed by \lstinline{td}, before \lstinline{g :: F Y -> Y} combines the results.%
+\Josh{\lstinline{F} is initially \lstinline{L} and later \lstinline{B}, but this changes the type of \lstinline{g} too (no need for \lstinline{cvt} etc)?}
 
 In the last, and the most difficult example in \citet{Bird-zippy-tabulations},
-\lstinline{F = L}, and \lstinline{dc :: L a -> L (L a)} computes all the \emph{immediate sublists} of the given list, that is, all the lists with exactly one element missing.
+\lstinline{F = L}, and \lstinline{dc :: L a -> L (L a)}%
+\Josh{Give definition, which is generalised to \lstinline{choose} later?}
+computes all the \emph{immediate sublists} of the given list, that is, all the lists with exactly one element missing.
 To compute \lstinline{td "abcd"}, for example, we need to compute \lstinline{td "abc"}, \lstinline{td "abd"}, \lstinline{td "acd"}, and \lstinline{td "bcd"}.
 To compute \lstinline{td "abc"}, in turns, we need \lstinline{td "ab"}, \lstinline{td "ac"}, and \lstinline{td "bc"}.
-Notice that \lstinline{td "ab"} will also be invoked when computing \lstinline{td "abd"} --- proceeding in this top-down manner, many sub-computation are repeated.
+Notice that \lstinline{td "ab"} will also be invoked when computing \lstinline{td "abd"} --- proceeding in this top-down manner, many sub-computation are repeated.%
+\todo{A figure to contrast with \cref{fig:sublists-lattice}?}
 
 \begin{figure}[t]
 \centering
@@ -261,8 +270,11 @@ To sace space we omitted the \lstinline{td}s.}
 \label{fig:sublists-lattice}
 \end{figure}
 
-One would instead wish to proceed in a bottom-up manner, depicted in Figure~\ref{fig:sublists-lattice}.
-The $n$th layer consists of values of \lstinline{td} at lists of length $n$.
+One would instead wish to proceed in a bottom-up manner, depicted in Figure~\ref{fig:sublists-lattice}.%
+\Josh{Four levels are enough?}
+The $n$th layer%
+\Josh{Change to `level' to avoid confusion with `layers of functors' later}
+consists of values of \lstinline{td} at lists of length $n$.
 We start from layer $1$, and compute each layer $n+1$ from layer $n$ by reusing the values stored in the latter, until we reach a layer consisting of only one value.
 Assuming, for now, that each layer is represented by lists,
 layer $2$ would be
@@ -277,24 +289,29 @@ Applying \lstinline{map g} to the list above, we get layer $3$:
 \begin{lstlisting}
   [td "abc", td "abd", td "acd", td "bcd" ...]
 \end{lstlisting}
-If such a function \lstinline{cd} can be constructed, a bottom-up algorithm computing the same value as \lstinline{td} is given by:
+If such a function \lstinline{cd} can be constructed, a bottom-up algorithm computing the same value as \lstinline{td} is given by:%
+\Josh{Bring \lstinline{head} in front of \lstinline{loop}?}
 \begin{lstlisting}
 bu :: L X -> Y                loop [y] = y
 bu = loop . map f             loop ys  = loop . map g . cd $ ys
 \end{lstlisting}
 That is, layer $1$ is constructed by applying \lstinline{f} to each element of the input list. Afterwards, we keep applying \lstinline{map g . cd} to get the next level, until we get a layer with only one element, which will be our result.
 
-The \lstinline{bu} given above is much simpler than that of Richard's who, to cope with more general problems, had to store not just values but tables of values in each level. Note that we have to start from singleton lists, not the empty list, as the first layer --- otherwise we would not know what the elements are .
+The \lstinline{bu} given above is much simpler than that of Richard's who, to cope with more general problems, had to store not just values but tables of values in each level. Note that we have to start from singleton lists, not the empty list, as the first layer --- otherwise we would not know what the elements are.%
+\Josh{I did a reformulation\ldots
+I'm puzzled by having to start from singleton lists instead of the empty list, which is the immediate sub-list of any singleton list (missing the bottom of the lattice), but somehow that's the best Richard could do.}
 
 All these, however, are merely a first attempt.
-Richard must have realized at some point that it is difficult to construct \lstinline{cd} using lists, and decided to represent each level using the \lstinline{B} datatype mentioned before.
+Richard must have realized at some point that it is difficult to construct \lstinline{cd} using lists, and decided to represent each level using the \lstinline{B} datatype mentioned before.%
+\Josh{Do we get any explanation from the dependently typed reformulation? (Easy access to particular groups of sub-lists?)}
 Therefore \lstinline{cd} has type \lstinline{L a -> B (L a)}, and \lstinline{bu} and \lstinline{loop} are defined by
 \begin{lstlisting}
 bu :: L X -> Y                loop (Tip y) = y
 bu = loop . cvt . map f       loop ys      = loop . mapB g . cd $ ys
 \end{lstlisting}
 where \lstinline{loop :: B Y -> B Y}.
-The function \lstinline{cvt : L a -> B a} prepares the first level.
+The function \lstinline{cvt :: L a -> B a} prepares the first level.%
+\Josh{A point of comparison (later we don't need this conversion)}
 
 \begin{figure}[t]
 \centering
@@ -304,7 +321,8 @@ The function \lstinline{cvt : L a -> B a} prepares the first level.
 \end{figure}
 
 I try to trace Richard's \lstinline{cd} to find out how it works.
-Given input \lstinline{"abcde"}, the function \lstinline{cvt} yields a tree that is slanted to the left as level $1$:
+Given input \lstinline{"abcde"}, the function \lstinline{cvt} yields a tree that is slanted to the left as level $1$:%
+\Josh{Wrong order?}
 \begin{lstlisting}
 Bin (Bin (Bin (Bin (Tip 'a') (Tip 'b')) (Tip 'c')) (Tip 'd')) (Tip 'e')
 \end{lstlisting}
@@ -315,12 +333,15 @@ Indeed, with its clever mapping and zipping, \lstinline{cd} managed to bring tog
 
 This still does not give me much intuition why \lstinline{cd} works.
 Clearly, \lstinline{cd} does not work on all inputs, but only the trees built by \lstinline{cvt} and \lstinline{cd} itself.
-What are the constraints of these trees, and how does \lstinline{cd} exploit them?
+What are the constraints of these trees, and how does \lstinline{cd} exploit them?%
+\Josh{To be explicitly responded at the end of S3}
 Richard did gave some hint: if we compute the sizes of subtrees alone the left spines (see the red numbers in Figure~\ref{fig:map_g_cd}),
-|[1,2,3,4,5]|, |[1, 3, 6, 10]|, and |[1,4,10]| are the first three diagonals of Pascal's triangle --- the trees are related to binomial coefficients (hence the name \lstinline{B})!
+|[1,2,3,4,5]|, |[1, 3, 6, 10]|, and |[1,4,10]| are the first three diagonals of Pascal's triangle --- the trees are related to binomial coefficients (hence the name \lstinline{B})!%
+\Josh{Could be `binary'}
 
 Given these clues, how do we prove that \lstinline{cd} indeed does the job --- bringing related immediate sublists together?
-In fact, how do we even write down ``bringing related immediate sublists together'' as a formal specification?
+In fact, how do we even write down ``bringing related immediate sublists together'' as a formal specification?%
+\Josh{and proving \lstinline{td} equals \lstinline{bu}}
 
 I fear that there would be plenty of complex proof waiting ahead.
 
@@ -506,7 +527,7 @@ These layers are laid out horizontally.
 To see why the two-dimensional layout is helpful, consider two ways of defining |α ⊗ α'|: either |map(sub G) α' ∘ α|, where the outer functor~|F| is transformed to~|G| first, or |α ∘ map(sub F) α'|, where the inner functor~|F'| is transformed to~|G'| first.
 The two definitions are equal (due to the naturality of~|α|), but the equality can be seen more directly with string diagrams:
 \[ \tikzfig{pics/horizontal-definitions} \]
-On the diagrams, |α'|~is applied to the inner/right wire because |map α'| means skipping over the outer functor and transforming the inner functor using~|α'|.
+On the diagrams, |α'|~is applied to the inner/right wire because |map α'| means skipping over the outer/left functor and transforming the inner functor using~|α'|.
 (The dashed lines are added to emphasise that both diagrams are constructed as the sequential composition of two transformations.)
 By laying out layers of functors in a separate dimension, it's much easier to see which layers are being transformed, and determine whether two sequentially composed transformations are in fact applied in parallel, so that their order of application can be swapped.
 This is abstracted as a graphical reasoning principle:
@@ -546,7 +567,7 @@ td s e g 3 =  g ∘
 \[ \tikzfig{pics/td} \]
 \end{minipage}
 
-All the |mapBT|'s are gone in the diagram, because I can directly apply a function to the intended layers/wires, rather than count awkwardly how many outer layers I want to skip using |mapBT|, one layer at a time.
+All the |mapBT|'s are gone in the diagram, because I can directly apply a transformation to the intended layers/wires, rather than count awkwardly how many outer layers I want to skip using |mapBT|, one layer at a time.
 Functoriality (|map(sub F) (f' ∘ f) = map(sub F) f' ∘ map(sub F) f|) is also transparent in the diagram, so it's slightly easier to see that |td| has two phases (between which I draw a dashed line):
 The first phase constructs deeply nested blank tables, and the second phase fills and demolishes the tables inside out.
 
@@ -612,7 +633,8 @@ But first let me update this to a dependently typed string diagram.
 That's a tree rotation all right.
 So I should do an induction that uses this equation to rotate the right-leaning tree in |td| and obtain the left-leaning tree in |bu|.
 And then I'll need to prove the equation, meaning that I'll need to go through the definitions of |retabulate| and |blanks|\ldots
-Oh hell, that's a lot of work.
+Oh hell, that's a lot of work.%
+\todo{Comonads?}
 
 %\todo[inline]{To prove the equality between |td| and |bu| along this direction:
 %The consumption parts of the two algorithms are the same.
@@ -681,7 +703,7 @@ More specifically, why is it good to keep \emph{two} layers of tables and not mo
 
 When there are multiple layers of tables of type |BT(C n k)| with |n > k|, meaning that the input list is split into proper sub-lists multiple times, all the final sub-lists will appear (as indices in the element types) in the entire nested table multiple times --- that is, overlapping sub-problems will appear.
 Therefore, when I use~|g| to fill in a nested table, I'm invoking~|g| to compute solutions for overlapping sub-problems repetitively, which is what I want to avoid.
-More precisely, `using~|g| to fill in a nested table' means applying~|g| under at least two layers, for example |mapBT (mapBT g) : BT(C 3 2) (BT(C 2 1) (BT(C 1 0) s)) xs → BT(C 3 2) (BT(C 2 1) s) xs|, where the result is at least two layers of tables, so there should be at least \emph{three} layers of tables (to which |mapBT (mapBT g)| is applied) for the solving of overlapping sub-problems to happen.
+More precisely, `using~|g| to fill in a nested table' means applying~|g| under at least two layers, for example |mapBT (mapBT g) : BT(C 3 2) (BT(C 2 1) (BT(C 1 0) s)) ⇉ BT(C 3 2) (BT(C 2 1) s)|, where the result is at least two layers of tables, so there should be at least \emph{three} layers of tables (to which |mapBT (mapBT g)| is applied) for the solving of overlapping sub-problems to happen.
 The bottom-up algorithm never gets to three layers of tables, and therefore avoids solving overlapping sub-problems.
 
 That reasoning doesn't sound too bad, although it's clear that there's much more to be done.
