@@ -60,6 +60,7 @@
 
 %format (sub(x)) = "\unskip_{" x "}"
 %format (C(n)(k)) = "\unskip^{" n "}_{" k "}"
+%format CHOOSE (n) (k) = "C^{" n "}_{" k "}"
 
 %format =' = "\unskip=\ignorenext"
 %format →' = "\kern-.345em\mathrlap{\to}"
@@ -357,8 +358,14 @@ I fear that there will be plenty of complex proof waiting ahead for me.
 
 \section{Indexed Data Types of Binomial Trees}
 
-\todo[inline]{Starting with the legitimacy of \lstinline{zipBWith}, which is now a standard application of length/shape indexing of datatypes --- nothing surprising; opening my favourite editor and switching to Agda}
+So, what is \lstinline{cd} doing? As a first step, why is the `zip' justified~--- what if the two trees have different shapes? Ah! Maybe Richard's hint about sizes is key: perhaps the two trees \emph{cannot} have different shapes.
 
+Let me try to prove that, by capturing the tree shape in its type. This is now a standard example in dependent types: familiar territory! I open my favourite editor, and switch from Haskell to Agda.
+
+Here is Richard's \lstinline{B} datatype of binary trees, now indexed by shape:
+\Jeremy{Is the argument ordering conventional? I would have put indices before parameters.}
+\Jeremy{For consistency here, we should talk earlier about ``level $k$'' rather than ``level $n$''}
+\Jeremy{This |a| parameter is explicit, whereas for |BT| it is implicit: why?}
 \begin{code}
 data B (a : Set) : ℕ → ℕ → Set where
   tipZ  :   a               → B a       n     0
@@ -366,33 +373,39 @@ data B (a : Set) : ℕ → ℕ → Set where
   bin   :   B a n (1 +  k)
         →'  B a n       k   → B a (1 +  n) (  1 + k)
 \end{code}
+The idea is that a tree of type |B a n k| with $0 \le k \le n$ has precisely the binomial coefficient |CHOOSE n k| elements; there are no trees of type |B a n k| when $k > n$. Moreover, the indices $n, k$ completely determine the shape: there are now two base cases, for $k=0$ and $k=n$, and an inductive case for $0 < k < n$.
 
+This now justifies the zip, which takes two trees \emph{of the same shape}, and returns another tree of that shape:
 \begin{code}
 zipBWith : (a → b → c) → B a n k → B b n k → B c n k
 \end{code}
+In fact, that type is so informative that only one program inhabits it, and that program can be found automatically by proof search\Jeremy{right?}.
 
+And now the type of Richard's \lstinline{cd} can be given more precisely. It takes as input the data for level~$k$ out of $n$ levels, with $0 \le k < n$; these are the results for each of the |CHOOSE n k| length-$k$ sublists of the original length-$n$ list. And it returns as output the components for level~$1+k$; there are |CHOOSE n (1+k)| \Jeremy{why is the |1+k| being formatted funny?} of these, each a length-$(1+k)$ list to be fed into \lstinline{g}. The input data can conveniently be stored in a tree indexed by $n,k$, and the output indexed by $n,1+k$:
 \begin{code}
 cd : B a n k → B (Vec a (1 + k)) n (1 + k)
 \end{code}
 
-\todo[inline]{Use even richer dependent types to say more and prove less}
+So much for the shape. But how do I know that the contents are correct~--- that |cd| is correctly rearranging the values? Perhaps I can use some more refined dependent types, to capture more information intrinsically and leave less for me to prove later.
 
-\todo[inline]{What to say? Need a spec: the equational one using \lstinline{choose} (marking the element positions with sub-lists and specifying where the elements should go); but requires a lot of proving}
-
+I need to decide what the types should say~--- that is, I need a specification. 
+\Jeremy{I don't really understand the TODO: ``What to say? Need a spec: the equational one using \lstinline{choose} (marking the element positions with sub-lists and specifying where the elements should go); but requires a lot of proving''.}
+In Haskell, I suppose Richard might have defined the choice of \lstinline{k} elements from a list (implicitly of length \lstinline{n}):
+\Jeremy{shouldn't all occurrences of \lstinline{k+1} be \lstinline{1+k}?}
 \begin{lstlisting}
 choose               :: Int -> L a -> B (L a)
 choose    0  xs      =  Tip []
 choose (k+1) xs      ||  length xs == k+1  =  Tip xs
 choose (k+1) (x:xs)  =  Bin (choose (k+1) xs) (mapB (x:) (choose k xs))
 \end{lstlisting}
-
+Then he could have specified \lstinline{cd} by
 \[ \text{\lstinline{cd (choose k xs)}} \equals \text{\lstinline{mapB (choose k) (choose (k+1) xs)}} \]
+Informally: given all the length-\lstinline{k} sublists of length-\lstinline{n} list \lstinline{xs} (with \lstinline{0 <= k < n}), \lstinline{cd} rearranges and duplicates them into the appropriate positions for the length-\lstinline{(k+1)} sublists, where in the position for a particular length-\lstinline{(k+1)} sublist \lstinline{ys} we place all its length-\lstinline{k} sublists \lstinline{choose n ys}.
 
-\todo[inline]{Maybe find some indexing scheme that enforces the elements of a binomial tree to be \lstinline{mapB h (choose k xs)} with equality proofs about the elements, and then write a function between such trees?
-Might be able to turn a large number of equalities into judgemental ones so that the Agda type checker can do the rewriting for us, in the same spirit as \varcitet{McBride-ornaments}{'s} compiler for Hutton's razor; ad~hoc and not very clean however (trees scattered with proofs)}
+But proving that using only simple types looks like hard work. Can I find some indexing scheme that forces the elements of a binomial tree to be \lstinline{mapB h (choose k xs)} with equality proofs about the elements, and then write a function between such trees? 
+I might be able to turn a large number of \Jeremy{propositional?} equalities into judgemental ones so that the Agda type checker can do the rewriting for me, in the same spirit as \varcitet{McBride-ornaments}{'s} compiler for Hutton's Razor. However, that still seems rather ad~hoc, passing proofs by brute force around the tree: not appealing.
 
-\todo[inline]{Revelation (before attempting to write down the ad hoc data type): make better use of the dependently typed language by putting the sub-lists in the indices of the element type!}
-
+Revelation! I can make better use of dependent types, by using the sublists themselves as the indices of the element types. Nobody said the indices have to be natural numbers. Here is a refinement of the binomial tree datatype:
 \begin{code}
 data BT {a : Set} : (n k : ℕ) → (Vec a k → Set) → Vec a n → Set where
   tipZ  :   p []                             → BT       n     0       p xs
@@ -400,19 +413,17 @@ data BT {a : Set} : (n k : ℕ) → (Vec a k → Set) → Vec a n → Set where
   bin   :   BT n (1 +  k)   p            xs
         →'  BT n       k (  p ∘ (x ∷_))  xs  → BT (1 +  n) (  1 + k)  p (x ∷ xs)
 \end{code}
+The `T' in |BT| stands for `table'.
+I will sometimes write |BT n k| as |BT(C n k)|, mirroring the traditional mathematical notation $C^\mathit{n}_\mathit{k}$ for binomial coefficients.
+Extensionally, |BT(C n k) p xs| means that the predicate |p : Vec a k → Set| holds for all the length-|k| sublists of |xs : Vec a n|; to be more precise, a proof of |BT(C n k) p xs| is a table of proofs of |p ys|, where |ys| ranges over the length-|k| sublists of |xs|.
+Both the plain shape-indexed trees and the trees with equality proofs become special cases, by specialising |p| to |const a| and to |λ ys → Σ[ z ∈ b ] z ≡ h ys| (given |b : Set| and |h : Vec a k → b|) respectively.
 
-\todo[inline]{The `T' in |BT| stands for `tree' or `table'.
-Sometimes write |BT n k| as |BT(C n k)|, mirroring the traditional mathematical notation $C^\mathit{n}_\mathit{k}$ for the number of $k$-combinations of $n$~elements.
-Extensionally, |BT(C n k) p xs| means that the predicate |p : Vec a k → Set| holds for all the length-|k| sub-lists of |xs : Vec a n|, or more precisely, a proof of |BT(C n k) p xs| is a table of proofs of |p ys| where |ys| ranges over the length-|k| sub-lists of |xs|.
-Both the plain shape-indexed trees and the trees with equality proofs become special cases by specialising |p| to |const a| and |λ ys → Σ[ z ∈ b ] z ≡ h ys| (given |b : Set| and |h : Vec a k → b|).}
-
-\todo[inline]{Apparently there's a design pattern transforming non-deterministic computations into indexed data types to be abstracted and formulated (and a paper to be written).
+\todo[inline]{Apparently there's a design pattern to be abstracted and formulated (and a paper to be written) here, transforming non-deterministic computations into indexed data types.
 The continuation-passing-style indexing is also intriguing.
-The familiar |All| data type, for example, becomes a special case.}
+The familiar |All| data type, for example, becomes a special case. (For the Afterword?)}
 
-\todo[inline]{Think of |BT| as a new definition of the notion of combination, and I can now say in terms of |BT| what I wanted to say with the equation involving \lstinline{choose}.
-The list in the type of \lstinline{cd}, which is renamed to |retabulate| here, is actually a particular kind of binomial tree.}
-
+I can think of |BT| as a new definition of the notion of combination, and I can now say in terms of |BT| what I wanted to say with the equation involving \lstinline{choose}.
+The list in the type of \lstinline{cd}, which is renamed to |retabulate| here, is actually a particular kind of binomial tree.
 \begin{code}
 _∷ᴮᵀ_ : p xs → BT(C sk k) (p ∘ (x ∷_)) xs → BT(C ssk sk) p (x ∷ xs)
 y ∷ᴮᵀ t = bin (tipS y) t
