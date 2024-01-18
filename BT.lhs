@@ -232,8 +232,9 @@ I know \lstinline{B} is this Haskell datatype of trees,
 \begin{lstlisting}
 data B a = Tip a || Bin (B a) (B a)
 \end{lstlisting}
-\lstinline{mapB} and \lstinline{zipBWith} are the usual \lstinline{map} and \lstinline{zipWith} functions for these trees, and \lstinline{L} is the standard data type of lists, but how did Richard come up with such an incomprehensible function definition?
-And he didn't bother to explain it in the paper.
+And presumably \lstinline{mapB} and \lstinline{zipBWith} are the usual \lstinline{map} and \lstinline{zipWith} functions for these trees, and \lstinline{L} is the standard data type of lists.
+But how did Richard come up with such an incomprehensible function definition?
+He didn't bother to explain it in the paper.
 
 \section{Simply Typed Algorithms}
 
