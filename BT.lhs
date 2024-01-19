@@ -242,24 +242,29 @@ He didn't bother to explain it in the paper.
 From the explanations that \emph{are} in the paper, I can make a pretty good guess at what \lstinline{cd} is doing at a high level.
 %
 \citet{Bird-zippy-tabulations} is studying the relationship between top-down and bottom-up algorithms. A generic top-down algorithm is specified by:%
-\Josh{Include |f| and |g| as arguments (like |foldr| etc)}
-\Jeremy{Can we avoid using \lstinline{$}? Richard wouldn't have used it\ldots}
+\Josh{Include |f| and |g| as arguments (like |foldr| etc). Shin: Done.}
+\Jeremy{Can we avoid using \lstinline{$}? Richard wouldn't have used it\ldots. Shin: Used application instead.}
 \begin{lstlisting}
-td :: L X -> Y
-td [x]  = f x
-td xs   = g . mapF td . dc $ xs
+td :: (X -> Y) -> (L Y -> Y) -> L X -> Y
+td f g [x] = f x
+td f g xs  = g (map (td f g) (dc xs))
 \end{lstlisting}
-In \citeauthor{Bird-zippy-tabulations}'s paper, \lstinline{L} can be more general; but let's see what it means for plain lists.
+In \citeauthor{Bird-zippy-tabulations}'s paper, \lstinline{L} can be more general; but let's see what it means for plain lists.\
 The input of \lstinline{td} is a list of \lstinline{X}'s, and the output is a single value of type \lstinline{Y}.
 Singleton lists form the base cases, processed by a function \lstinline{f :: X -> Y}.
-A non-singleton list is decomposed into an \lstinline{F}-structure of shorter lists by  \lstinline{dc :: L a -> F (L a)}.
-Each shorter list is then recursively processed by \lstinline{td}, before \lstinline{g :: F Y -> Y} combines the results.%
+A non-singleton list is decomposed into shorter lists by  \lstinline{dc :: L a -> L (L a)}.
+Each shorter list is then recursively processed by \lstinline{td}, before \lstinline{g :: L Y -> Y} combines the results.%
 \Josh{\lstinline{F} is initially \lstinline{L} and later \lstinline{B}, but this changes the type of \lstinline{g} too (no need for \lstinline{cvt} etc)?}
+\Shin{Gotta mention somewhere that \lstinline{cd} is simplified too (\lstinline{F} is instantiated to lists).}
 
 In the last ---~and the most difficult~--- example in the paper,
 \lstinline{F = L}, and \lstinline{dc :: L a -> L (L a)}%
 \Josh{Give definition, which is generalised to \lstinline{choose} later?}
-computes all the \emph{immediate sublists} of the given list; that is, all the lists with exactly one element missing.
+computes all the \emph{immediate sublists} of the given list; that is, all the lists with exactly one element missing:
+\begin{lstlisting}
+dc [x,y]  = [[x],[y]]
+dc (x:xs) = [ x:ys || ys <- dc xs] ++ [xs]
+\end{lstlisting}
 To compute \lstinline{td "abcd"}, for example, we need to compute \lstinline{td "abc"}, \lstinline{td "abd"}, \lstinline{td "acd"}, and \lstinline{td "bcd"}.
 To compute \lstinline{td "abc"} in turn, we need \lstinline{td "ab"}, \lstinline{td "ac"}, and \lstinline{td "bc"}.
 Notice that \lstinline{td "ab"} will also be invoked when computing \lstinline{td "abd"}: following this top-down computation, many sub-computations are repeated.%
@@ -275,46 +280,52 @@ To sace space we omitted the \lstinline{td}s.}
 
 It is better to proceed bottom-up instead, as depicted in Figure~\ref{fig:sublists-lattice}.%
 \Josh{Four levels are enough?}
-The $n$th layer%
-\Josh{Change to `level' to avoid confusion with `layers of functors' later}
+The $n$th level%
+\Josh{Change to `level' to avoid confusion with `layers of functors' later. Shin: Okay!}
 consists of values of \lstinline{td} at lists of length $n$.
-We start from layer $1$, and compute layer $n+1$ from layer $n$ by reusing the values stored in the latter, until we reach the top layer consisting of only one value.
-If the layers are lists,
-layer $2$ would be
+We start from level $1$, and compute level $n+1$ from level $n$ by reusing the values stored in the latter, until we reach the top level consisting of only one value.
+If the levels are lists, level $2$ would be
 \begin{lstlisting}
   [td "ab", td "ac", td "bc", td "ad" ...]
 \end{lstlisting}
-To construct layer $3$ from layer $2$, we need a function \lstinline{cd :: L a -> L (L a)} that, given layer $2$, copies and rearranges its elements such that immediate sublists of the same list are brought together:
+To construct level $3$ from level $2$, we need a function \lstinline{cd :: L a -> L (L a)} that, given level $2$, copies and rearranges its elements such that immediate sublists of the same list are brought together:
 \begin{lstlisting}
   [[td "ab", td "ac", td "bc"], [td "ab", td "ad", td "bd"] ... ]
 \end{lstlisting}
-Applying \lstinline{map g} to the list above, we get layer $3$:
+Applying \lstinline{map g} to the list above, we get level $3$:
 \begin{lstlisting}
   [td "abc", td "abd", td "acd", td "bcd" ...]
 \end{lstlisting}
 If such a function \lstinline{cd} can be constructed, a bottom-up algorithm computing the same value as \lstinline{td} is given by:%
-\Josh{Bring \lstinline{head} in front of \lstinline{loop}?}
-\Jeremy{Unless we're really pressed for space, I think it is better to put this on four lines}
+\Josh{Bring \lstinline{head} in front of \lstinline{loop}? Shin: Done.}
+\Jeremy{Unless we're really pressed for space, I think it is better to put this on four lines. Shin: Done.}
 \begin{lstlisting}
-bu :: L X -> Y                loop [y] = y
-bu = loop . map f             loop ys  = loop . map g . cd $ ys
-\end{lstlisting}
-That is, layer $1$ is obtained by applying \lstinline{f} to each element of the input list. Then we keep applying \lstinline{map g . cd} to get the next level, stopping when we get a layer with a single element, which will be our result.
+bu :: L X -> Y
+bu = head . loop . map f
 
-The \lstinline{bu} given above is much simpler than Richard's: to cope with more general problems, had to store not just values but tables of values in each level. Note that we have to start from singleton lists, not the empty list, as the first layer --- otherwise we would not know what the elements are.%
+loop [y] = [y]
+loop ys  = loop . map g . cd $ ys
+\end{lstlisting}
+That is, level $1$ is obtained by applying \lstinline{f} to each element of the input list. Then we keep applying \lstinline{map g . cd} to get the next level, stopping when we get a level with a single element, which will be our result.
+
+The \lstinline{bu} given above is much simpler than Richard's: to cope with more general problems, had to store not just values but tables of values in each level. I'm puzzled at first by why Richard starts from singleton lists instead of the empty list (missing the bottom of the lattice). But then I realise that whereas a $2$-list is completely determined by its two $1$-element sublists, a $1$-list is not determined by its one $0$-element sublist~--- more context would be needed.%
 \Josh{I did a reformulation\ldots
   ``I'm puzzled by having to start from singleton lists instead of the empty list, which is the immediate sub-list of any singleton list (missing the bottom of the lattice), but somehow that's the best Richard could do.''
-JG: How about ``I'm puzzled at first by why Richard starts from singleton lists instead of the empty list (missing the bottom of the lattice). But then I realise that whereas a 2-list is completely determined by its two 1-element sublists, a 1-list is not determined by its one 0-element sublist~--- more contextwould be needed.''}
+JG: How about ``I'm puzzled at first by why Richard starts from singleton lists instead of the empty list (missing the bottom of the lattice). But then I realise that whereas a 2-list is completely determined by its two 1-element sublists, a 1-list is not determined by its one 0-element sublist~--- more contextwould be needed.''
+Shin: Used Jeremy's version.}
 
 All these, however, are merely a first attempt.
 Richard must have realized at some point that it is difficult to define the \lstinline{cd} rearrangement using lists, and decided to represent each level using the \lstinline{B} datatype mentioned before.%
 \Josh{Do we get any explanation from the dependently typed reformulation? (Easy access to particular groups of sub-lists?)}
 Now \lstinline{cd} has type \lstinline{L a -> B (L a)}, and \lstinline{bu} and \lstinline{loop} are defined by
 \begin{lstlisting}
-bu :: L X -> Y                loop (Tip y) = y
-bu = loop . cvt . map f       loop ys      = loop . mapB g . cd $ ys
+bu :: L X -> Y
+bu = unTip . loop . cvt . map f
+
+loop y  = y
+loop ys = loop . mapB g . cd $ ys
 \end{lstlisting}
-where \lstinline{loop :: B Y -> B Y}.
+where \lstinline{loop :: B Y -> B Y}, and \lstinline{unTip (Tip y) = y}.
 The function \lstinline{cvt :: L a -> B a} prepares the first level.%
 \Josh{A point of comparison (later we don't need this conversion)}
 
@@ -327,7 +338,7 @@ The function \lstinline{cvt :: L a -> B a} prepares the first level.%
 
 I try to trace Richard's \lstinline{cd} to find out how it works.
 Given input \lstinline{"abcde"}, the function \lstinline{cvt} yields a tree that is slanted to the left as level $1$:%
-\Josh{Wrong order?}
+\Josh{Wrong order? Shin: Richard's \lstinline{cvt} is \lstinline{foldl1 Bin . map Tip}.. so it is his order. If that's not consistant with ours... let's think about what to do. :(}
 \begin{lstlisting}
 Bin (Bin (Bin (Bin (Tip 'a') (Tip 'b')) (Tip 'c')) (Tip 'd')) (Tip 'e')
 \end{lstlisting}
@@ -388,7 +399,7 @@ cd : B a n k → B (Vec a (1 + k)) n (1 + k)
 
 So much for the shape. But how do I know that the contents are correct~--- that |cd| is correctly rearranging the values? Perhaps I can use some more refined dependent types, to capture more information intrinsically and leave less for me to prove later.
 
-I need to decide what the types should say~--- that is, I need a specification. 
+I need to decide what the types should say~--- that is, I need a specification.
 \Jeremy{I don't really understand the TODO: ``What to say? Need a spec: the equational one using \lstinline{choose} (marking the element positions with sub-lists and specifying where the elements should go); but requires a lot of proving''.}
 In Haskell, I suppose Richard might have defined the choice of \lstinline{k} elements from a list (implicitly of length \lstinline{n}):
 \Jeremy{shouldn't all occurrences of \lstinline{k+1} be \lstinline{1+k}?}
@@ -402,7 +413,7 @@ Then he could have specified \lstinline{cd} by
 \[ \text{\lstinline{cd (choose k xs)}} \equals \text{\lstinline{mapB (choose k) (choose (k+1) xs)}} \]
 Informally: given all the length-\lstinline{k} sublists of length-\lstinline{n} list \lstinline{xs} (with \lstinline{0 <= k < n}), \lstinline{cd} rearranges and duplicates them into the appropriate positions for the length-\lstinline{(k+1)} sublists, where in the position for a particular length-\lstinline{(k+1)} sublist \lstinline{ys} we place all its length-\lstinline{k} sublists \lstinline{choose n ys}.
 
-But proving that using only simple types looks like hard work. Can I find some indexing scheme that forces the elements of a binomial tree to be \lstinline{mapB h (choose k xs)} with equality proofs about the elements, and then write a function between such trees? 
+But proving that using only simple types looks like hard work. Can I find some indexing scheme that forces the elements of a binomial tree to be \lstinline{mapB h (choose k xs)} with equality proofs about the elements, and then write a function between such trees?
 I might be able to turn a large number of \Jeremy{propositional?} equalities into judgemental ones so that the Agda type checker can do the rewriting for me, in the same spirit as \varcitet{McBride-ornaments}{'s} compiler for Hutton's Razor. However, that still seems rather ad~hoc, passing proofs by brute force around the tree: not appealing.
 
 Revelation! I can make better use of dependent types, by using the sublists themselves as the indices of the element types. Nobody said the indices have to be natural numbers. Here is a refinement of the binomial tree datatype:
