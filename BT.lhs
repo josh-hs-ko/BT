@@ -384,7 +384,7 @@ data B (a : Set) : ℕ → ℕ → Set where
   bin   :   B a n (1 +  k)
         →'  B a n       k   → B a (1 +  n) (  1 + k)
 \end{code}
-The idea is that a tree of type |B a n k| with $0 \le k \le n$ has precisely the binomial coefficient |CHOOSE n k| elements; there are no trees of type |B a n k| when $k > n$. Moreover, the indices $n, k$ completely determine the shape: there are now two base cases, for $k=0$ and $k=n$, and an inductive case for $0 < k < n$.
+The idea is that the \emph{size} of a tree of type |B a n k| with $0 \le k \le n$ is precisely the binomial coefficient |CHOOSE n k|; and there are no trees of type |B a n k| when $k > n$. Moreover, the indices $n, k$ completely determine the \emph{shape}: there are now two base cases, for $k=0$ and $k=n$, and an inductive case for $0 < k < n$.
 
 This now justifies the zip, which takes two trees \emph{of the same shape}, and returns another tree of that shape:
 \begin{code}
@@ -410,7 +410,7 @@ choose (k+1) xs      ||  length xs == k+1  =  Tip xs
 choose (k+1) (x:xs)  =  Bin (choose (k+1) xs) (mapB (x:) (choose k xs))
 \end{lstlisting}
 Then he could have specified \lstinline{cd} by
-\[ \text{\lstinline{cd (choose k xs)}} \equals \text{\lstinline{mapB (choose k) (choose (k+1) xs)}} \]
+\[ \text{\lstinline{cd (choose k xs)}} \equals \text{\lstinline{mapB (choose k) (choose (k+1) xs)}} \hfill (\ast) \]
 Informally: given all the length-\lstinline{k} sublists of length-\lstinline{n} list \lstinline{xs} (with \lstinline{0 <= k < n}), \lstinline{cd} rearranges and duplicates them into the appropriate positions for the length-\lstinline{(k+1)} sublists, where in the position for a particular length-\lstinline{(k+1)} sublist \lstinline{ys} we place all its length-\lstinline{k} sublists \lstinline{choose n ys}.
 
 But proving that using only simple types looks like hard work. Can I find some indexing scheme that forces the elements of a binomial tree to be \lstinline{mapB h (choose k xs)} with equality proofs about the elements, and then write a function between such trees?
@@ -425,7 +425,9 @@ data BT {a : Set} : (n k : ℕ) → (Vec a k → Set) → Vec a n → Set where
         →'  BT n       k (  p ∘ (x ∷_))  xs  → BT (1 +  n) (  1 + k)  p (x ∷ xs)
 \end{code}
 The `T' in |BT| stands for `table'.
-I will sometimes write |BT n k| as |BT(C n k)|, mirroring the traditional mathematical notation $C^\mathit{n}_\mathit{k}$ for binomial coefficients.
+I decide to write |BT n k| as |BT(C n k)|, mirroring the traditional mathematical notation $C^\mathit{n}_\mathit{k}$ for binomial coefficients.
+%format BT_ n k = "\Varid{BT}^{" n "}_{" k "}"
+\Jeremy{FWIW, I would define an lhs2\TeX{} macro \verb"BT_" such that \verb"BT_ n k" yields |BT_ n k|.}
 Extensionally, |BT(C n k) p xs| means that the predicate |p : Vec a k → Set| holds for all the length-|k| sublists of |xs : Vec a n|; to be more precise, a proof of |BT(C n k) p xs| is a table of proofs of |p ys|, where |ys| ranges over the length-|k| sublists of |xs|.
 Both the plain shape-indexed trees and the trees with equality proofs become special cases, by specialising |p| to |const a| and to |λ ys → Σ[ z ∈ b ] z ≡ h ys| (given |b : Set| and |h : Vec a k → b|) respectively.
 
@@ -433,13 +435,13 @@ Both the plain shape-indexed trees and the trees with equality proofs become spe
 The continuation-passing-style indexing is also intriguing.
 The familiar |All| data type, for example, becomes a special case. (For the Afterword?)}
 
-I can think of |BT| as a new definition of the notion of combination, and I can now say in terms of |BT| what I wanted to say with the equation involving \lstinline{choose}.
-The list in the type of \lstinline{cd}, which is renamed to |retabulate| here, is actually a particular kind of binomial tree.
+I can think of |BT| as a new definition of the notion of combination, and I can now say in terms of |BT| what I wanted to say with the equation $(\ast)$ involving \lstinline{choose}.
+Concretely, I'll use these binomial trees as a data refinement of the lists in the type of \lstinline{cd}; and here's the refinement of `cons':
 \begin{code}
 _∷ᴮᵀ_ : p xs → BT(C sk k) (p ∘ (x ∷_)) xs → BT(C ssk sk) p (x ∷ xs)
 y ∷ᴮᵀ t = bin (tipS y) t
 \end{code}
-
+I decide to use the name |retabulate| for the data refinement of \lstinline{cd} \Jeremy{why?}:
 \begin{code}
 retabulate : (SUPPRESSED(n > k)) → BT(C n k) p xs → BT(C n sk) (BT(C sk k) p) xs
 retabulate {xs =' _ ∷ []     }  (tipZ y)  =  tipS  (tipZ y)
@@ -448,20 +450,18 @@ retabulate (bin t         (tipZ y)  )     =  bin   (retabulate t) (mapBT (_∷�
 retabulate (bin (tipS y)  u         )     =  tipS  (y ∷ᴮᵀ u)
 retabulate (bin t         u         )     =  bin   (retabulate t)
                                                    (zipBTWith _∷ᴮᵀ_ t (retabulate u))
-
 \end{code}
-which is parametrically polymorphic in |a : Set| and |p : Vec a k → Set|.
+This is parametrically polymorphic in the type |a : Set| of list elements and the predicate |p : Vec a k → Set| on sublists.
+I have greyed out the |n > k| argument, to indicate that it's in the actual code but omitted in the presentation (for making the comparison with \lstinline{cd} more direct). I've also omitted a couple of impossible cases that actually have to be listed and proved absurd.
+\Jeremy{The last three cases of |retabulate| obviously match the last three of \lstinline{cd}. But the first two cases of |retabulate| correspond to just the first case of \lstinline{cd}. Evidently we now need an extra case analysis between |tipS| and |bin|; fair enough. But the correspondence would be clearer still if we delegated this case analysis to an auxilliary function, wouldn't it?}
 
-\todo[inline]{The |n > k| argument is `greyed out', meaning that it's in the actual code but omitted in the presentation (for comparing with \lstinline{cd} more easily).
-Also omitted are a couple of impossible cases that actually have to be listed and proved to be impossible.}
-
-\todo[inline]{First climax: The definition of \lstinline{cd} can be quite straightforwardly ported to to Agda as |retabulate|, meaning that the definition has been verified just by finding a right type for it!
-(Need a comparison between \lstinline{cd} and |retabulate|: including more cases than \lstinline{cd} (foreshadowing the generalisation about base cases), generalising a couple of cases, and handling some inequality proofs for the |n > k| argument.)
+\todo[inline]{Still need a comparison between \lstinline{cd} and |retabulate|: including more cases than \lstinline{cd} (foreshadowing the generalisation about base cases), generalising a couple of cases, and handling some inequality proofs for the |n > k| argument.
 There's actually no need to understand the definition of \lstinline{cd}/|retabulate|, but I can still work out a case or two to see how well type-directed programming works.
 A coherence commuting diagram (in the sense of data refinement) between |retabulate| and \lstinline{cd} to understand one in terms of the other?}
 
-\todo[inline]{Conjecture: the behaviour of |retabulate| is uniquely determined by its type (which works as a tight specification).
-The proof may be similar to \varcitet{Voigtlander-BX-for-free}{'s} (and generalised with parametricity for dependent types~\citep{Bernardy-proofs-for-free} and datatype-generic lookup~\citep{Diehl-InfIR}).}
+I'm pleasantly surprised to see that the definition of \lstinline{cd} can be quite straightforwardly ported to Agda this way, even with the much more informative type. In fact, the definition has been verified just by finding the (or rather, a) right type for it!
+In fact, I conjecture that the behaviour of |retabulate| is uniquely determined by its type, which acts as a tight specification.
+The proof may be similar to \varcitet{Voigtlander-BX-for-free}{'s} (and generalised with parametricity for dependent types~\citep{Bernardy-proofs-for-free} and datatype-generic lookup~\citep{Diehl-InfIR}). \Jeremy{Should this move to the Afterword?}
 
 \section{Dependently Typed Algorithms}
 
