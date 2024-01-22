@@ -67,16 +67,19 @@ module ImmediateSublists where
 
   Ind : Set₁
   Ind = {A : Set} (S : ∀ {n} → Vec A n → Set)
-      → S [] → (∀ {k xs} → BT (suc k) k S xs → S xs)
-      → (n : ℕ) (xs : Vec A n) → S xs
+      → ({xs : Vec A 0} → ⊤ → S xs) → (∀ {k xs} → BT (suc k) k S xs → S xs)
+      → (n : ℕ) {xs : Vec A n} → ⊤ → S xs
 
-  blanks : (n : ℕ) → {xs : Vec A (suc n)} → BT (suc n) n (const ⊤) xs
-  blanks  zero           = tipZ tt
-  blanks (suc n) {_ ∷ _} = bin (tipS tt) (blanks n)
+  blanks' : (n : ℕ) → {xs : Vec A (suc n)} → BT (suc n) n (const ⊤) xs
+  blanks'  zero           = tipZ tt
+  blanks' (suc n) {_ ∷ _} = bin (tipS tt) (blanks' n)
+
+  blanks : (n : ℕ) → {xs : Vec A (suc n)} → ⊤ → BT (suc n) n (const ⊤) xs
+  blanks n = const (blanks' n)
 
   td : Ind
-  td S e g  zero   [] = e
-  td S e g (suc n) xs = g (mapBT (const (td S e g n _)) (blanks n))
+  td S e g  zero   = e
+  td S e g (suc n) = g ∘ mapBT (td S e g n) ∘ blanks n
 
   BT' : (Q : {ys : Vec A k} → P ys → Set) → {xs : Vec A n} → BT n k P xs → Set
   BT' Q (tipZ p)  = Q p
@@ -86,10 +89,10 @@ module ImmediateSublists where
   Ind-unary-parametricity : Ind → Set₁
   Ind-unary-parametricity f =
       {A : Set} (S : ∀ {n} → Vec A n → Set) (T : ∀ {n} {xs : Vec A n} → S xs → Set)
-    → (e : S []) → T e
+    → (e : {xs : Vec A 0} → ⊤ → S xs) → (∀ {xs} → T (e {xs} tt))
     → (g : ∀ {k xs} → BT (suc k) k S xs → S xs)
     → (∀ {k xs} {t : BT (suc k) k S xs} → BT' T t → T (g t))
-    → (n : ℕ) (xs : Vec A n) → T (f S e g n xs)
+    → (n : ℕ) {xs : Vec A n} → T (f S e g n {xs} tt)
 
   _+′_ : ℕ → ℕ → ℕ
   zero  +′ n = n
@@ -100,11 +103,11 @@ module ImmediateSublists where
   revcat (x ∷ xs) ys = revcat xs (x ∷ ys)
 
   td-parametric : Ind-unary-parametricity td
-  td-parametric {A} S T e e' g g' = td (T ∘ td S e g _) e' (g' ∘ see-below [] (td S e g _))
+  td-parametric {A} S T e e' g g' n = td (λ {n} xs → T (td S e g n {xs} tt)) (const e') (g' ∘ see-below [] (λ xs → td S e g _ {xs} tt)) n tt
     where
       see-below : ∀ {m n xs} (ys : Vec A m) (h : (zs : Vec A n) → S (revcat ys zs))
                 → BT (suc n) n (T ∘ h) xs
-                → BT' T {xs} (mapBT (λ {zs} _ → h zs) (blanks n))
+                → BT' T {xs} (mapBT (λ {zs} _ → h zs) (blanks' n))
       see-below ys h (tipZ t)           = t
       see-below ys h (bin (tipS t) ts)  = t , see-below (_ ∷ ys) (h ∘ (_ ∷_)) ts
       see-below ys h (bin (bin ts _) _) = ⊥-elim (unbounded ts)
@@ -112,14 +115,14 @@ module ImmediateSublists where
   uniqueness :
       (f : Ind) → Ind-unary-parametricity f
     → {A : Set} (S : ∀ {n} → Vec A n → Set)
-    → (e : S []) (g : ∀ {k xs} → BT (suc k) k S xs → S xs)
-    → (n : ℕ) (xs : Vec A n) → f S e g n xs ≡ td S e g n xs
+    → (e : {xs : Vec A 0} → ⊤ → S xs) (g : ∀ {k xs} → BT (suc k) k S xs → S xs)
+    → (n : ℕ) {xs : Vec A n} → f S e g n {xs} tt ≡ td S e g n {xs} tt
   uniqueness f param {A} S e g =
-    param S (λ {n} {xs} s → s ≡ td S e g n xs) e refl g (λ t' → cong g (see-below S (td S e g _) _ t'))
+    param S (λ {n} {xs} s → s ≡ td S e g n {xs} tt) e refl g (λ t' → cong g (see-below S (λ xs → td S e g _ {xs} tt) _ t'))
     where
       see-below : (S' : Vec A k → Set) (h : (xs : Vec A k) → S' xs)
                 → (t : BT (suc k) k S' xs) → BT' (λ {xs} s → s ≡ h xs) t
-                → t ≡ mapBT (λ {xs} _ → h xs) (blanks k)
+                → t ≡ mapBT (λ {xs} _ → h xs) (blanks' k)
       see-below S' h (tipZ s)          eq       = cong tipZ eq
       see-below S' h (bin (tipS s) t) (eq , t') = cong₂ bin (cong tipS eq) (see-below (S' ∘ (_ ∷_)) (h ∘ (_ ∷_)) t t')
       see-below S' h (bin (bin t _) _) _        = ⊥-elim (unbounded t)
