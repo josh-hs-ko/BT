@@ -327,6 +327,7 @@ All these, however, are merely a first attempt.
 Richard must have realized at some point that it is difficult to define the \lstinline{cd} rearrangement using lists, and decided to represent each level using the \lstinline{B} datatype mentioned before.%
 \Josh{Do we get any explanation from the dependently typed reformulation? (Easy access to particular groups of sub-lists?)}
 Now \lstinline{cd} has type \lstinline{L a -> B (L a)}, and \lstinline{bu} and \lstinline{loop} are defined by
+\Jeremy{Shouldn't that be \lstinline{loop (Tip y) = Tip y}?}
 \begin{lstlisting}
 bu :: L X -> Y
 bu = unTip . loop . cvt . map f
