@@ -479,14 +479,35 @@ The proof might be similar to \varcitet{Voigtlander-BX-for-free}{'s} (and genera
 
 \section{Dependently Typed Algorithms}
 
-\todo[inline]{Do dependent types help us prove that \lstinline{bu} equals \lstinline{td} too?}
+So much for \lstinline{cd}, and rearranging the subresults into the correct places. What about the main problem: do dependent types help us prove also that the bottom-up algorithm \lstinline{bu} equals the top-down \lstinline{td}?
 
-\todo[inline]{Starting with the assumptions:
-The input to~\lstinline{g} is actually a binomial tree too.
-Solutions should be indexed by the input list.
-Dependent types allow~|g| to subsume the base cases encoded by~\lstinline{f}.
-Arrive at an \emph{induction principle} with induction hypotheses for immediate sub-lists.}
+Let's start with the assumptions. 
+The combining function~|g| takes as argument something about the \emph{immediate} sublists of a list: that can be represented as a binomial tree too\Jeremy{is that really `too'? wasn't that what \lstinline{cd} was doing all along?}.
+The solutions~|s| should be indexed by the input list.
+Dependent types allow~|g| to subsume the base cases encoded separately by~\lstinline{f} in Richard's paper.
+We can also use the more obvious empty list as the base case, rather than having to stop with singleton lists, because the missing context is provided in the type.
+We arrive at an \emph{induction principle} for lists, in which the induction hypothesis is that the property holds for all immediate sublists:
+\Jeremy{Why are the two |⊤| arguments needed? What breaks if we try to do without them? Could we then also do without the distinction between |blanks| and |blanks'|?}
+\Jeremy{More naming: why |s| rather than |p| for the property? Can I use |ys| rather than |xs| in the locally bound type for~|g|?}
+\begin{code}
+ImmediateSublistInduction : Set₁
+ImmediateSublistInduction =
+  {  a : Set} (s : {k : ℕ} → Vec a k → Set)
+  (  e : {xs : Vec a 0} → ⊤ → s xs)
+  (  g : {k : ℕ} {xs : Vec a (1 + k)} → BT(C sk k) s xs → s xs)
+  (  n : ℕ) {xs : Vec a n} → ⊤ → s xs
+\end{code}
+That is, we can prove a property~|s| for a given list~|xs| of length~|n|, given a base case proof~|e| for the empty list, and an inductive step~|g| assuming the property for all immediate sublists of a nonempty list.
 
+Here's the top-down algorithm:
+\begin{code}
+td : ImmediateSublistInduction
+td s e g    0      = e
+td s e g (  1+ n)  = g ∘ mapBT (td s e g n) ∘ blanks(C sn n)
+\end{code}
+This is appealingly similar to Richard's function~\lstinline{td}, the only significant difference being the freedom to use the empty list for the base case. 
+Here, |blanks(C n k)| constructs the length-|k| sublists of a length-|n| list:
+\Jeremy{I don't understand the intuition behind the name `blanks' here. A |BT(C n k)| with a trivial predicate argument |p| is just the collection of |k|-sublists of an |n|-list, ie basically \lstinline{choose}, right?}
 \begin{code}
 blanks' : (n k : ℕ) → (SUPPRESSED(n GEQ k)) → BT(C n k) (const ⊤) xs
 blanks' _          0       = tipZ tt
@@ -496,22 +517,8 @@ blanks' (1 + n) (  1 + k)  = bin (blanks' n (1 + k)) (blanks' n k)
 blanks : (n k : ℕ) → (SUPPRESSED(n GEQ k)) → ⊤ → BT(C n k) (const ⊤) xs
 blanks(C n k) = const (blanks' n k)
 \end{code}
-
-\begin{code}
-ImmediateSublistInduction : Set₁
-ImmediateSublistInduction =
-  {  a : Set} (s : {k : ℕ} → Vec a k → Set)
-  (  e : {xs : Vec a 0} → ⊤ → s xs)
-  (  g : {k : ℕ} {xs : Vec a (1 + k)} → BT(C sk k) s xs → s xs)
-  (  n : ℕ) {xs : Vec a n} → ⊤ → s xs
-\end{code}
-
-\begin{code}
-td : ImmediateSublistInduction
-td s e g    0      = e
-td s e g (  1+ n)  = g ∘ mapBT (td s e g n) ∘ blanks(C sn n)
-\end{code}
-
+And here is the bottom-up algorithm:
+\Jeremy{missing a definition of |unTip|?}
 \begin{code}
 bu : ImmediateSublistInduction
 bu s e g n = unTip ∘ loop 0 ∘ mapBT e ∘ blanks(C n 0)
@@ -520,11 +527,12 @@ bu s e g n = unTip ∘ loop 0 ∘ mapBT e ∘ blanks(C n 0)
     loop n  = id
     loop k  = loop (1 + k) ∘ mapBT g ∘ retabulate
 \end{code}
+That is, we initialize with a proof for the empty list, and iteratively lift this to all longer and longer sublists of the input.
 
-\todo[inline]{Any two inhabitants of |ImmediateSublistInduction| are equal (up to extensional equality) due to parametricity, so |td| equals |bu| simply because they have the same, uniquely inhabited type.
-(The induction principle for natural numbers is a simpler example to think about.)
-However, I'd like to compare what |td| and |bu| do \emph{intensionally}, an aspect which would be overlooked from the parametricity perspective.
-Need more tools to see through the complexity.}
+Intriguingly, any two inhabitants of |ImmediateSublistInduction| are equal (up to extensional equality), due to parametricity\Jeremy{proof?}. So in fact |td| equals |bu|, merely because they have the same, uniquely inhabited type! 
+(The induction principle for natural numbers is a simpler example to think about.)Jeremy{``I'm reminded of a cute recent paper by Olivier Danvy [JFP 29:e26, 2019] about left and right folds over the natural numbers, which is a simpler illustration of the same idea.'' Fair?})
+
+But I would really like to compare what |td| and |bu| do \emph{intensionally}. That aspect is overlooked from the parametricity perspective. I'll need some more powerful tools to see through the extra complexity\ldots
 
 \section{Categories of Families of Types and Functions}
 
