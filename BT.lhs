@@ -321,10 +321,7 @@ loop ys  = loop . map g . cd $ ys
 That is, level $1$ is obtained by applying \lstinline{f} to each element of the input list. Then we keep applying \lstinline{map g . cd} to get the next level, stopping when we get a level with a single element, which will be our result.
 
 The \lstinline{bu} given above is much simpler than Richard's: to cope with more general problems, he had to store not just values but tables of values in each level.
-I'm puzzled at first by why Richard starts from singleton lists instead of the empty list (missing the bottom of the lattice). But then I realise that whereas a $2$-list is completely determined by its two $1$-element sublists, a $1$-list is not determined by its one $0$-element sublist~--- more context would be needed.
-%\Josh{I did a reformulation\ldots  ``I'm puzzled by having to start from singleton lists instead of the empty list, which is the immediate sub-list of any singleton list (missing the bottom of the lattice), but somehow that's the best Richard could do.''
-%JG: How about ``I'm puzzled at first by why Richard starts from singleton lists instead of the empty list (missing the bottom of the lattice). But then I realise that whereas a 2-list is completely determined by its two 1-element sublists, a 1-list is not determined by its one 0-element sublist~--- more contextwould be needed.''
-%Shin: Used Jeremy's version.}
+I'm puzzled at first by why Richard starts from singleton lists instead of the empty list (missing the bottom of the lattice). But then I realise that whereas a $2$-list is completely determined by its two $1$-element sublists, a $1$-list is not determined by its one $0$-element sublist~--- more context would be needed. \Jeremy{\ldots but in Agda, this context can be provided in the type.}
 
 All these, however, are merely a first attempt.
 Richard must have realized at some point that it is difficult to define the \lstinline{cd} rearrangement using lists, and decided to represent each level using the \lstinline{B} datatype mentioned before.%
