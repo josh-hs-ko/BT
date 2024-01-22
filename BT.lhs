@@ -234,61 +234,69 @@ I know \lstinline{B} is this Haskell datatype of trees,
 data B a = Tip a || Bin (B a) (B a)
 \end{lstlisting}
 And presumably \lstinline{mapB} and \lstinline{zipBWith} are the usual \lstinline{map} and \lstinline{zipWith} functions for these trees, and \lstinline{L} is the standard data type of lists.
-But how did Richard\Jeremy{We should be more consistent about whether to call him Richard or Bird} come up with such an incomprehensible function definition?
+But how did Richard%
+\Jeremy{We should be more consistent about whether to call him Richard or Bird. Shin: does it work if we say "Richard" when we refer to the person and say Bird (2008) when we refer to the paper?}
+come up with such an incomprehensible function definition?
 He didn't bother to explain it in the paper.
 
 \section{Simply Typed Algorithms}
 
 From the explanations that \emph{are} in the paper, I can make a pretty good guess at what \lstinline{cd} is doing at a high level.
 %
-\citet{Bird-zippy-tabulations} is studying the relationship between top-down and bottom-up algorithms. A generic top-down algorithm is specified by:%
-\Josh{Include |f| and |g| as arguments (like |foldr| etc). Shin: Done.}
-\Jeremy{Can we avoid using \lstinline{$}? Richard wouldn't have used it\ldots. Shin: Used application instead.}
+\citet{Bird-zippy-tabulations} is studying the relationship between top-down and bottom-up algorithms. A generic top-down algorithm is specified by:
+%\Josh{Include |f| and |g| as arguments (like |foldr| etc). Shin: Done.}
+%\Jeremy{Can we avoid using \lstinline{$}? Richard wouldn't have used it\ldots. Shin: Used application instead.}
 \begin{lstlisting}
 td :: (X -> Y) -> (L Y -> Y) -> L X -> Y
 td f g [x] = f x
 td f g xs  = g (map (td f g) (dc xs))
 \end{lstlisting}
-In \citeauthor{Bird-zippy-tabulations}'s paper, \lstinline{L} can be more general; but let's see what it means for plain lists.\
 The input of \lstinline{td} is a list of \lstinline{X}'s, and the output is a single value of type \lstinline{Y}.
 Singleton lists form the base cases, processed by a function \lstinline{f :: X -> Y}.
 A non-singleton list is decomposed into shorter lists by  \lstinline{dc :: L a -> L (L a)}.
 Each shorter list is then recursively processed by \lstinline{td}, before \lstinline{g :: L Y -> Y} combines the results.%
-\Josh{\lstinline{F} is initially \lstinline{L} and later \lstinline{B}, but this changes the type of \lstinline{g} too (no need for \lstinline{cvt} etc)?}
-\Shin{Gotta mention somewhere that \lstinline{cd} is simplified too (\lstinline{F} is instantiated to lists).}
+\Josh{\lstinline{F} is initially \lstinline{L} and later \lstinline{B}, but this changes the type of \lstinline{g} too (no need for \lstinline{cvt} etc)? Shin: removed \lstinline{F}. I think we still need \lstinline{cvt} after switching to \lstinline{B}.}
+\footnote{The setting in \citet{Bird-zippy-tabulations} is more general: \lstinline{L} need not be a list, and \lstinline{dc} returns an \lstinline{F}-structure of lists. We simplified the setting for ease of discussion.}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.5\textwidth]{pics/td-call-tree.pdf}
+\caption{Computing \lstinline{td "abcd"} top-down.}
+\label{fig:td-call-tree}
+\end{figure}
 
 In the last ---~and the most difficult~--- example in the paper,
-\lstinline{F = L}, and \lstinline{dc :: L a -> L (L a)}%
-\Josh{Give definition, which is generalised to \lstinline{choose} later?}
+\lstinline{dc :: L a -> L (L a)}%
+\Josh{Give definition, which is generalised to \lstinline{choose} later? Shin: done.}
 computes all the \emph{immediate sublists} of the given list; that is, all the lists with exactly one element missing:
 \begin{lstlisting}
 dc [x,y]  = [[x],[y]]
 dc (x:xs) = [ x:ys || ys <- dc xs] ++ [xs]
 \end{lstlisting}
-To compute \lstinline{td "abcd"}, for example, we need to compute \lstinline{td "abc"}, \lstinline{td "abd"}, \lstinline{td "acd"}, and \lstinline{td "bcd"}.
+To compute \lstinline{td "abcd"}, for example, we need to compute \lstinline{td "abc"}, \lstinline{td "abd"}, \lstinline{td "acd"}, and \lstinline{td "bcd"}, as seen in \cref{fig:td-call-tree}.
 To compute \lstinline{td "abc"} in turn, we need \lstinline{td "ab"}, \lstinline{td "ac"}, and \lstinline{td "bc"}.
-Notice that \lstinline{td "ab"} will also be invoked when computing \lstinline{td "abd"}: following this top-down computation, many sub-computations are repeated.%
-\todo{A figure to contrast with \cref{fig:sublists-lattice}?}
+Notice, however, that \lstinline{td "ab"} is invoked again when computing \lstinline{td "abd"}:
+following this top-down computation, many sub-computations are repeated.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.5\textwidth]{pics/sublists-lattice.pdf}
-\caption{Computing \lstinline{td "abcde"} bottom-up.%
-To sace space we omitted the \lstinline{td}s.}
+\caption{Computing \lstinline{td "abcde"} bottom-up.
+To save space we omitted the \lstinline{td}s.}
 \label{fig:sublists-lattice}
 \end{figure}
 
 It is better to proceed bottom-up instead, as depicted in Figure~\ref{fig:sublists-lattice}.%
-\Josh{Four levels are enough?}
-The $n$th level%
-\Josh{Change to `level' to avoid confusion with `layers of functors' later. Shin: Okay!}
+\Josh{Four levels are enough? Shin: I don't understand.. don't we want to see the complete picture?}
+The $n$th level
+%\Josh{Change to `level' to avoid confusion with `layers of functors' later. Shin: Okay!}
 consists of values of \lstinline{td} at lists of length $n$.
 We start from level $1$, and compute level $n+1$ from level $n$ by reusing the values stored in the latter, until we reach the top level consisting of only one value.
 If the levels are lists, level $2$ would be
 \begin{lstlisting}
   [td "ab", td "ac", td "bc", td "ad" ...]
 \end{lstlisting}
-To construct level $3$ from level $2$, we need a function \lstinline{cd :: L a -> L (L a)} that, given level $2$, copies and rearranges its elements such that immediate sublists of the same list are brought together:
+To construct level $3$ from level $2$, we need a function \lstinline{cd :: L a -> L (L a)} that, given level $2$, copies and rearranges its elements such that the result of \lstinline{td} at immediate sublists of the same list are brought together:
 \begin{lstlisting}
   [[td "ab", td "ac", td "bc"], [td "ab", td "ad", td "bd"] ... ]
 \end{lstlisting}
@@ -297,8 +305,8 @@ Applying \lstinline{map g} to the list above, we get level $3$:
   [td "abc", td "abd", td "acd", td "bcd" ...]
 \end{lstlisting}
 If such a function \lstinline{cd} can be constructed, a bottom-up algorithm computing the same value as \lstinline{td} is given by:%
-\Josh{Bring \lstinline{head} in front of \lstinline{loop}? Shin: Done.}
-\Jeremy{Unless we're really pressed for space, I think it is better to put this on four lines. Shin: Done.}
+%\Josh{Bring \lstinline{head} in front of \lstinline{loop}? Shin: Done.}
+%\Jeremy{Unless we're really pressed for space, I think it is better to put this on four lines. Shin: Done.}
 \begin{lstlisting}
 bu :: L X -> Y
 bu = head . loop . map f
@@ -308,11 +316,11 @@ loop ys  = loop . map g . cd $ ys
 \end{lstlisting}
 That is, level $1$ is obtained by applying \lstinline{f} to each element of the input list. Then we keep applying \lstinline{map g . cd} to get the next level, stopping when we get a level with a single element, which will be our result.
 
-The \lstinline{bu} given above is much simpler than Richard's: to cope with more general problems, had to store not just values but tables of values in each level. I'm puzzled at first by why Richard starts from singleton lists instead of the empty list (missing the bottom of the lattice). But then I realise that whereas a $2$-list is completely determined by its two $1$-element sublists, a $1$-list is not determined by its one $0$-element sublist~--- more context would be needed.%
-\Josh{I did a reformulation\ldots
-  ``I'm puzzled by having to start from singleton lists instead of the empty list, which is the immediate sub-list of any singleton list (missing the bottom of the lattice), but somehow that's the best Richard could do.''
-JG: How about ``I'm puzzled at first by why Richard starts from singleton lists instead of the empty list (missing the bottom of the lattice). But then I realise that whereas a 2-list is completely determined by its two 1-element sublists, a 1-list is not determined by its one 0-element sublist~--- more contextwould be needed.''
-Shin: Used Jeremy's version.}
+The \lstinline{bu} given above is much simpler than Richard's: to cope with more general problems, he had to store not just values but tables of values in each level.
+I'm puzzled at first by why Richard starts from singleton lists instead of the empty list (missing the bottom of the lattice). But then I realise that whereas a $2$-list is completely determined by its two $1$-element sublists, a $1$-list is not determined by its one $0$-element sublist~--- more context would be needed.
+%\Josh{I did a reformulation\ldots  ``I'm puzzled by having to start from singleton lists instead of the empty list, which is the immediate sub-list of any singleton list (missing the bottom of the lattice), but somehow that's the best Richard could do.''
+%JG: How about ``I'm puzzled at first by why Richard starts from singleton lists instead of the empty list (missing the bottom of the lattice). But then I realise that whereas a 2-list is completely determined by its two 1-element sublists, a 1-list is not determined by its one 0-element sublist~--- more contextwould be needed.''
+%Shin: Used Jeremy's version.}
 
 All these, however, are merely a first attempt.
 Richard must have realized at some point that it is difficult to define the \lstinline{cd} rearrangement using lists, and decided to represent each level using the \lstinline{B} datatype mentioned before.%
@@ -342,10 +350,12 @@ Given input \lstinline{"abcde"}, the function \lstinline{cvt} yields a tree that
 \begin{lstlisting}
 Bin (Bin (Bin (Bin (Tip 'a') (Tip 'b')) (Tip 'c')) (Tip 'd')) (Tip 'e')
 \end{lstlisting}
-Following Richard's convention, I draw a \lstinline{Tip x} as \lstinline{x}, and draw \lstinline{Bin t u} as a dot with \lstinline{t} to its left and \lstinline{u} below, resulting in the tree labelled $1$\Jeremy{perhaps subfigure labels should be (1), (2) etc} in Figure~\ref{fig:map_g_cd}.
-Applying \lstinline{mapB g . cd} to this, I get level $2$, labelled $2$ in the figure.
+Following Richard's convention, I draw a \lstinline{Tip x} as \lstinline{x}, and draw \lstinline{Bin t u} as a dot with \lstinline{t} to its left and \lstinline{u} below, resulting in the tree labelled (1)%
+\Jeremy{perhaps subfigure labels should be (1), (2) etc. Shin: done.}
+in Figure~\ref{fig:map_g_cd}.
+Applying \lstinline{mapB g . cd} to this, I get level $2$, labelled (2) in the figure.
 For a closer look, I apply \lstinline{cd} to level $2$.
-Indeed, with its clever mapping and zipping, \lstinline{cd} managed to bring together precisely the right elements (labelled $2.5$ in Figure~\ref{fig:map_g_cd}), so that when we apply \lstinline{mapB g}, we get level $3$.
+Indeed, with its clever mapping and zipping, \lstinline{cd} managed to bring together precisely the right elements (labelled (2.5) in Figure~\ref{fig:map_g_cd}), so that when we apply \lstinline{mapB g}, we get level $3$.
 
 This still does not give me much intuition for why \lstinline{cd} works.
 Presumably \lstinline{cd} does not do something useful on arbitrary binary trees, only the trees built by \lstinline{cvt} and \lstinline{cd} itself.
@@ -357,15 +367,16 @@ Richard did give some hint: if we compute the sizes of subtrees along their left
 \Josh{Could be `binary'}
 
 Given these clues, how do we prove that \lstinline{cd} indeed does the job --- bringing related immediate sublists together?
-In fact, how do we even write down ``bringing related immediate sublists together'' as a formal specification?%
-\Josh{and proving \lstinline{td} equals \lstinline{bu}}
+In fact, how do we even write down ``bringing related immediate sublists together'' as a formal specification?
+How does that help me to prove that \lstinline{td} equals \lstinline{bu}?
+%\Josh{and proving \lstinline{td} equals \lstinline{bu}. Shin: added.}
 
 I fear that there will be plenty of complex proof waiting ahead for me.
 
-\todo[inline]{Recap of what Richard's paper wanted to do: transforming a top-down algorithm (which acts as a specification) to a bottom-up algorithm, which `I' (Shin) had already worked out a simplified version; explain why the base cases have to be singleton lists; the role of \lstinline{cd} in the bottom-up algorithm, intuitively; relationship to binomial cofficients}
+%\todo[inline]{Recap of what Richard's paper wanted to do: transforming a top-down algorithm (which acts as a specification) to a bottom-up algorithm, which `I' (Shin) had already worked out a simplified version; explain why the base cases have to be singleton lists; the role of \lstinline{cd} in the bottom-up algorithm, intuitively; relationship to binomial cofficients}
 
-%But I still couldn’t see, \emph{formally}, how to make sense of the definition of \lstinline{cd} or get from the definition to a correctness proof of \lstinline{bu}.%
-\todo{Main question; even suggest there's a lot of proving ahead (actually not)}
+%But I still couldn’t see, \emph{formally}, how to make sense of the definition of \lstinline{cd} or get from the definition to a correctness proof of \lstinline{bu}.
+%\todo{Main question; even suggest there's a lot of proving ahead (actually not)}
 
 \section{Indexed Data Types of Binomial Trees}
 
