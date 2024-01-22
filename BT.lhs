@@ -431,7 +431,7 @@ Informally: given all the length-\lstinline{k} sublists of length-\lstinline{n} 
 But proving that using only simple types looks like hard work. Can I find some indexing scheme that forces the elements of a binomial tree to be \lstinline{mapB h (choose k xs)} with equality proofs about the elements, and then write a function between such trees?
 I might be able to turn a large number of \Jeremy{propositional?} equalities into judgemental ones so that the Agda type checker can do the rewriting for me, in the same spirit as \varcitet{McBride-ornaments}{'s} compiler for Hutton's Razor. However, that still seems rather ad~hoc, passing proofs by brute force around the tree: not appealing.
 
-A lightbulb lights up over my head. I can make better use of dependent types, by using the sublists themselves as the indices of the element types. Nobody said the indices have to be natural numbers. Here is a refinement of the binomial tree datatype:
+A lightbulb lights up over my head: I can make better use of dependent types, by using the sublists themselves as the indices of the element types! After all, nobody said the indices have to be natural numbers. Here is a refinement of the binomial tree datatype:
 \begin{code}
 data BT {a : Set} : (n k : ℕ) → (Vec a k → Set) → Vec a n → Set where
   tipZ  :   p []                             → BT       n     0       p xs
@@ -476,9 +476,9 @@ I've also omitted a couple of impossible cases that actually have to be listed a
 There's actually no need to understand the definition of \lstinline{cd}/|retabulate|, but I can still work out a case or two to see how well type-directed programming works.
 A coherence commuting diagram (in the sense of data refinement) between |retabulate| and \lstinline{cd} to understand one in terms of the other?}
 
-I'm pleasantly surprised to see that the definition of \lstinline{cd} can be quite straightforwardly ported to Agda this way, even with the much more informative type. In fact, the definition has been verified just by finding the (or rather, a) right type for it!
-In fact, I conjecture that the behaviour of |retabulate| is uniquely determined by its type, which acts as a tight specification.
-The proof may be similar to \varcitet{Voigtlander-BX-for-free}{'s} (and generalised with parametricity for dependent types~\citep{Bernardy-proofs-for-free} and datatype-generic lookup~\citep{Diehl-InfIR}). \Jeremy{Should this move to the Afterword?}
+I'm pleasantly surprised to see that the definition of \lstinline{cd} can be quite straightforwardly carried over to Agda this way, even with the much more informative type. In fact, the definition has been verified simply by finding the (or rather, a) right type for it!
+Further, I conjecture that the behaviour of |retabulate| is uniquely determined by its type, which therefore acts as a tight specification.
+The proof might be similar to \varcitet{Voigtlander-BX-for-free}{'s} (and generalised with parametricity for dependent types~\citep{Bernardy-proofs-for-free} and datatype-generic lookup~\citep{Diehl-InfIR}). \Jeremy{Should this move to the Afterword?}
 
 \section{Dependently Typed Algorithms}
 
