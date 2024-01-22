@@ -427,7 +427,7 @@ Informally: given all the length-\lstinline{k} sublists of length-\lstinline{n} 
 But proving that using only simple types looks like hard work. Can I find some indexing scheme that forces the elements of a binomial tree to be \lstinline{mapB h (choose k xs)} with equality proofs about the elements, and then write a function between such trees?
 I might be able to turn a large number of \Jeremy{propositional?} equalities into judgemental ones so that the Agda type checker can do the rewriting for me, in the same spirit as \varcitet{McBride-ornaments}{'s} compiler for Hutton's Razor. However, that still seems rather ad~hoc, passing proofs by brute force around the tree: not appealing.
 
-Revelation! I can make better use of dependent types, by using the sublists themselves as the indices of the element types. Nobody said the indices have to be natural numbers. Here is a refinement of the binomial tree datatype:
+A lightbulb lights up over my head. I can make better use of dependent types, by using the sublists themselves as the indices of the element types. Nobody said the indices have to be natural numbers. Here is a refinement of the binomial tree datatype:
 \begin{code}
 data BT {a : Set} : (n k : ℕ) → (Vec a k → Set) → Vec a n → Set where
   tipZ  :   p []                             → BT       n     0       p xs
