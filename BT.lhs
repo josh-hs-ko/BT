@@ -316,7 +316,7 @@ bu :: L X -> Y
 bu = head . loop . map f
 
 loop [y] = [y]
-loop ys  = loop . map g . cd $ ys
+loop ys  = loop (map g (cd ys))
 \end{lstlisting}
 That is, level $1$ is obtained by applying \lstinline{f} to each element of the input list. Then we keep applying \lstinline{map g . cd} to get the next level, stopping when we get a level with a single element, which will be our result.
 
@@ -327,13 +327,13 @@ All these, however, are merely a first attempt.
 Richard must have realized at some point that it is difficult to define the \lstinline{cd} rearrangement using lists, and decided to represent each level using the \lstinline{B} datatype mentioned before.%
 \Josh{Do we get any explanation from the dependently typed reformulation? (Easy access to particular groups of sub-lists?)}
 Now \lstinline{cd} has type \lstinline{L a -> B (L a)}, and \lstinline{bu} and \lstinline{loop} are defined by
-\Jeremy{Shouldn't that be \lstinline{loop (Tip y) = Tip y}?}
+\Jeremy{Shouldn't that be \lstinline{loop (Tip y) = Tip y}? Shin: Yes! Corrected.}
 \begin{lstlisting}
 bu :: L X -> Y
 bu = unTip . loop . cvt . map f
 
-loop y  = y
-loop ys = loop . mapB g . cd $ ys
+loop (Tip y) = (Tip y)
+loop ys      = loop (mapB g (cd ys))
 \end{lstlisting}
 where \lstinline{loop :: B Y -> B Y}, and \lstinline{unTip (Tip y) = y}.
 The function \lstinline{cvt :: L a -> B a} prepares the first level.%
@@ -482,7 +482,7 @@ The proof might be similar to \varcitet{Voigtlander-BX-for-free}{'s} (and genera
 
 So much for \lstinline{cd}, and rearranging the subresults into the correct places. What about the main problem: do dependent types help us prove also that the bottom-up algorithm \lstinline{bu} equals the top-down \lstinline{td}?
 
-Let's start with the assumptions. 
+Let's start with the assumptions.
 The combining function~|g| takes as argument something about the \emph{immediate} sublists of a list: that can be represented as a binomial tree too\Jeremy{is that really `too'? wasn't that what \lstinline{cd} was doing all along?}.
 The solutions~|s| should be indexed by the input list.
 Dependent types allow~|g| to subsume the base cases encoded separately by~\lstinline{f} in Richard's paper.
@@ -506,7 +506,7 @@ td : ImmediateSublistInduction
 td s e g    0      = e
 td s e g (  1+ n)  = g ∘ mapBT (td s e g n) ∘ blanks(C sn n)
 \end{code}
-This is appealingly similar to Richard's function~\lstinline{td}, the only significant difference being the freedom to use the empty list for the base case. 
+This is appealingly similar to Richard's function~\lstinline{td}, the only significant difference being the freedom to use the empty list for the base case.
 Here, |blanks(C n k)| constructs the length-|k| sublists of a length-|n| list:
 \Jeremy{I don't understand the intuition behind the name `blanks' here. A |BT(C n k)| with a trivial predicate argument |p| is just the collection of |k|-sublists of an |n|-list, ie basically \lstinline{choose}, right?}
 \begin{code}
@@ -530,7 +530,7 @@ bu s e g n = unTip ∘ loop 0 ∘ mapBT e ∘ blanks(C n 0)
 \end{code}
 That is, we initialize with a proof for the empty list, and iteratively lift this to all longer and longer sublists of the input.
 
-Intriguingly, any two inhabitants of |ImmediateSublistInduction| are equal (up to extensional equality), due to parametricity\Jeremy{proof?}. So in fact |td| equals |bu|, merely because they have the same, uniquely inhabited type! 
+Intriguingly, any two inhabitants of |ImmediateSublistInduction| are equal (up to extensional equality), due to parametricity\Jeremy{proof?}. So in fact |td| equals |bu|, merely because they have the same, uniquely inhabited type!
 (The induction principle for natural numbers is a simpler example to think about.)Jeremy{``I'm reminded of a cute recent paper by Olivier Danvy [JFP 29:e26, 2019] about left and right folds over the natural numbers, which is a simpler illustration of the same idea.'' Fair?})
 
 But I would really like to compare what |td| and |bu| do \emph{intensionally}. That aspect is overlooked from the parametricity perspective. I'll need some more powerful tools to see through the extra complexity\ldots
