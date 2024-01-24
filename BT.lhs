@@ -532,25 +532,25 @@ But I would really like to compare what |td| and |bu| do \emph{intensionally}. T
 
 \section{Categories of Families of Types and Functions}
 
-All the indices in the types are getting annoying, and they are distorting the types to the extent that makes me afraid that I've deviated too much from Richard's paper.
+All the type indices are getting annoying, and they are distorting the types to an extent that makes me afraid that I've deviated too far from Richard's paper.
 Have I taken a completely new path?
-That would be exciting, but also frightening because I'd be on my own and couldn't rely on Richard's insights anymore.
+That would be exciting, but also frightening: I'd be on my own, and not able to rely on Richard's insights anymore.
 
-I've definitely done something radically new that Richard wouldn't imagine: proving two non-trivial programs equal just by saying that they have the same type.
-On the other hand, I don't think I'm in a totally uncharted territory yet, because I still see vaguely familiar patterns if I squint at my Agda code:
-The programs are still essentially the same as their Haskell counterparts; in particular, like \lstinline{cd}, my |retabulate| still transforms a tree of |p|'s into a tree of lists/trees of |p|'s, roughly speaking.
+I've definitely done something radically new that Richard wouldn't have imagined: proving two non-trivial programs equal just by showing that they have the same type.
+On the other hand, I don't think I'm in a totally uncharted territory yet, because I still see vaguely familiar patterns if I squint at my Agda code. 
+The programs are still essentially the same as their Haskell counterparts; in particular, like \lstinline{cd}, roughly speaking my |retabulate| still transforms a tree of |p|'s into a tree of lists/trees of |p|'s.
 
 Hm, does it even make sense to say `a tree of |p|'s'?
 Usually when a functional programmer says `a tree of something', that `tree' is a parametric data type, and that `something' is a type, but here |p|~is a type family rather than a type\ldots
 
 And then I see it: \emph{I'm in a different category.}
 
-Functional programmers are familiar with types and functions, and knows when functions can be composed sequentially --- when adjacent functions are mediated by the same types.
+Functional programmers are familiar with types and functions, and knows when functions can be composed sequentially --- when adjacent functions meet at the same type.
 Categories are settings in which the same intuition about sequential composition works:
-Instead of types and functions, the categorical programmer can switch to work with some \emph{objects} and \emph{morphisms} specified by a category, where each morphism is labelled with a source object and a target object (like the source and target types of a function), and morphisms can be composed sequentially when adjacent morphisms are mediated by the same objects.%
+Instead of types and functions, the categorical programmer can switch to work with some \emph{objects} and \emph{morphisms} specified by a category, where each morphism is labelled with a source object and a target object (like the source and target types of a function), and morphisms can be composed sequentially when adjacent morphisms meet at the same object.%
 \todo{laws}
 Working in a new setting that's identified as a category (or some crazier variant that supports more operations in addition to sequential composition) is a blessing for the functional programmer: It means that the programmer can still rely on some of their intuitions about types and functions to navigate in the new setting.
-(And the formal definitions of various kinds of category makes it precise what intuitions remain reliable.)
+(And the formal definitions of various kinds of category make precise which intuitions remain reliable.)
 
 In my case, I've left the category of types and functions and landed in a kind of category where the objects are type families.
 A bit of notation will make it clearer:
@@ -563,13 +563,13 @@ Now I can write
 BT(C n k) : Fam (Vec a k) → Fam (Vec a n)
 \end{code}
 This makes a lot of sense:
-In a simply typed setting, a parametric data type~|D| maps a type~|a| to a type |D a|; categorically, it should map an object to an object, and indeed |BT(C n k)| maps a type family to a type family.
+In a simply typed setting, a parametric data type~|D| maps a type~|a| to a type |D a|; categorically, it should map objects to objects, and indeed |BT(C n k)| maps type families to type families.
 
 \todo[inline]{Explain the relationship between parametric data types and functors; independence of data at functor level from those at parameter level (foreshadowing natural transformations?)}
 
 What about morphisms?
 A clue can be found in the type of the standard function |map(sub D) : (a → b) → (D a → D b)| that comes with any (`reasonable') parametric data type~|D| for changing the type parameter.
-Looking through the categorical lens, |map(sub D)| takes a morphism/function from~|a| to~|b| and maps it to a morphism/function from |D a| to |D b|.
+Looking through the categorical lens, |map(sub D)| takes a morphism/function from~|a| to~|b| and lifts it to a morphism/function from |D a| to |D b|.
 Then it is obvious from
 \begin{code}
 mapBT : (∀ {ys} → p ys → q ys) → ∀ {xs} → BT(C n k) p xs → BT(C n k) q xs
@@ -584,9 +584,9 @@ so that the type of |mapBT| can be rewritten into the familiar form --- just lik
 mapBT : (p ⇉ q) → (BT(C n k) p ⇉ BT(C n k) q)
 \end{code}
 
-There are quite a few versions of `categories of families', and the version I'm looking at is a simplest one:
-Given an index type~|a|, a category of families has objects of type |Fam a| and morphisms between objects |p|~and~|q| of type |p ⇉ q| --- I'll call such a category |Fam' a|.
-So actually I'm working in not just one but many categories of families with different index types.
+There are quite a few versions of `categories of families', and the version I'm looking at is one of the simplest:\Jeremy{or ``is the simplest one''?}
+Given an index type~|a|, a category of families has objects of type |Fam a| and morphisms of type |p ⇉ q| between objects |p|~and~|q| --- I'll call such a category |Fam' a|.
+So actually I'm working in not just one but many related categories of families, with different index types.
 For example, |BT(C n k)| (together with |mapBT|), as a functor, goes from |Fam' (Vec a k)| to |Fam' (Vec a n)|.
 But I'd better check if all the other functions used in the two algorithms fit into these categories.
 Sure enough:
@@ -597,7 +597,7 @@ blanks(C n k)  :  const ⊤       ⇉  BT(C n k) (const ⊤)
 g              :  BT(C sk k) s  ⇉  s
 e              :  const ⊤       ⇉  s
 \end{code}
-where the |⊤|~arguments of |blanks| and~|e| need to be lifted to a type family |const ⊤| to fit into the category of families.
+where the |⊤|~arguments of |blanks| and~|e| need to be lifted to a type family |const ⊤| to fit into the picture.
 The usual side conditions apply (|n > k| for |retabulate| and |n GEQ k| for |blanks(C n k)|), and |e|~is defined only in |Fam' (Vec a 0)|.
 
 \todo[inline]{Not a purely categorical treatment, but just using categories as an abstraction that highlights certain structures of the programs}
