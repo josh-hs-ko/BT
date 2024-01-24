@@ -403,7 +403,7 @@ This now justifies the zip, which takes two trees \emph{of the same shape}, and 
 \begin{code}
 zipBWith : (a → b → c) → B a n k → B b n k → B c n k
 \end{code}
-In fact, that type is so informative that only one program inhabits it, and that program can be found automatically by proof search\Jeremy{right?}.
+In fact, that type is so informative that only one program inhabits it, and that program can be found automatically by proof search. (Well, at least the positive clauses are automatic. Proving absurdity of the other clauses takes a little effort.)
 
 And now the type of Richard's \lstinline{cd} can be given more precisely. It takes as input the data for level~$k$ out of $n$ levels, with $0 \le k < n$; these are the results for each of the |CHOOSE n k| length-$k$ sublists of the original length-$n$ list. And it returns as output the components for level~$1+k$; there are |CHOOSE n (1+k)| \Jeremy{why is the |1+k| being formatted funny?} of these, each a length-$(1+k)$ list to be fed into \lstinline{g}. The input data can conveniently be stored in a tree indexed by $n,k$, and the output indexed by $n,1+k$:
 \begin{code}
@@ -413,9 +413,9 @@ cd : B a n k → B (Vec a (1 + k)) n (1 + k)
 So much for the shape. But how do I know that the contents are correct~--- that |cd| is correctly rearranging the values? Perhaps I can use some more refined dependent types, to capture more information intrinsically and leave less for me to prove later.
 
 I need to decide what the types should say~--- that is, I need a specification.
-\Jeremy{I don't really understand the TODO: ``What to say? Need a spec: the equational one using \lstinline{choose} (marking the element positions with sub-lists and specifying where the elements should go); but requires a lot of proving''.}
+\Jeremy{I don't really understand the TODO: ``What to say? Need a spec: the equational one using \lstinline{choose} (marking the element positions with sub-lists and specifying where the elements should go); but requires a lot of proving''. Update 20240124: A lot of equational reasoning. Do we mention Shin's paper?}
 In Haskell, I suppose Richard might have defined the choice of \lstinline{k} elements from a list (implicitly of length \lstinline{n}):
-\Jeremy{shouldn't all occurrences of \lstinline{k+1} be \lstinline{1+k}?}
+\Jeremy{shouldn't all occurrences of \lstinline{k+1} be \lstinline{1+k}? Update 20240124: it's complicated. Haskell has \lstinline{n+k} patterns; but Agda used to require |1+n|.}
 \begin{lstlisting}
 choose               :: Int -> L a -> B (L a)
 choose    0  xs      =  Tip []
@@ -454,7 +454,7 @@ Concretely, I'll use these binomial trees as a data refinement of the lists in t
 _∷ᴮᵀ_ : p xs → BT(C sk k) (p ∘ (x ∷_)) xs → BT(C ssk sk) p (x ∷ xs)
 y ∷ᴮᵀ t = bin (tipS y) t
 \end{code}
-I decide to use the name |retabulate| for the data refinement of \lstinline{cd} \Jeremy{why?}:
+I decide to use the name |retabulate| for the data refinement of \lstinline{cd} \Jeremy{I'd like to think of a better name.}:
 \begin{code}
 retabulate : (SUPPRESSED(n > k)) → BT(C n k) p xs → BT(C n sk) (BT(C sk k) p) xs
 retabulate {xs =' _ ∷ []     }  (tipZ y)  =  tipS  (tipZ y)
@@ -468,7 +468,7 @@ This is parametrically polymorphic in the type |a : Set| of list elements and th
 I have greyed out the |n > k| argument, to indicate that it's in the actual code but omitted in the presentation (for making the comparison with \lstinline{cd} more direct).
 \Josh{`Don't bother to trace all the side conditions --- I'll check them in the formalisation.'}
 I've also omitted a couple of impossible cases that actually have to be listed and proved absurd.
-\Jeremy{The last three cases of |retabulate| obviously match the last three of \lstinline{cd}. But the first two cases of |retabulate| correspond to just the first case of \lstinline{cd}. Evidently we now need an extra case analysis between |tipS| and |bin|; fair enough. But the correspondence would be clearer still if we delegated this case analysis to an auxilliary function, wouldn't it?}
+\Jeremy{The last three cases of |retabulate| obviously match the last three of \lstinline{cd}. But the first two cases of |retabulate| correspond to just the first case of \lstinline{cd}. Evidently we now need an extra case analysis between |tipS| and |bin|; fair enough. But the correspondence would be clearer still if we delegated this case analysis to an auxilliary function, wouldn't it? Update 20240124: first two cases of |retabulate| are different from \lstinline{cd}, because our base case is different}
 
 \todo[inline]{Still need a comparison between \lstinline{cd} and |retabulate|: including more cases than \lstinline{cd} (foreshadowing the generalisation about base cases), generalising a couple of cases, and handling some inequality proofs for the |n > k| argument.
 There's actually no need to understand the definition of \lstinline{cd}/|retabulate|, but I can still work out a case or two to see how well type-directed programming works.
@@ -483,19 +483,18 @@ The proof might be similar to \varcitet{Voigtlander-BX-for-free}{'s} (and genera
 So much for \lstinline{cd}, and rearranging the subresults into the correct places. What about the main problem: do dependent types help us prove also that the bottom-up algorithm \lstinline{bu} equals the top-down \lstinline{td}?
 
 Let's start with the assumptions.
-The combining function~|g| takes as argument something about the \emph{immediate} sublists of a list: that can be represented as a binomial tree too\Jeremy{is that really `too'? wasn't that what \lstinline{cd} was doing all along?}.
+The combining function~|g| takes as argument something about the \emph{immediate} sublists of a list: that can be represented as a binomial tree rather than a list too.
 The solutions~|s| should be indexed by the input list.
 Dependent types allow~|g| to subsume the base cases encoded separately by~\lstinline{f} in Richard's paper.
 We can also use the more obvious empty list as the base case, rather than having to stop with singleton lists, because the missing context is provided in the type.
 We arrive at an \emph{induction principle} for lists, in which the induction hypothesis is that the property holds for all immediate sublists:
 \Jeremy{Why are the two |⊤| arguments needed? What breaks if we try to do without them? Could we then also do without the distinction between |blanks| and |blanks'|?}
-\Jeremy{More naming: why |s| rather than |p| for the property? Can I use |ys| rather than |xs| in the locally bound type for~|g|?}
 \begin{code}
 ImmediateSublistInduction : Set₁
 ImmediateSublistInduction =
   {  a : Set} (s : {k : ℕ} → Vec a k → Set)
-  (  e : {xs : Vec a 0} → ⊤ → s xs)
-  (  g : {k : ℕ} {xs : Vec a (1 + k)} → BT(C sk k) s xs → s xs)
+  (  e : {ys : Vec a 0} → ⊤ → s ys)
+  (  g : {k : ℕ} {ys : Vec a (1 + k)} → BT(C sk k) s ys → s ys)
   (  n : ℕ) {xs : Vec a n} → ⊤ → s xs
 \end{code}
 That is, we can prove a property~|s| for a given list~|xs| of length~|n|, given a base case proof~|e| for the empty list, and an inductive step~|g| assuming the property for all immediate sublists of a nonempty list.
@@ -508,7 +507,7 @@ td s e g (  1+ n)  = g ∘ mapBT (td s e g n) ∘ blanks(C sn n)
 \end{code}
 This is appealingly similar to Richard's function~\lstinline{td}, the only significant difference being the freedom to use the empty list for the base case.
 Here, |blanks(C n k)| constructs the length-|k| sublists of a length-|n| list:
-\Jeremy{I don't understand the intuition behind the name `blanks' here. A |BT(C n k)| with a trivial predicate argument |p| is just the collection of |k|-sublists of an |n|-list, ie basically \lstinline{choose}, right?}
+\Jeremy{I suggest calling this |choose| instead of |blanks|. And it would be helpful to go first to the version returning a |BT(C n k) id xs|, then noticing that the sublists aren't needed in the value because they are completely determined by the types.}
 \begin{code}
 blanks' : (n k : ℕ) → (SUPPRESSED(n GEQ k)) → BT(C n k) (const ⊤) xs
 blanks' _          0       = tipZ tt
@@ -860,7 +859,7 @@ All these are for another day, however.%
 
 \todo[inline]{Largely follows the actual development, which we realise makes a nice story, going from the concrete to the abstract (`based on a true story')}
 
-\todo[inline]{Monologue of a dependently typed programmer, going through what they think about (in an intuitive and colloquial style) when solving the problem/mystery (cf~the beginning of the science fiction novel \textit{Project Hail Mary}) rather than reporting a piece of already finished work; the format is more effective for presenting thought processes and focusing on ideas (people don't usually hurry to work out all the technical detail when first solving a problem)}
+\todo[inline]{`Socratic monologue' of a dependently typed programmer, going through what they think about (in an intuitive and colloquial style) when solving the problem/mystery (cf~the beginning of the science fiction novel \textit{Project Hail Mary}) rather than reporting a piece of already finished work; the format is more effective for presenting thought processes and focusing on ideas (people don't usually hurry to work out all the technical detail when first solving a problem)}
 
 \todo[inline]{Resist the temptation to generalise (for example, to dynamic programming in general as \citet{Bird-zippy-tabulations} attempted to do), and keep the material simple (no graded comonads, for example) and self-contained (but not a detailed tutorial); loose ends here and there to point out generality and future work (exercises and papers)}
 
