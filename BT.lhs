@@ -327,7 +327,6 @@ All these, however, are merely a first attempt.
 Richard must have realized at some point that it is difficult to define the \lstinline{cd} rearrangement using lists, and decided to represent each level using the \lstinline{B} datatype mentioned before.%
 \Josh{Do we get any explanation from the dependently typed reformulation? (Easy access to particular groups of sub-lists?)}
 Now \lstinline{cd} has type \lstinline{L a -> B (L a)}, and \lstinline{bu} and \lstinline{loop} are defined by
-\Jeremy{Shouldn't that be \lstinline{loop (Tip y) = Tip y}? Shin: Yes! Corrected.}
 \begin{lstlisting}
 bu :: L X -> Y
 bu = unTip . loop . cvt . map f
@@ -353,7 +352,6 @@ Given input \lstinline{"abcde"}, the function \lstinline{cvt} yields a tree that
 Bin (Bin (Bin (Bin (Tip 'a') (Tip 'b')) (Tip 'c')) (Tip 'd')) (Tip 'e')
 \end{lstlisting}
 Following Richard's convention, I draw a \lstinline{Tip x} as \lstinline{x}, and draw \lstinline{Bin t u} as a dot with \lstinline{t} to its left and \lstinline{u} below, resulting in the tree labelled (1)%
-\Jeremy{perhaps subfigure labels should be (1), (2) etc. Shin: done.}
 in Figure~\ref{fig:map_g_cd}.
 Applying \lstinline{mapB g . cd} to this, I get level $2$, labelled (2) in the figure.
 For a closer look, I apply \lstinline{cd} to level $2$.
@@ -387,9 +385,7 @@ So, what is \lstinline{cd} doing? As a first step, why is the `zip' justified~--
 Let me try to prove that, by capturing the tree shape in its type. This is now a standard example in dependent types: familiar territory! I open my favourite editor, and switch from Haskell to Agda.
 
 Here is Richard's \lstinline{B} datatype of binary trees, now indexed by shape:
-\Jeremy{Is the argument ordering conventional? I would have put indices before parameters.}
 \Jeremy{For consistency here, we should talk earlier about ``level $k$'' rather than ``level $n$''}
-\Jeremy{This |a| parameter is explicit, whereas for |BT| it is implicit: why?}
 \begin{code}
 data B (a : Set) : ℕ → ℕ → Set where
   tipZ  :   a               → B a       n     0
@@ -405,7 +401,7 @@ zipBWith : (a → b → c) → B a n k → B b n k → B c n k
 \end{code}
 In fact, that type is so informative that only one program inhabits it, and that program can be found automatically by proof search. (Well, at least the positive clauses are automatic. Proving absurdity of the other clauses takes a little effort.)
 
-And now the type of Richard's \lstinline{cd} can be given more precisely. It takes as input the data for level~$k$ out of $n$ levels, with $0 \le k < n$; these are the results for each of the |CHOOSE n k| length-$k$ sublists of the original length-$n$ list. And it returns as output the components for level~$1+k$; there are |CHOOSE n (1+k)| \Jeremy{why is the |1+k| being formatted funny?} of these, each a length-$(1+k)$ list to be fed into \lstinline{g}. The input data can conveniently be stored in a tree indexed by $n,k$, and the output indexed by $n,1+k$:
+And now the type of Richard's \lstinline{cd} can be given more precisely. It takes as input the data for level~$k$ out of $n$ levels, with $0 \le k < n$; these are the results for each of the |CHOOSE n k| length-$k$ sublists of the original length-$n$ list. And it returns as output the components for level~$1+k$; there are |CHOOSE n (sk)| of these, each a length-$(1+k)$ list to be fed into \lstinline{g}. The input data can conveniently be stored in a tree indexed by $n,k$, and the output indexed by $n,1+k$:
 \begin{code}
 cd : B a n k → B (Vec a (1 + k)) n (1 + k)
 \end{code}
@@ -415,7 +411,7 @@ So much for the shape. But how do I know that the contents are correct~--- that 
 I need to decide what the types should say~--- that is, I need a specification.
 \Jeremy{I don't really understand the TODO: ``What to say? Need a spec: the equational one using \lstinline{choose} (marking the element positions with sub-lists and specifying where the elements should go); but requires a lot of proving''. Update 20240124: A lot of equational reasoning. Do we mention Shin's paper?}
 In Haskell, I suppose Richard might have defined the choice of \lstinline{k} elements from a list (implicitly of length \lstinline{n}):
-\Jeremy{shouldn't all occurrences of \lstinline{k+1} be \lstinline{1+k}? Update 20240124: it's complicated. Haskell has \lstinline{n+k} patterns; but Agda used to require |1+n|.}
+\Jeremy{shouldn't all occurrences of \lstinline{k+1} be \lstinline{1+k}? Update 20240124: it's complicated. Haskell has \lstinline{n+k} patterns; but Agda used to require \lstinline{1+n}.}
 \begin{lstlisting}
 choose               :: Int -> L a -> B (L a)
 choose    0  xs      =  Tip []
