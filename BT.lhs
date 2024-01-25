@@ -284,14 +284,14 @@ following this top-down computation, many sub-computations are repeated.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.5\textwidth]{pics/sublists-lattice.pdf}
-\caption{Computing \lstinline{td "abcde"} bottom-up.
+\includegraphics[width=0.43\textwidth]{pics/sublists-lattice.pdf}
+\caption{Computing \lstinline{td "abcd"} bottom-up.
 To save space we omitted the \lstinline{td}s.}
 \label{fig:sublists-lattice}
 \end{figure}
 
 It is better to proceed bottom-up instead, as depicted in Figure~\ref{fig:sublists-lattice}.%
-\Josh{Four levels are enough? Shin: I don't understand.. don't we want to see the complete picture?}
+\Josh{Four levels are enough? Shin: Done.}
 The $n$th level
 %\Josh{Change to `level' to avoid confusion with `layers of functors' later. Shin: Okay!}
 consists of values of \lstinline{td} at lists of length $n$.
@@ -537,7 +537,7 @@ Have I taken a completely new path?
 That would be exciting, but also frightening: I'd be on my own, and not able to rely on Richard's insights anymore.
 
 I've definitely done something radically new that Richard wouldn't have imagined: proving two non-trivial programs equal just by showing that they have the same type.
-On the other hand, I don't think I'm in a totally uncharted territory yet, because I still see vaguely familiar patterns if I squint at my Agda code. 
+On the other hand, I don't think I'm in a totally uncharted territory yet, because I still see vaguely familiar patterns if I squint at my Agda code.
 The programs are still essentially the same as their Haskell counterparts; in particular, like \lstinline{cd}, roughly speaking my |retabulate| still transforms a tree of |p|'s into a tree of lists/trees of |p|'s.
 
 Hm, does it even make sense to say `a tree of |p|'s'?
