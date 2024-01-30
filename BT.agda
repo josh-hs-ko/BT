@@ -111,16 +111,16 @@ mapBT-∘ f g (TipZ p)  = refl
 mapBT-∘ f g (TipS p)  = refl
 mapBT-∘ f g (Bin t u) = cong₂ Bin (mapBT-∘ f g t) (mapBT-∘ f g u)
 
-unTip : BT n n P ⇉ P
-unTip (TipS p)  = p
-unTip (TipZ {xs = []} p) = p
-unTip (Bin t _) = ⊥-elim (unbounded t)
+unTip : BT n n P xs → P xs
+unTip           (TipS p)  = p
+unTip {xs = []} (TipZ p)  = p
+unTip           (Bin t _) = ⊥-elim (unbounded t)
 
 unTip-natural : (h : P ⇉ Q) {xs : Vec A n} (t : BT n n P xs)
               → h ∘ unTip $ t ≡ unTip ∘ mapBT h $ t
-unTip-natural h (TipS p)  = refl
-unTip-natural h (TipZ {xs = []} p) = refl
-unTip-natural h (Bin t _) = ⊥-elim (unbounded t)
+unTip-natural h      (TipS p)  = refl
+unTip-natural h {[]} (TipZ p)  = refl
+unTip-natural h      (Bin t _) = ⊥-elim (unbounded t)
 
 zipBTWith : (P ⇉ Q ⇒ R) → (BT n k P ⇉ BT n k Q ⇒ BT n k R)
 zipBTWith f (TipZ p)   (TipZ q)   = TipZ (f p q)
@@ -138,6 +138,30 @@ zipBTWith-natural p q r f f' f∼f' (TipZ x)   (TipZ y)   = cong TipZ f∼f'
 zipBTWith-natural p q r f f' f∼f' (TipS x)   u          = cong TipS (trans f∼f' (cong (f' (p x)) (unTip-natural q u)))
 zipBTWith-natural p q r f f' f∼f' (Bin t _)  (TipS _)   = ⊥-elim (unbounded t)
 zipBTWith-natural p q r f f' f∼f' (Bin t t') (Bin u u') = cong₂ Bin (zipBTWith-natural p q r f f' f∼f' t u) (zipBTWith-natural p q r f f' f∼f' t' u')
+
+data Exactly : A → Set where
+  exactly : (x : A) → Exactly x
+
+mapExactly : (f : A → B) → Exactly x → Exactly (f x)
+mapExactly f (exactly x) = exactly (f x)
+
+incr : suc m ≤′ n → m ≤′ n
+incr  ≤′-refl    = ≤′-step ≤′-refl
+incr (≤′-step d) = ≤′-step (incr d)
+
+choose : (n k : ℕ) → k ≤′ n → (xs : Vec A n) → BT n k Exactly xs
+choose _        zero   _               xs       = TipZ (exactly [])
+choose (suc k) (suc k)  ≤′-refl        xs       = TipS (exactly xs)
+choose (suc n) (suc k) (≤′-step n≥1+k) (x ∷ xs) = Bin (choose n (suc k) n≥1+k xs) (mapBT (mapExactly (x ∷_)) (choose n k n≥k xs))
+  where n≥k = incr n≥1+k
+
+toBTExactly : BT n k (const ⊤) xs → BT n k Exactly xs
+toBTExactly = mapBT (λ {ys} _ → exactly ys)
+
+-- test-choose : (a b c : A)
+--             → choose 3 1 (≤′-step (≤′-step <′-base)) (a ∷ b ∷ c ∷ [])
+--             ≡ Bin (Bin (TipS (exactly (c ∷ []))) (TipZ (exactly (b ∷ [])))) (TipZ (exactly (a ∷ [])))
+-- test-choose _ _ _ = refl
 
 blanks' : (n k : ℕ) → n ≥′ k → {xs : Vec A n} → BT n k (const ⊤) xs
 blanks' _        zero   _                       = TipZ tt

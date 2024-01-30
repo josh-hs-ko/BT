@@ -22,13 +22,15 @@ module Nat where
 
   Ind-unary-parametricity : Ind → Set₁
   Ind-unary-parametricity f =
-      (P : ℕ → Set) (Q : ∀ {n} → P n → Set)
+      (P : ℕ → Set)                   (Q : ∀ {n} → P n → Set)
     → (pz : P zero)                  → Q pz
     → (ps : ∀ {n} → P n → P (suc n)) → (∀ {n} {p : P n} → Q p → Q (ps p))
     → (n : ℕ) → Q (f P pz ps n)
 
   ind-parametric : Ind-unary-parametricity ind
   ind-parametric P Q pz qz ps qs = ind (Q ∘ ind P pz ps) qz qs
+  -- ind-parametric P Q pz qz ps qs zero    = qz
+  -- ind-parametric P Q pz qz ps qs (suc n) = qs (ind-parametric P Q pz qz ps qs n)
 
   uniqueness :
       (f : Ind) → Ind-unary-parametricity f
