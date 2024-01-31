@@ -266,7 +266,7 @@ data B a = Tip a || Bin (B a) (B a)
 \end{lstlisting}
 And presumably \lstinline{mapB} and \lstinline{zipBWith} are the usual \lstinline{map} and \lstinline{zipWith} functions for these trees, and \lstinline{L} is the standard data type of lists.
 But how did Richard%
-\Jeremy{We should be more consistent about whether to call him Richard or Bird. Shin: does it work if we say "Richard" when we refer to the person and say Bird (2008) when we refer to the paper?}
+%\Jeremy{We should be more consistent about whether to call him Richard or Bird. Shin: does it work if we say "Richard" when we refer to the person and say Bird (2008) when we refer to the paper?}
 come up with such an incomprehensible function definition?
 He didn't bother to explain it in the paper.
 
@@ -286,8 +286,8 @@ td f g xs  = g (map (td f g) (dc xs))
 The input of \lstinline{td} is a list of \lstinline{a}'s, and the output is a single value of type \lstinline{b}.
 Singleton lists form the base cases, processed by a function \lstinline{f}.
 A non-singleton list is decomposed into shorter lists by \lstinline{dc :: L a -> L (L a)}.
-Each shorter list is then recursively processed by \lstinline{td}, before \lstinline{g} combines the results.%
-\Josh{\lstinline{F} is initially \lstinline{L} and later \lstinline{B}, but this changes the type of \lstinline{g} too (no need for \lstinline{cvt} etc)? Shin: removed \lstinline{F}. I think we still need \lstinline{cvt} after switching to \lstinline{B}.}
+Each shorter list is then recursively processed by \lstinline{td}, before \lstinline{g} combines the results.
+%\Josh{\lstinline{F} is initially \lstinline{L} and later \lstinline{B}, but this changes the type of \lstinline{g} too (no need for \lstinline{cvt} etc)? Shin: removed \lstinline{F}. I think we still need \lstinline{cvt} after switching to \lstinline{B}.}
 \footnote{The setting in \citet{Bird-zippy-tabulations} is more general: \lstinline{L} need not be a list, and \lstinline{dc} returns an \lstinline{F}-structure of lists. We simplified the setting for ease of discussion.}
 
 \begin{figure}[t]
@@ -298,8 +298,8 @@ Each shorter list is then recursively processed by \lstinline{td}, before \lstin
 \end{figure}
 
 In the last ---~and the most difficult~--- example in the paper,
-\lstinline{dc :: L a -> L (L a)}%
-\Josh{Give definition, which is generalised to \lstinline{choose} later? Shin: done.}
+\lstinline{dc :: L a -> L (L a)}
+%\Josh{Give definition, which is generalised to \lstinline{choose} later? Shin: done.}
 computes all the \emph{immediate sublists} of the given list; that is, all the lists with exactly one element missing:
 \begin{lstlisting}
 dc [x,y]  = [[x],[y]]
@@ -318,8 +318,8 @@ To save space we omitted the \lstinline{td}s.}
 \label{fig:sublists-lattice}
 \end{figure}
 
-It is better to proceed bottom-up instead, as depicted in Figure~\ref{fig:sublists-lattice}.%
-\Josh{Four levels are enough? Shin: Done.}
+It is better to proceed bottom-up instead, as depicted in Figure~\ref{fig:sublists-lattice}.
+%\Josh{Four levels are enough? Shin: Done.}
 The $n$th level
 %\Josh{Change to `level' to avoid confusion with `layers of functors' later. Shin: Okay!}
 consists of values of \lstinline{td} at lists of length $n$.
@@ -369,7 +369,8 @@ The function \lstinline{cvt :: L a -> B a} prepares the first level.%
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.8\textwidth]{pics/map_g_cd.pdf}
-\caption{How \lstinline{mapB g . cd} constructs a new level.}
+\caption{How \lstinline{mapB g . cd} constructs a new level.
+Again, \lstinline{ab}, \lstinline{ac}... etc. denote results of \lstinline{td}, not the sublists themselves.}
 \label{fig:map_g_cd}
 \end{figure}
 
@@ -379,11 +380,12 @@ Given input \lstinline{"abcde"}, the function \lstinline{cvt} yields a tree that
 \begin{lstlisting}
 Bin (Bin (Bin (Bin (Tip 'a') (Tip 'b')) (Tip 'c')) (Tip 'd')) (Tip 'e')
 \end{lstlisting}
-Following Richard's convention, I draw a \lstinline{Tip x} as \lstinline{x}, and draw \lstinline{Bin t u} as a dot with \lstinline{t} to its left and \lstinline{u} below, resulting in the tree labelled (1)%
+Following Richard's convention, I draw a \lstinline{Tip x} as \lstinline{x}, and draw \lstinline{Bin t u} as a dot with \lstinline{t} to its left and \lstinline{u} below, resulting in the tree labelled (1)
 in Figure~\ref{fig:map_g_cd}.
 Applying \lstinline{mapB g . cd} to this, I get level $2$, labelled (2) in the figure.
 For a closer look, I apply \lstinline{cd} to level $2$.
 Indeed, with its clever mapping and zipping, \lstinline{cd} managed to bring together precisely the right elements (labelled (2.5) in Figure~\ref{fig:map_g_cd}), so that when we apply \lstinline{mapB g}, we get level $3$.
+\Shin{I added the second sentence in the caption of Figure~\ref{fig:map_g_cd}. I think it's probably necessary because I myself got confused from time to time .}
 
 This still does not give me much intuition for why \lstinline{cd} works.
 Presumably \lstinline{cd} does not do something useful on arbitrary binary trees, only the trees built by \lstinline{cvt} and \lstinline{cd} itself.
@@ -490,7 +492,11 @@ Concretely, I'll use these binomial trees as a data refinement of the lists in t
 _∷ᴮᵀ_ : p xs → BT(C sk k) (p ∘ (x ∷_)) xs → BT(C ssk sk) p (x ∷ xs)
 y ∷ᴮᵀ t = bin (tipS y) t
 \end{code}
-I decide to use the name |retabulate| for the data refinement of \lstinline{cd} \Jeremy{I'd like to think of a better name.}:
+I decide to use the name |retabulate| for the data refinement of \lstinline{cd} \Jeremy{I'd like to think of a better name.}%
+\Shin{Can we give some explanation why this type enforces $(\ast)$?
+The way I understand it is that the input is a table containing all length |k| sublists and they all satisfy |p|, thus matching \lstinline{choose n k};
+the output chooses |sk| elements and, for each of them, chooses all length |k| sublists, and they all satisfy |p|, thus kind of matching the two \lstinline{choose}s. What is the significance of |p| here? And we might want to mention that \lstinline{flatten} is gone.}%
+:
 \begin{code}
 retabulate : (SUPPRESSED(k < n)) → BT(C n k) p xs → BT(C n sk) (BT(C sk k) p) xs
 retabulate {xs =' _ ∷ []     }  (tipZ y)  =  tipS  (tipZ y)
@@ -640,6 +646,7 @@ What |choose| does is not really compute the sublists, which have already been `
 Instead, |choose| merely affirms that there is a table indexed by all the length-|k| sublists of a length-|n| list whenever |k ≤↑ n|; the elements in the table don't matter, and can well be~|⊤|.
 
 So, instead of |choose|, I can use
+\Shin{I find |blank| clearer if we include |xs| as an simplcit argument...}
 \begin{temp}
 \begin{code}
 blank : (n k : ℕ) → k ≤↑ n → BT(C n k) (const ⊤) xs
