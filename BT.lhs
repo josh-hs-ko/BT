@@ -865,62 +865,63 @@ The usual side conditions apply (|n > k| for |retabulate| and |n GEQ k| for |bla
 
 \section{String-Diagrammatic Algorithms}
 
-Now I see that I'm pretty much still writing ordinary functional programs, so there's a better chance that I can port what Richard did with his programs to my setting.
-An important clue left by Richard was \emph{naturality}, a categorical notion which he used a lot in his proofs.
+Now I see that I'm pretty much still writing ordinary functional programs, so there's a better chance that I can transfer what Richard did with his programs to my setting.
+An important clue Richard left was \emph{naturality}, a categorical notion which he used a lot in his proofs.
 In functional programming, naturality usually stems from parametricity:
-All parametric functions (such as |retabulate| and |unTip|) are \emph{natural transformations}.
+All parametrically polymorphic functions (such as |retabulate| and |unTip|) are \emph{natural transformations}.
 Now I know in which categories I should talk about them.
 
-And I know a new weapon that Richard didn't know: \emph{string diagrams}.
-I've seen how dramatically string diagrams simplify proofs about natural transformations (and other stuff too, for which the simplification is even more dramatic actually), so it's probably worthwhile to take a look at the two algorithms from a string-diagrammatic perspective.
+But I have an additional tool that Richard didn't: \emph{string diagrams}.
+I've seen how dramatically string diagrams simplify proofs about natural transformations (and indeed other stuff, for which the simplification can be even more dramatic), so it's probably worthwhile to take a look at the two algorithms from a string-diagrammatic perspective.
 
-But before that, I need to refresh my memory of string diagrams\ldots
+So I had better refresh my memory of string diagrams\ldots
 
 %\todo[inline]{Richard already pointed out that naturality is the key; try string diagrams!}
 
 At a higher abstraction level, what a natural transformation does is transform one functor into another.
 For example, |retabulate| transforms the functor |BT(C n k)| into the composition of functors |BT(C n sk) ∘ BT(C sk k)|, while |unTip| transforms the functor |BT(C n n)| into the identity functor.
-String diagrams reorganise such `type information' in two-dimensional pictures:
-Natural transformations are represented as dots with input wires attached below and output wires above, where the wires represent functors.
-(I learned string diagrams mainly from \citet{Coecke-PQP}, so my string diagrams go upwards from input to output.)
+String diagrams present such `type information' as two-dimensional pictures:
+Natural transformations are represented as dots, with input wires attached below and output wires above, where the wires represent functors.
+(I learned string diagrams mainly from \citet{Coecke-PQP}, so my string diagrams have inputs below and outputs on top.)
 \[ \tikzfig{pics/retabulate-unTip} \]
-The composition of a series of functors is represented as a bunch of wires spread horizontally, and the identity functor is omitted (being the unit of functor composition), so |retabulate| has two output wires and |unTip| has none.
+Functor composition is represented as juxtaposition of wires, and the identity functor is omitted (being the unit of functor composition). So |retabulate| has two output wires, and |unTip| has none.
 
-Any two natural transformations |α : ∀ {a} → F a → G a| and |β : ∀ {a} → G a → H a| can be composed \emph{sequentially} into |β ∘ α : ∀ {a} → F a → H a|, which is drawn on a string diagram as |α|~and~|β| connected by the middle wire with label~|G| (which obscures part of the wire);
-|α|~can also be composed \emph{in parallel} with |α' : ∀ {b} → F' b → G' b| into |α ⊗ α' : ∀ {b} → F (F' b) → G (G' b)|, which is drawn on a string diagram as, well, |α|~and~|α'| in parallel.
+Any two natural transformations |α : ∀ {a} → F a → G a| and |β : ∀ {a} → G a → H a| can be composed \emph{sequentially} into |β ∘ α : ∀ {a} → F a → H a|, which is drawn in a string diagram as |α|~and~|β| connected by the middle wire with label~|G| (obscuring a section of the wire);
+|α|~can also be composed \emph{in parallel} with |α' : ∀ {b} → F' b → G' b| into |α ⊗ α' : ∀ {b} → F (F' b) → G (G' b)|, which is drawn in a string diagram as, well, |α|~and~|α'| in parallel.
 \[ \tikzfig{pics/vertical} \hspace{.15\textwidth} \tikzfig{pics/horizontal} \]
-The two kinds of composition embody the two-dimensional structure of natural transformations:
+The two kinds of composition embody the two-dimensional structure of natural transformations.
 Natural transformations are laid out vertically in the order they are applied.
-Independent of that order/direction/dimension, the functors being transformed have a composite structure, which is intuitively layers of functors that can be transformed individually without affecting other layers --- that is, in parallel.
+Independent of that order/direction/dimension, the functors being transformed also have a composite structure, which is intuitively layers of functors that can be transformed independently of other layers --- that is, in parallel.
 These layers are laid out horizontally.
 
 To see why the two-dimensional layout is helpful, consider two ways of defining |α ⊗ α'|: either |map(sub G) α' ∘ α|, where the outer functor~|F| is transformed to~|G| first, or |α ∘ map(sub F) α'|, where the inner functor~|F'| is transformed to~|G'| first.
 The two definitions are equal (due to the naturality of~|α|), but the equality can be seen more directly with string diagrams:
 \[ \tikzfig{pics/horizontal-definitions} \]
-On the diagrams, |α'|~is applied to the inner/right wire because |map α'| means skipping over the outer/left functor and transforming the inner functor using~|α'|.
+The |map| means skipping over the outer/left functor and transforming the inner functor; so in the diagrams, |α'|~is applied to the inner/right wire.
 (The dashed lines are added to emphasise that both diagrams are constructed as the sequential composition of two transformations.)
-By laying out layers of functors in a separate dimension, it's much easier to see which layers are being transformed, and determine whether two sequentially composed transformations are in fact applied in parallel, so that their order of application can be swapped.
+By placing layers of functors in a separate dimension, it's much easier to see which layers are being transformed, and determine whether two sequentially composed transformations are in fact applied in parallel, so that their order of application can be swapped.
 This is abstracted as a diagrammatic reasoning principle:
-Dots can be moved upwards or downwards, possibly changing their vertical positions relative to other dots (while stretching or shrinking the wires, which can be thought of as elastic strings), and the meaning of a diagram will remain the same (extensionally).
+Dots can be moved upwards or downwards, possibly changing their vertical positions relative to other dots (while stretching or shrinking the wires, which can be thought of as elastic strings), and the meaning of a diagram will remain extensionally the same.
 
 There are many functions that are not natural transformations, but they can be lifted to natural transformations to fit into string diagrams:
 A function |f : a → b| can be lifted to have the type |∀ {c} → (const a) c → (const b) c| (where |c|~can range over any non-empty domain) and become a natural transformation from |const a| to |const b|.
 I prefer to leave the lifting implicit and just write |a|~and~|b| for wire labels, since it's usually clear that |a|~and~|b| are not functors and need to be lifted.
-For some concrete examples, here are the types of the rest of the functions used in the two algorithms as string diagrams:
+For some concrete examples, here as string diagrams are the types of the other functions |g|, |e|, |blanks(C n k)| used in the two algorithms:
 \[ \tikzfig{pics/g-e-blanks} \]
 (Here |⊤|~abbreviates the type family |const ⊤|, which is only an object in the categories of families, and needs to be lifted to |const (const ⊤)| to be a functor for those categories.)%
 \todo{Faces are categories?}
-With the lifting, the usual naturality can also be reformulated diagrammatically:
+With this lifting, the usual naturality can also be reformulated diagrammatically:
 For any |f : a → b|,
 \[ |map(sub G) f ∘ α = α ∘ map(sub F) f| \hspace{.15\textwidth} \tikzfig{pics/naturality} \]
-The reformulation makes it intuitive that the naturality of~|α| is about |α|~transforming only the outer functor, independently of whatever happening inside.
+The reformulation makes it intuitively clear that the naturality of~|α| is about |α|~transforming only the outer functor, independently of whatever is happening inside.
 
 %\todo[inline]{Recap of string diagrams for 2-categories, i.e., layered type structure (composition of functors); layers may be transformed independently of others, and this intuition is captured by the definition of natural transformations.
 %The two sides of a traditional naturality equation look rather different, whereas in a diagrammatic equation the two sides are `the same picture', allowing us to change perspectives effortlessly.}
 
 That's enough abstract nonsense --- time to get back to the two algorithms.
-I'm not confident enough to work with the recursive definitions straight away, so I take the special case |td s e g 3| of the top-down computation and unfolds it into a deeply nested expression.
+I'm not confident enough to work with the recursive definitions straight away, so I take the special case |td s e g 3| of the top-down computation and unfold it into a deeply nested expression.
 Translating that into a string diagram is basically writing down all the intermediate type information and laying out the nested type structures horizontally (whereas function composition is laid out vertically).
+\Jeremy{``Recall that |s| here is a type family, an object in this category, so is drawn as a wire label, whereas |e| and |g| are natural transformations, so drawn as dots.'' Worth saying?}
 
 \noindent
 \begin{minipage}{.55\textwidth}
@@ -938,7 +939,7 @@ td s e g 3 =  g ∘
 \[ \tikzfig{pics/td} \]
 \end{minipage}
 
-All the |mapBT|'s are gone in the diagram, because I can directly apply a transformation to the intended layers/wires, rather than count awkwardly how many outer layers I want to skip using |mapBT|, one layer at a time.
+All the |mapBT|s are gone in the diagram, because I can directly apply a transformation to the intended layers/wires, rather than count awkwardly how many outer layers I have to skip using |mapBT|, one layer at a time.
 Functoriality (|mapBT (f' ∘ f) = mapBT f' ∘ mapBT f|) is also transparent in the diagram, so it's slightly easier to see that |td| has two phases (between which I draw a dashed line):
 The first phase constructs deeply nested blank tables, and the second phase fills and demolishes the tables inside out.
 
@@ -946,15 +947,15 @@ It doesn't seem that the string diagram helps much though.
 Functoriality is already somewhat transparent in the traditional expression (thanks to the infix notation of function composition), so I don't really need the string diagram to see that |td| has two phases.
 Moreover, there's nothing I can meaningfully move in the diagram --- all the transformations here are lifted after all.
 
-Hm, maybe I'll have more luck with the bottom-up computation, which has `real' natural transformations?
+Hm. Maybe I'll have more luck with the bottom-up computation, which has `real' natural transformations?
 I go on to expand |bu s e g 3|.
 The loop in the expression unfolds into a sequence of functions, alternating between table construction using |retabulate| and demolition using |mapBT g|.
 
 `A sequence\ldots'
 I mutter.
-I don't expect anything else from unfolding a loop, but the sequential structure is so different from the deeply nested structure of |td|.
+I didn't expect anything else from unfolding a loop. But the sequential structure is so different from the deeply nested structure of |td|.
 
-And then, something unexpected yet familiar appears in the translated diagram.
+And then, something unexpected yet familiar appears in the translated diagram:
 
 \noindent
 \begin{minipage}{.45\textwidth}
@@ -978,10 +979,11 @@ bu s e g 3 =  unTip ∘
 \[ \tikzfig{pics/bu} \]
 \end{minipage}
 
-There are also two phases for table construction and demolition, and the demolition phase is \emph{exactly the same} as the one in |td|!
+There are also two phases for table construction and demolition, and the |g|s and |e| in the demolition phase are \emph{exactly the same} as in |td|!
 
 The string diagram is truly helpful this time.
-Now I see that, as Richard hinted, I could rewrite the traditional expression using the naturality of |unTip| and |retabulate| to push |g|~and~|e| to the left of the sequence and separate the two phases:
+Now I see, as Richard hinted, that I could rewrite the traditional expression using the naturality of |unTip| and |retabulate| to push |g|~and~|e| to the left of the sequence and separate the two phases:
+%if False
 \begin{code}
    bu s e g 3
 =  {-\;definition -}
@@ -996,8 +998,31 @@ Now I see that, as Richard hinted, I could rewrite the traditional expression us
    g ∘ mapBT (g ∘ mapBT (g ∘ mapBT e)) ∘
    unTip ∘ retabulate ∘ retabulate ∘ retabulate ∘ blanks(C 3 0)
 \end{code}
-But on the string diagram, all those rewritings amount to nothing more than gently pulling the two phases apart from each other (making the dashed line horizontal).
-In fact I don't even bother to pull, because on this diagram I can already see both the sequence (the dots appearing one by one vertically) and the result of rewriting the sequence using naturality at the same time.
+%else
+\begin{code}
+   bu s e g 3
+=  {-\;definition -}
+   unTip ∘ mapBT g ∘ retabulate ∘ mapBT g ∘ retabulate ∘ mapBT g ∘ retabulate ∘
+   mapBT e ∘ blanks(C 3 0)
+=  {-\;naturality of |unTip| -}
+   g ∘ unTip ∘ retabulate ∘ mapBT g ∘ retabulate ∘ mapBT g ∘ retabulate ∘
+   mapBT e ∘ blanks(C 3 0)
+=  {-\;naturality of |retabulate| -}
+   g ∘ unTip ∘ mapBT (mapBT g) ∘ retabulate ∘ retabulate ∘ mapBT g ∘ retabulate ∘
+   mapBT e ∘ blanks(C 3 0)
+=  {-\;naturality of |unTip| again -}
+   g ∘ mapBT g ∘ unTip ∘ retabulate ∘ retabulate ∘ mapBT g ∘ retabulate ∘
+   mapBT e ∘ blanks(C 3 0)
+=  {-\;similarly -}
+   g ∘ mapBT g ∘ mapBT (mapBT g) ∘ mapBT (mapBT (mapBT e)) ∘ 
+   unTip ∘ retabulate ∘ retabulate ∘ retabulate ∘ blanks(C 3 0)
+=  {-\;functoriality -}
+   g ∘ mapBT (g ∘ mapBT (g ∘ mapBT e)) ∘
+   unTip ∘ retabulate ∘ retabulate ∘ retabulate ∘ blanks(C 3 0)
+\end{code}
+%endif
+But in the string diagram, all those rewritings amount to nothing more than gently pulling the two phases apart, eventually making the dashed line horizontal.
+In fact I don't even bother to pull, because on this diagram I can already see simultaneously both the sequence (the dots appearing one by one vertically) and the result of rewriting the sequence using naturality.
 
 %\todo[inline]{Specialised cases (with a concrete size) only; production and consumption parts, which can be separated by naturality.}
 
@@ -1011,12 +1036,12 @@ Maybe what I need is an equation about |blanks| and |retabulate| that can help m
 The equation flashes through my mind.
 Of course it has to be this equation --- I used it as a specification for \lstinline{cd}, the Haskell predecessor of |retabulate|.
 How else would I introduce |retabulate| into the picture?
-But first let me update this to a dependently typed string diagram.%
+But first let me update this for my dependently typed string diagrams:%
 \todo{No need for \lstinline{flatten}}
 
 \[ \tikzfig{pics/rotation} \]
 
-That's a tree rotation all right.
+That's a tree rotation all right!
 So I should do an induction that uses this equation to rotate the right-leaning tree in |td| and obtain the left-leaning tree in |bu|.
 And then I'll need to prove the equation, meaning that I'll need to go through the definitions of |retabulate| and |blanks|\ldots
 Oh hell, that's a lot of work.
@@ -1027,27 +1052,29 @@ Oh hell, that's a lot of work.
 %(Looks like co-associativity; maybe |BT| is some kind of graded comonad?)
 %The rotation proof is not difficult but not trivial either, and the |retabulate|-|blanks| equation still needs to be established by delving into the definitions\ldots}
 
-But do I need to?
+But wait a minute~--- do I really need to go through all this?
 
 The three functors at the top of the diagrams catch my attention.
 In Agda, they expand to the type |BT(C n sk) (BT(C sk k) (const ⊤)) xs|.
-An inhabitant of this type is a table of \emph{blank} tables, and the structures of all the tables are completely determined by the indices --- the type has a unique inhabitant!
+An inhabitant of this type is a table of \emph{blank} tables, so there is no choice of table entries;
+and moreover the structures of all the tables are completely determined by the indices\ldots the type has a unique inhabitant!
 So the equation is actually trivial to prove, because, forced by the type, the two sides have to construct the same table, and I don't need to look into the definitions of |retabulate| and |blanks|!
 
 Relieved, I start to work on the proof.
-The precise notion I need here is (mere) propositions.
+The precise notion I need here is (mere) propositions:
 \begin{code}
 isProp : Set → Set
 isProp a = {x y : a} → x ≡ y
 \end{code}
-The type |BT(C n k) p xs| is propositional if the payload~|p| is pointwise propositional --- this is easy to prove by a straightforward double induction.
+The type |BT(C n k) p xs| is propositional if the payload~|p| is pointwise propositional --- this is easy to prove by a straightforward double induction:
 \begin{code}
 BT-isProp : (∀ {ys} → isProp (p ys)) → isProp (BT(C n k) p xs)
 \end{code}
-And then the |rotation| equation can be proved trivially by invoking |BT-isProp| twice.
+And then the |rotation| equation can be proved trivially by invoking |BT-isProp| twice:
+\Jeremy{alternative line break--- ok?}
 \begin{code}
-rotation  :
-  retabulate (SUPPRESSED n>k) (blanks(C n k) (SUPPRESSED nGEQk) tt) ≡ mapBT (blanks(C sk k) (SUPPRESSED(skGEQk))) (blanks(C n sk) (SUPPRESSED nGEQsk) tt)
+rotation  :    retabulate (SUPPRESSED n>k) (blanks(C n k) (SUPPRESSED nGEQk) tt) 
+            ≡  mapBT (blanks(C sk k) (SUPPRESSED(skGEQk))) (blanks(C n sk) (SUPPRESSED nGEQsk) tt)
 rotation = BT-isProp (BT-isProp refl)
 \end{code}
 All the inequality arguments are universally quantified, but they don't make the proof any more complex, because the proof doesn't look into any of the function definitions.
@@ -1072,7 +1099,7 @@ If I want to stick to string diagrams, I'll need to translate the algorithms to 
 Moreover, the |BT-isProp| reasoning is formally an induction (on the length of the input list), which needs to be worked out.
 And actually, compared with a diagrammatic but unformalised proof, I prefer a full Agda formalisation.
 That means I'll need to spell out a lot of detail, including naturality rewriting.
-Whining, I finish the entire proof in Agda, but as usual, in the end it's satisfying to see everything checked.
+Whining, I finish the entire proof in Agda, but as usual, in the end there's a dopamine hit from seeing everything checked.
 
 %\todo[inline]{Sketch inductive diagrammatic definitions and Agda formalisation}
 
@@ -1088,11 +1115,11 @@ More specifically, why is it good to keep \emph{two} layers of tables and not mo
 
 When there are multiple layers of tables of type |BT(C n k)| with |n > k|, meaning that the input list is split into proper sub-lists multiple times, all the final sub-lists will appear (as indices in the element types) in the entire nested table multiple times --- that is, overlapping sub-problems will appear.
 Therefore, when I use~|g| to fill in a nested table, I'm invoking~|g| to compute solutions for overlapping sub-problems repetitively, which is what I want to avoid.
-More precisely, `using~|g| to fill in a nested table' means applying~|g| under at least two layers, for example |mapBT (mapBT g) : BT(C 3 2) (BT(C 2 1) (BT(C 1 0) s)) ⇉ BT(C 3 2) (BT(C 2 1) s)|, where the result is at least two layers of tables, so there should be at least \emph{three} layers of tables (to which |mapBT (mapBT g)| is applied) for the solving of overlapping sub-problems to happen.
+More precisely, `using~|g| to fill in a nested table' means applying~|g| under at least two layers, for example |mapBT (mapBT g) : BT(C 3 2) (BT(C 2 1) (BT(C 1 0) s)) ⇉ BT(C 3 2) (BT(C 2 1) s)|, where the result is at least two layers of tables, so there should be at least \emph{three} layers of tables (to which |mapBT (mapBT g)| is applied) for overlapping sub-problems to occur.
 The bottom-up algorithm never gets to three layers of tables, and therefore avoids solving overlapping sub-problems.
 
 That reasoning doesn't sound too bad, although it's clear that there's much more to be done.
-The whole reasoning is still too informal and lacks detail.
+The whole argument is still too informal and lacks detail.
 It's easy to poke holes in the reasoning --- for example, if the input list has duplicate elements, then the bottom-up algorithm won't be able to avoid solving overlapping sub-problems entirely.
 To fix this, the algorithm will need a redesign.
 And of course it's tempting to explore more problem-splitting strategies other than immediate sub-lists, maybe eventually arriving at something general about dynamic programming.
