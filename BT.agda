@@ -9,6 +9,7 @@ open import Data.Product
 open import Data.Nat
 open import Data.Nat.Properties
 open import Data.Vec
+open import Data.Char using (Char)
 open import Relation.Binary.PropositionalEquality
 
 variable
@@ -45,33 +46,33 @@ infix 2 ∀[_]_⇉_
 -- Binomial trees
 
 data BT : (n k : ℕ) → Fam (Vec A k) → Fam (Vec A n) where
-  TipZ : P []                        → BT      n   0      P xs
-  TipS : P xs                        → BT (1 + n) (1 + n) P xs
-  Bin  : BT n (1 + k) P           xs
+  tipZ : P []                               → BT      n   0      P xs
+  tipS : P xs                               → BT (1 + k) (1 + k) P xs
+  bin  : BT n (1 + k)        P           xs
        → BT n      k (λ ys → P (x ∷ ys)) xs → BT (1 + n) (1 + k) P (x ∷ xs)
 
--- testBT : (a b c d : A) → BT 4 2 P (a ∷ b ∷ c ∷ d ∷ [])
--- testBT a b c d =
---   Bin (Bin (TipS      {!   !})
---            (Bin (TipS {!   !})
---                 (TipZ {!   !})))
---       (Bin (Bin (TipS {!   !})
---                 (TipZ {!   !}))
---            (TipZ      {!   !}))
+-- testBT : BT 4 2 P ('a' ∷ 'b' ∷ 'c' ∷ 'd' ∷ [])
+-- testBT =
+--   bin (bin (tipS {!   !})
+--            (bin (tipS {!   !})
+--                 (tipZ {!   !})))
+--       (bin (bin (tipS {!   !})
+--                 (tipZ {!   !}))
+--            (tipZ {!   !}))
 
--- testBT² : (a b c : A) → BT 3 2 (BT 2 1 P) (a ∷ b ∷ c ∷ [])
--- testBT² a b c =
---   Bin (TipS      (Bin (TipS {!   !})
---                       (TipZ {!   !})))
---       (Bin (TipS (Bin (TipS {!   !})
---                       (TipZ {!   !})))
---            (TipZ (Bin (TipS {!   !})
---                       (TipZ {!   !}))))
+-- testBT² : BT 3 2 (BT 2 1 P) ('a' ∷ 'b' ∷ 'c' ∷ [])
+-- testBT² =
+--   bin (tipS (bin (tipS {!   !})
+--                  (tipZ {!   !})))
+--       (bin (tipS (bin (tipS {!   !})
+--                       (tipZ {!   !})))
+--            (tipZ (bin (tipS {!   !})
+--                       (tipZ {!   !}))))
 
 bounded : BT n k P xs → n ≥ k
-bounded (TipZ _)  = z≤n
-bounded (TipS _)  = ≤-refl
-bounded (Bin _ u) = s≤s (bounded u)
+bounded (tipZ _)  = z≤n
+bounded (tipS _)  = ≤-refl
+bounded (bin _ u) = s≤s (bounded u)
 
 unbounded : BT n (suc n) P xs → ⊥
 unbounded t = ≤⇒≯ (bounded t) ≤-refl
@@ -83,50 +84,50 @@ IsProp' : Set → Set
 IsProp' A = (x y : A) → x ≡ y
 
 BT-isProp' : (∀ {ys} → IsProp (P ys)) → IsProp' (BT n k P xs)
-BT-isProp' P-isProp (TipZ p)  (TipZ p')   = cong TipZ P-isProp
-BT-isProp' P-isProp (TipS p)  (TipS p')   = cong TipS P-isProp
-BT-isProp' P-isProp (Bin t u) (Bin t' u') = cong₂ Bin (BT-isProp' P-isProp t t')
+BT-isProp' P-isProp (tipZ p)  (tipZ p')   = cong tipZ P-isProp
+BT-isProp' P-isProp (tipS p)  (tipS p')   = cong tipS P-isProp
+BT-isProp' P-isProp (bin t u) (bin t' u') = cong₂ bin (BT-isProp' P-isProp t t')
                                                       (BT-isProp' P-isProp u u')
-BT-isProp' P-isProp (TipS p)  (Bin t' _)  = ⊥-elim (unbounded t')
-BT-isProp' P-isProp (Bin t u) (TipS p')   = ⊥-elim (unbounded t)
+BT-isProp' P-isProp (tipS p)  (bin t' _)  = ⊥-elim (unbounded t')
+BT-isProp' P-isProp (bin t u) (tipS p')   = ⊥-elim (unbounded t)
 
 BT-isProp : (∀ {ys} → IsProp (P ys)) → IsProp (BT n k P xs)
 BT-isProp P-isProp = BT-isProp' P-isProp _ _
 
 -- mapBT : (∀ {xs} → P xs → Q xs) → ∀ {xs} → BT n k P xs → BT n k Q xs
 mapBT : (P ⇉ Q) → BT n k P ⇉ BT n k Q
-mapBT f (TipZ p)  = TipZ (f p)
-mapBT f (TipS p)  = TipS (f p)
-mapBT f (Bin t u) = Bin (mapBT f t) (mapBT f u)
+mapBT f (tipZ p)  = tipZ (f p)
+mapBT f (tipS p)  = tipS (f p)
+mapBT f (bin t u) = bin (mapBT f t) (mapBT f u)
 
 cong-mapBT : {f g : P ⇉ Q} → (∀ {ys} (p : P ys) → f p ≡ g p)
            → (t : BT n k P xs) → mapBT f t ≡ mapBT g t
-cong-mapBT f≗g (TipZ p)  = cong TipZ (f≗g p)
-cong-mapBT f≗g (TipS p)  = cong TipS (f≗g p)
-cong-mapBT f≗g (Bin t u) = cong₂ Bin (cong-mapBT f≗g t) (cong-mapBT f≗g u)
+cong-mapBT f≗g (tipZ p)  = cong tipZ (f≗g p)
+cong-mapBT f≗g (tipS p)  = cong tipS (f≗g p)
+cong-mapBT f≗g (bin t u) = cong₂ bin (cong-mapBT f≗g t) (cong-mapBT f≗g u)
 
 mapBT-∘ : (f : Q ⇉ R) (g : P ⇉ Q)
         → (t : BT n k P xs) → mapBT (f ∘ g) $ t ≡ mapBT f ∘ mapBT g $ t
-mapBT-∘ f g (TipZ p)  = refl
-mapBT-∘ f g (TipS p)  = refl
-mapBT-∘ f g (Bin t u) = cong₂ Bin (mapBT-∘ f g t) (mapBT-∘ f g u)
+mapBT-∘ f g (tipZ p)  = refl
+mapBT-∘ f g (tipS p)  = refl
+mapBT-∘ f g (bin t u) = cong₂ bin (mapBT-∘ f g t) (mapBT-∘ f g u)
 
 unTip : BT n n P xs → P xs
-unTip           (TipS p)  = p
-unTip {xs = []} (TipZ p)  = p
-unTip           (Bin t _) = ⊥-elim (unbounded t)
+unTip           (tipS p)  = p
+unTip {xs = []} (tipZ p)  = p
+unTip           (bin t _) = ⊥-elim (unbounded t)
 
 unTip-natural : (h : P ⇉ Q) {xs : Vec A n} (t : BT n n P xs)
               → h ∘ unTip $ t ≡ unTip ∘ mapBT h $ t
-unTip-natural h      (TipS p)  = refl
-unTip-natural h {[]} (TipZ p)  = refl
-unTip-natural h      (Bin t _) = ⊥-elim (unbounded t)
+unTip-natural h      (tipS p)  = refl
+unTip-natural h {[]} (tipZ p)  = refl
+unTip-natural h      (bin t _) = ⊥-elim (unbounded t)
 
 zipBTWith : (P ⇉ Q ⇒ R) → (BT n k P ⇉ BT n k Q ⇒ BT n k R)
-zipBTWith f (TipZ p)   (TipZ q)   = TipZ (f p q)
-zipBTWith f (TipS p)   u          = TipS (f p (unTip u))
-zipBTWith f (Bin t _ ) (TipS _)   = ⊥-elim (unbounded t)
-zipBTWith f (Bin t t') (Bin u u') = Bin (zipBTWith f t u) (zipBTWith f t' u')
+zipBTWith f (tipZ p)   (tipZ q)   = tipZ (f p q)
+zipBTWith f (tipS p)   u          = tipS (f p (unTip u))
+zipBTWith f (bin t _ ) (tipS _)   = ⊥-elim (unbounded t)
+zipBTWith f (bin t t') (bin u u') = bin (zipBTWith f t u) (zipBTWith f t' u')
 
 zipBTWith-natural :
     (p : P ⇉ P') (q : Q ⇉ Q') (r : R ⇉ R')
@@ -134,10 +135,10 @@ zipBTWith-natural :
   → ({xs : Vec A k} {x : P xs} {y : Q xs} → r (f x y) ≡ f' (p x) (q y))
   →  {xs : Vec A n} (t : BT n k P xs) (u : BT n k Q xs)
   → mapBT r (zipBTWith f t u) ≡ zipBTWith f' (mapBT p t) (mapBT q u)
-zipBTWith-natural p q r f f' f∼f' (TipZ x)   (TipZ y)   = cong TipZ f∼f'
-zipBTWith-natural p q r f f' f∼f' (TipS x)   u          = cong TipS (trans f∼f' (cong (f' (p x)) (unTip-natural q u)))
-zipBTWith-natural p q r f f' f∼f' (Bin t _)  (TipS _)   = ⊥-elim (unbounded t)
-zipBTWith-natural p q r f f' f∼f' (Bin t t') (Bin u u') = cong₂ Bin (zipBTWith-natural p q r f f' f∼f' t u) (zipBTWith-natural p q r f f' f∼f' t' u')
+zipBTWith-natural p q r f f' f∼f' (tipZ x)   (tipZ y)   = cong tipZ f∼f'
+zipBTWith-natural p q r f f' f∼f' (tipS x)   u          = cong tipS (trans f∼f' (cong (f' (p x)) (unTip-natural q u)))
+zipBTWith-natural p q r f f' f∼f' (bin t _)  (tipS _)   = ⊥-elim (unbounded t)
+zipBTWith-natural p q r f f' f∼f' (bin t t') (bin u u') = cong₂ bin (zipBTWith-natural p q r f f' f∼f' t u) (zipBTWith-natural p q r f f' f∼f' t' u')
 
 data Exactly : A → Set where
   exactly : (x : A) → Exactly x
@@ -150,9 +151,9 @@ incr  ≤′-refl    = ≤′-step ≤′-refl
 incr (≤′-step d) = ≤′-step (incr d)
 
 choose : (n k : ℕ) → k ≤′ n → (xs : Vec A n) → BT n k Exactly xs
-choose _        zero   _               xs       = TipZ (exactly [])
-choose (suc k) (suc k)  ≤′-refl        xs       = TipS (exactly xs)
-choose (suc n) (suc k) (≤′-step n≥1+k) (x ∷ xs) = Bin (choose n (suc k) n≥1+k xs) (mapBT (mapExactly (x ∷_)) (choose n k n≥k xs))
+choose _        zero   _               xs       = tipZ (exactly [])
+choose (suc k) (suc k)  ≤′-refl        xs       = tipS (exactly xs)
+choose (suc n) (suc k) (≤′-step n≥1+k) (x ∷ xs) = bin (choose n (suc k) n≥1+k xs) (mapBT (mapExactly (x ∷_)) (choose n k n≥k xs))
   where n≥k = incr n≥1+k
 
 toBTExactly : BT n k (const ⊤) xs → BT n k Exactly xs
@@ -160,13 +161,13 @@ toBTExactly = mapBT (λ {ys} _ → exactly ys)
 
 -- test-choose : (a b c : A)
 --             → choose 3 1 (≤′-step (≤′-step <′-base)) (a ∷ b ∷ c ∷ [])
---             ≡ Bin (Bin (TipS (exactly (c ∷ []))) (TipZ (exactly (b ∷ [])))) (TipZ (exactly (a ∷ [])))
+--             ≡ bin (bin (tipS (exactly (c ∷ []))) (tipZ (exactly (b ∷ [])))) (tipZ (exactly (a ∷ [])))
 -- test-choose _ _ _ = refl
 
 blanks' : (n k : ℕ) → n ≥′ k → {xs : Vec A n} → BT n k (const ⊤) xs
-blanks' _        zero   _                       = TipZ tt
-blanks' (suc k) (suc k)  ≤′-refl                = TipS tt
-blanks' (suc n) (suc k) (≤′-step n≥1+k) {_ ∷ _} = Bin (blanks' n (suc k) n≥1+k) (blanks' n k n≥k)
+blanks' _        zero   _                       = tipZ tt
+blanks' (suc k) (suc k)  ≤′-refl                = tipS tt
+blanks' (suc n) (suc k) (≤′-step n≥1+k) {_ ∷ _} = bin (blanks' n (suc k) n≥1+k) (blanks' n k n≥k)
   where n≥k = ≤′-trans (≤′-step ≤′-refl) n≥1+k
 
 blanks : (n k : ℕ) → n ≥′ k → ∀[ Vec A n ] const ⊤ ⇉ BT n k (const ⊤)
@@ -180,26 +181,26 @@ blanks n k n≥k = const (blanks' n k n≥k)
 ≤-isProp = ≤-isProp' _ _
 
 _∷ᴮᵀ_ : P xs → BT (1 + k) k (P ∘ (x ∷_)) xs → BT (2 + k) (1 + k) P (x ∷ xs)
-p ∷ᴮᵀ t = Bin (TipS p) t
+p ∷ᴮᵀ t = bin (tipS p) t
 
 retabulate : n > k → BT n k P ⇉ BT n (suc k) (BT (suc k) k P)
-retabulate 1+n>1+n       (TipS p)                       = ⊥-elim (<-irrefl refl 1+n>1+n)
-retabulate _ {_ ∷ []   } (TipZ p)                       = TipS (TipZ p)
-retabulate _ {_ ∷ _ ∷ _} (TipZ p)                       = Bin (retabulate 1+n>0 (TipZ p)) (TipZ (TipZ p)) where 1+n>0 = s≤s z≤n
-retabulate _             (Bin t@(Bin t' _)   (TipZ q))  = Bin (retabulate 1+n>1 t) (mapBT (_∷ᴮᵀ (TipZ q)) t) where 1+n>1 = s≤s (bounded t')
-retabulate _             (Bin t@(Bin _  _)   (TipS q))  = ⊥-elim (unbounded t)
-retabulate _             (Bin   (TipS p)   u)           = TipS (p ∷ᴮᵀ u)
-retabulate (s≤s 1+n>1+k) (Bin t@(Bin t' _) u@(Bin _ _)) = Bin (retabulate 1+n>2+k t) (zipBTWith _∷ᴮᵀ_ t (retabulate 1+n>1+k u)) where 1+n>2+k = s≤s (bounded t')
+retabulate 1+n>1+n       (tipS p)                       = ⊥-elim (<-irrefl refl 1+n>1+n)
+retabulate _ {_ ∷ []   } (tipZ p)                       = tipS (tipZ p)
+retabulate _ {_ ∷ _ ∷ _} (tipZ p)                       = bin (retabulate 1+n>0 (tipZ p)) (tipZ (tipZ p)) where 1+n>0 = s≤s z≤n
+retabulate _             (bin t@(bin t' _)   (tipZ q))  = bin (retabulate 1+n>1 t) (mapBT (_∷ᴮᵀ (tipZ q)) t) where 1+n>1 = s≤s (bounded t')
+retabulate _             (bin t@(bin _  _)   (tipS q))  = ⊥-elim (unbounded t)
+retabulate _             (bin   (tipS p)   u)           = tipS (p ∷ᴮᵀ u)
+retabulate (s≤s 1+n>1+k) (bin t@(bin t' _) u@(bin _ _)) = bin (retabulate 1+n>2+k t) (zipBTWith _∷ᴮᵀ_ t (retabulate 1+n>1+k u)) where 1+n>2+k = s≤s (bounded t')
 
 retabulate-natural : (n>k : n > k) {xs : Vec A n} (h : P ⇉ Q) (t : BT n k P xs)
                    → mapBT (mapBT h) ∘ retabulate n>k $ t ≡ retabulate n>k ∘ mapBT h $ t
-retabulate-natural 1+n>1+n       h (TipS p)                       = ⊥-elim (<-irrefl refl 1+n>1+n)
-retabulate-natural _ {_ ∷ []   } h (TipZ p)                       = refl
-retabulate-natural _ {_ ∷ _ ∷ _} h (TipZ p)                       = cong₂ Bin (retabulate-natural 1+n>0 h (TipZ p)) refl where 1+n>0 = s≤s z≤n
-retabulate-natural _             h (Bin   (TipS p)   u)           = refl
-retabulate-natural _             h (Bin t@(Bin t' _)   (TipZ q))  = cong₂ Bin (trans (retabulate-natural 1+n>1 h t) (cong (λ ineq → retabulate ineq (mapBT h t)) ≤-isProp)) (trans (sym (mapBT-∘ (mapBT h) (λ p → Bin (TipS p) (TipZ q)) t)) (mapBT-∘ (λ p → Bin (TipS p) (TipZ (h q))) h t)) where 1+n>1 = s≤s (bounded t')
-retabulate-natural _             h (Bin t@(Bin _  _)   (TipS q))  = ⊥-elim (unbounded t)
-retabulate-natural (s≤s 1+n>1+k) h (Bin t@(Bin t' _) u@(Bin _ _)) = cong₂ Bin (trans (retabulate-natural 1+n>2+k h t) (cong (λ ineq → retabulate ineq (mapBT h t)) ≤-isProp)) (trans (zipBTWith-natural h (mapBT h) (mapBT h) (λ p → Bin (TipS p)) (λ p → Bin (TipS p)) refl t (retabulate 1+n>1+k u)) (cong (zipBTWith (λ p → Bin (TipS p)) (mapBT h t)) (retabulate-natural 1+n>1+k h u))) where 1+n>2+k = s≤s (bounded t')
+retabulate-natural 1+n>1+n       h (tipS p)                       = ⊥-elim (<-irrefl refl 1+n>1+n)
+retabulate-natural _ {_ ∷ []   } h (tipZ p)                       = refl
+retabulate-natural _ {_ ∷ _ ∷ _} h (tipZ p)                       = cong₂ bin (retabulate-natural 1+n>0 h (tipZ p)) refl where 1+n>0 = s≤s z≤n
+retabulate-natural _             h (bin   (tipS p)   u)           = refl
+retabulate-natural _             h (bin t@(bin t' _)   (tipZ q))  = cong₂ bin (trans (retabulate-natural 1+n>1 h t) (cong (λ ineq → retabulate ineq (mapBT h t)) ≤-isProp)) (trans (sym (mapBT-∘ (mapBT h) (λ p → bin (tipS p) (tipZ q)) t)) (mapBT-∘ (λ p → bin (tipS p) (tipZ (h q))) h t)) where 1+n>1 = s≤s (bounded t')
+retabulate-natural _             h (bin t@(bin _  _)   (tipS q))  = ⊥-elim (unbounded t)
+retabulate-natural (s≤s 1+n>1+k) h (bin t@(bin t' _) u@(bin _ _)) = cong₂ bin (trans (retabulate-natural 1+n>2+k h t) (cong (λ ineq → retabulate ineq (mapBT h t)) ≤-isProp)) (trans (zipBTWith-natural h (mapBT h) (mapBT h) (λ p → bin (tipS p)) (λ p → bin (tipS p)) refl t (retabulate 1+n>1+k u)) (cong (zipBTWith (λ p → bin (tipS p)) (mapBT h t)) (retabulate-natural 1+n>1+k h u))) where 1+n>2+k = s≤s (bounded t')
 
 module Algorithms
   {A : Set} (S : {k : ℕ} → Fam (Vec A k))
@@ -217,7 +218,7 @@ module Algorithms
 
   bu : (n : ℕ) → ∀[ Vec A n ] const ⊤ ⇉ S
   bu n = unTip ∘ bu-loop (≤⇒≤‴ z≤n) ∘ mapBT e ∘ blanks n 0 (≤⇒≤′ z≤n)
-  -- bu _ = unTip (bu-loop (≤⇒≤‴ z≤n) (TipZ e))
+  -- bu n = unTip ∘ bu-loop (≤⇒≤‴ z≤n) ∘ tipZ ∘ e
 
 
 --------
@@ -435,8 +436,6 @@ module Consumption-and-Correctness
 
 module Checks where
 
-  pattern 1+ n = suc n
-
   ImmediateSublistInduction : Set₁
   ImmediateSublistInduction =
     {a : Set} (s : ∀ {k} → Vec a k → Set)
@@ -444,8 +443,8 @@ module Checks where
     (n : ℕ) {xs : Vec a n} → ⊤ → s xs
 
   td : ImmediateSublistInduction
-  td s e g  0     = e
-  td s e g (1+ n) = g ∘ mapBT (td s e g n) ∘ blanks (1 + n) n (≤′-step ≤′-refl)
+  td s e g  zero   = e
+  td s e g (suc n) = g ∘ mapBT (td s e g n) ∘ blanks (1 + n) n (≤′-step ≤′-refl)
 
   bu : ImmediateSublistInduction
   bu s e g n = unTip ∘ loop 0 (≤⇒≤‴ z≤n) ∘ mapBT e ∘ blanks n 0 (≤⇒≤′ z≤n)
@@ -459,3 +458,24 @@ module Checks where
     → retabulate n>k (blanks n k n≥k {xs} tt)
     ≡ mapBT (blanks (1 + k) k 1+k≥k) (blanks n (1 + k) n≥1+k tt)
   retabulate-blanks = BT-isProp (BT-isProp refl)
+
+  variable h : Vec _ _ → B
+
+  data B' : (n k : ℕ) (B : Set) → (Vec A k → B) → Vec A n → Set where
+    tipZ : (y : B) → y ≡ h []                    → B' n        0      B h xs
+    tipS : (y : B) → y ≡ h xs                    → B' (1 + k) (1 + k) B h xs
+    bin  : B' n (1 + k) B         h           xs
+         → B' n      k  B (λ zs → h (x ∷ zs)) xs → B' (1 + n) (1 + k) B h (x ∷ xs)
+
+  -- testB' : {h : Vec Char 2 → B} → B' 4 2 B h ('a' ∷ 'b' ∷ 'c' ∷ 'd' ∷ [])
+  -- testB' =
+  --   bin (bin (tipS {!   !} {!   !})
+  --            (bin (tipS {!   !} {!   !})
+  --                 (tipZ {!   !} {!   !})))
+  --       (bin (bin (tipS {!   !} {!   !})
+  --                 (tipZ {!   !} {!   !}))
+  --            (tipZ {!   !} {!   !}))
+
+  data All : (A → Set) → Vec A n → Set where
+    []  : All P []
+    _∷_ : P x → All P xs → All P (x ∷ xs)

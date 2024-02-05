@@ -22,22 +22,22 @@ module Nat where
 
   Ind-unary-parametricity : Ind → Set₁
   Ind-unary-parametricity f =
-      (P : ℕ → Set)                   (Q : ∀ {n} → P n → Set)
-    → (pz : P zero)                  → Q pz
-    → (ps : ∀ {n} → P n → P (suc n)) → (∀ {n} {p : P n} → Q p → Q (ps p))
-    → (n : ℕ) → Q (f P pz ps n)
+      {P : ℕ → Set}                   (Q : ∀ {n} → P n → Set)
+    → {pz : P zero}                  → Q pz
+    → {ps : ∀ {n} → P n → P (suc n)} → (∀ {n} {p : P n} → Q p → Q (ps p))
+    → {n : ℕ} → Q (f P pz ps n)
 
   ind-parametric : Ind-unary-parametricity ind
-  ind-parametric P Q pz qz ps qs = ind (Q ∘ ind P pz ps) qz qs
+  ind-parametric {P} Q {pz} qz {ps} qs {n} = ind (Q ∘ ind P pz ps) qz qs n
   -- ind-parametric P Q pz qz ps qs zero    = qz
   -- ind-parametric P Q pz qz ps qs (suc n) = qs (ind-parametric P Q pz qz ps qs n)
 
   uniqueness :
       (f : Ind) → Ind-unary-parametricity f
-    → (P : ℕ → Set) (pz : P zero) (ps : ∀ {n} → P n → P (suc n))
+    → (P : ℕ → Set) (pz : P zero) (ps : ∀ {m} → P m → P (suc m))
     → (n : ℕ) → f P pz ps n ≡ ind P pz ps n
   uniqueness f param P pz ps n =
-    param P (λ {n} p → p ≡ ind P pz ps n) pz refl ps (cong ps) n
+    param (λ {m} p → p ≡ ind P pz ps m) refl (cong ps)
 
 module ImmediateSublists where
 
