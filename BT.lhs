@@ -641,10 +641,11 @@ That paper will have to wait though --- I've still got a problem to solve:
 How do I use |BT| to specify \lstinline{cd}?
 
 What's special about |BT| is that the element types are indexed by sublists, so I know from the type of an element with which sublist it associates.
-That is, I can now directly say `values associated with sublists' and how they should be rearranged, rather than indirectly specify the rearrangement in terms of sublists and then extend to other types of values through parametricity.%
-\Shin{Can we give some explanation why this type enforces $(\ast)$?
-The way I understand it is that the input is a table containing all length |k| sublists and they all satisfy |p|, thus matching \lstinline{choose n k};
-the output chooses |sk| elements and, for each of them, chooses all length |k| sublists, and they all satisfy |p|, thus kind of matching the two \lstinline{choose}s. What is the significance of |p| here? And we might want to mention that \lstinline{flatten} is gone.}
+That is, I can now directly say `values associated with sublists' and how they should be rearranged, rather than indirectly specify the rearrangement in terms of sublists and then extend to other types of values through parametricity.
+%\Shin{Can we give some explanation why this type enforces $(\ast)$?
+%The way I understand it is that the input is a table containing all length |k| %sublists and they all satisfy |p|, thus matching \lstinline{choose n k};
+%the output chooses |sk| elements and, for each of them, chooses all length |k| %sublists, and they all satisfy |p|, thus kind of matching the two %\lstinline{choose}s. What is the significance of |p| here? And we might want to %mention that \lstinline{flatten} is gone.
+%SCM: it's much clearer now. Removing this comment.}
 |BT_ n k p xs| is the type of a table of |p|-typed values associated with the |k|-sublists of |xs|, and that's precisely the intended meaning of \lstinline{cd}'s input.
 What about the output?
 It should tabulate the |(1 + k)|-sublists of |xs|, so the type should be |BT_ n sk q xs| for some |q : Vec (1 + k) a → Set|; for each sublist |ys : Vec (1 + k) a|, I want a list of |p|-typed values associated with the immediate sublists of |ys|, which are |k|-sublists, and that's precisely a tree of type |BT_ sk k p ys| --- the shape of that tree is even a list!\todo{flatten}
