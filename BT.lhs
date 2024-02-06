@@ -418,7 +418,9 @@ Applying \lstinline{mapB g . cd} to this, I get level $2$, labelled (2) in the f
 For a closer look, I apply \lstinline{cd} to level $2$.
 Indeed, with its clever mapping and zipping, \lstinline{cd} managed to bring together precisely the right elements (labelled (2.5) in Figure~\ref{fig:map_g_cd}), so that when we apply \lstinline{mapB g}, we get level $3$.
 \Shin{I added the second sentence in the caption of Figure~\ref{fig:map_g_cd}. I think it's probably necessary because I myself got confused from time to time.}
-\Josh{Should update this paragraph and \cref{fig:map_g_cd} for just \lstinline{"abcd"}}
+\Josh{Should update this paragraph and \cref{fig:map_g_cd} for just \lstinline{"abcd"}.
+SCM: But I think we need an input with 5 elements to see more structure in the tree. I'd rather update previous examples to \lstinline{"abcde"} if we have to...
+It's probably too much to use \lstinline{"abcde"} in S3, however.}
 
 This still does not give me much intuition for why \lstinline{cd} works.
 Presumably \lstinline{cd} does not do something useful on arbitrary binary trees, only the trees built by \lstinline{cvt} and \lstinline{cd} itself.
@@ -1187,7 +1189,7 @@ Now I see, as Richard hinted, that I could rewrite the traditional expression us
    g ∘ mapBT g ∘ unTip ∘ retabulate ∘ retabulate ∘ mapBT g ∘ retabulate ∘
    mapBT e ∘ blanks(C 3 0)
 =  {-\;similarly -}
-   g ∘ mapBT g ∘ mapBT (mapBT g) ∘ mapBT (mapBT (mapBT e)) ∘ 
+   g ∘ mapBT g ∘ mapBT (mapBT g) ∘ mapBT (mapBT (mapBT e)) ∘
    unTip ∘ retabulate ∘ retabulate ∘ retabulate ∘ blanks(C 3 0)
 =  {-\;functoriality -}
    g ∘ mapBT (g ∘ mapBT (g ∘ mapBT e)) ∘
@@ -1246,7 +1248,7 @@ BT-isProp : (∀ {ys} → isProp (p ys)) → isProp (BT(C n k) p xs)
 And then the |rotation| equation can be proved trivially by invoking |BT-isProp| twice:
 \Jeremy{alternative line break--- ok?}
 \begin{code}
-rotation :  retabulate (SUPPRESSED n>k) (blanks(C n k) (SUPPRESSED nGEQk) tt) 
+rotation :  retabulate (SUPPRESSED n>k) (blanks(C n k) (SUPPRESSED nGEQk) tt)
               ≡ mapBT (blanks(C sk k) (SUPPRESSED(skGEQk))) (blanks(C n sk) (SUPPRESSED nGEQsk) tt)
 rotation = BT-isProp (BT-isProp refl)
 \end{code}
