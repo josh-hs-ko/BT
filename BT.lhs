@@ -1334,6 +1334,6 @@ Fancy types can replace traditional specs and proofs (for example, equality betw
 Category theory offers useful abstraction (for sometimes comprehending indexed definitions as if they were simply typed); in particular, the categorical abstraction enables the use of string diagrams to make reasoning with naturality transparent (and in this case the main proof is entirely about naturality and rendered trivial).}
 
 \bibliographystyle{ACM-Reference-Format}
-\bibliography{../bib/bib}
+\bibliography{bib}
 
 \end{document}
