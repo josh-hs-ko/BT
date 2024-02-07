@@ -1334,6 +1334,8 @@ Specifically:
 Fancy types can replace traditional specs and proofs (for example, equality between programs can be proved simply by showing that they have the same, uniquely inhabited type), and are a still under-explored methodology (going beyond length/shape indexing).
 Category theory offers useful abstraction (for sometimes comprehending indexed definitions as if they were simply typed); in particular, the categorical abstraction enables the use of string diagrams to make reasoning with naturality transparent (and in this case the main proof is entirely about naturality and rendered trivial).}
 
+\todo[inline]{We'll eventually need acknowledgements, although presumably they should be omitted for double-blind review. This is a placeholder to remember to thank Julie Summers, Royal Literary Fund Fellow at Kellogg College.}
+
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{bib}
 
