@@ -130,6 +130,7 @@
 %format mapBT = map ᴮᵀ
 %format zipBTWith = zip ᴮᵀ "\kern-1pt" With
 %format blanks' = blanks "^\prime"
+%format Fun = "\text{\textbf{\textsf{Fun}}}"
 %format Fam' = "\text{\textbf{\textsf{Fam}}}"
 %format mapExactly = map "_{" Exactly "}"
 
@@ -238,7 +239,7 @@
 \title{Binomial Tabulation: A Short Story (Functional Pearl)}
 
 \begin{abstract}
-\todo[inline]{Abstract: a demonstration of dependent types and string diagrams for the mathematically inclined functional programmer}
+\todo[inline]{Abstract: a demonstration of dependent types and string diagrams for the functional programmer (ideally already with a bit exposure to dependent types and category theory and not put off by basic concepts like indexed types, functors, and so on)}
 \end{abstract}
 
 %\begin{CCSXML}
@@ -504,7 +505,7 @@ But how do I know that the contents are correct~--- that \lstinline{cd} is corre
 \Jeremy{I don't really understand the TODO: ``What to say? Need a spec: the equational one using \lstinline{choose} (marking the element positions with sub-lists and specifying where the elements should go); but requires a lot of proving''. Update 20240124: A lot of equational reasoning. Do we mention Shin's paper? Josh: This has to be in the Afterword.}
 
 Most likely, the key is parametricity.
-The input to \lstinline{cd} is a list of values associated with $k$-sublists (for some $1 \le k < n$), and these values are rearranged in relation to |(1 + k)|-sublists.
+The input to \lstinline{cd} is a tree of values associated with $k$-sublists (for some $1 \le k < n$), and these values are rearranged in relation to |(1 + k)|-sublists.
 Since \lstinline{cd} is parametric in the type of these values, I can just take |k|-sublists themselves and specify how \lstinline{cd} should rearrange them, and then \lstinline{cd} will have to do the same rearrangement for any type of values.
 
 Formally, the first thing to do is define `|k|-sublists' for arbitrary~|k|.
@@ -531,7 +532,7 @@ Then Richard could have specified \lstinline{cd} by
 \hfill (\ast)
 \]
 Informally:
-Given all the {k}-sublists of an \lstinline{n}-list \lstinline{xs}, \lstinline{cd} should rearrange and duplicate them into the appropriate positions for the \lstinline{(k+1)}-sublists, where in the position for a particular \lstinline{(k+1)}-sublist, the result should be the list of all its immediate sublists as computed by \lstinline{flatten . choose k}.
+Given all the \lstinline{k}-sublists of an \lstinline{n}-list \lstinline{xs}, \lstinline{cd} should rearrange and duplicate them into the appropriate positions for the \lstinline{(k+1)}-sublists, where in the position for a particular \lstinline{(k+1)}-sublist, the result should be the list of all its immediate sublists as computed by \lstinline{flatten . choose k}.
 
 I could go on and derive the definition of \lstinline{cd} from the specification, finishing what Richard could've done in his paper, and maybe switching to |B(C n k)| throughout to make the shapes clear.
 But I can already imagine that would involve a large amount of tedious equational reasoning, and I'm not thrilled.
@@ -555,7 +556,7 @@ Perform `pattern matching' on the indices, and specify what should be in the tre
 The pattern-matching structure follows the definition of \lstinline{choose}.
 In the first case, \lstinline{choose} returns~\lstinline{Tip []}, so the tree should be a |tipZ| whose element~|y| should be accompanied with a proof~|e| that |y|~equals |h []|, so that |tipZ y e| `is' \lstinline{mapB h (Tip [])}.
 The second case is similar.
-In the third case, the first thing I do is switch from Richard's fictional snoc pattern \lstinline{xs ++ [x]} to a cons index |x ∷ xs| --- this just `reverses' the list and shouldn't break anything, as long as the snoc in \lstinline{mapB (++[x])} is also switched to a cons consistently.
+In the third case, the first thing I do is switch from Richard's snoc pattern \lstinline{xs ++ [x]} to a cons index |x ∷ xs| --- this just `reverses' the list and shouldn't break anything, as long as the snoc in \lstinline{mapB (++[x])} is also switched to a cons consistently.
 The first inductive call of \lstinline{choose} easily translates into the type of the left sub-tree.
 The right sub-tree should be the result of \lstinline{map h (map (x:) (choose k xs))}, where (luckily) the two maps can be fused into a single \lstinline{map (h . (x:))}, so the type of the second sub-tree uses the index |h ∘ (x ∷_)| instead of~|h|.
 
@@ -716,7 +717,7 @@ such that |s ys| is the type of solutions for |ys|.
 So
 \begin{temp}
 \begin{code}
-g : {k : ℕ} {ys : Vec (2 + k) a} → BT(C ssk sk) s ys → s ys
+g : BT(C ssk sk) s ys → s ys
 \end{code}
 \end{temp}
 I look at this with an involuntary smile --- now that's a nice and informative type!
@@ -729,7 +730,7 @@ I wrote |BT(C ssk sk)| because that was what Richard wanted to say:
 Richard used singleton lists as the base cases instead of the empty list, so \lstinline{g}~was applied to solutions for sublists of length at least~|1|, hence the subscript |1 + k|.
 But the most general type
 \begin{code}
-g : {k : ℕ} {ys : Vec (1 + k) a} → BT(C sk k) s ys → s ys
+g : BT(C sk k) s ys → s ys
 \end{code}
 looks just fine.
 In particular, when |k|~is~|0|, the type says that |g|~should compute a solution for a singleton list from a solution for the empty list (the only immediate sublist of a singleton list), which seems reasonable\ldots
@@ -783,14 +784,14 @@ data Exactly : a → Set where
   exactly : (x : a) → Exactly x
 \end{code}
 to say that the elements in the resulting table should be exactly the tabulated indices.
-Its map function are straightforward:
+Its map function is straightforward:
 \begin{code}
 mapExactly : (f : a → b) → Exactly x → Exactly (f x)
 mapExactly f (exactly x) = exactly (f x)
 \end{code}
 The definition of |choose| first performs an induction on~|k|, like the Haskell version.
 Different from the Haskell version, I need to make the Agda function total by saying explicitly that the length~|n| of the list |xs| is at least~|k|, so that there are enough elements to choose from.
-Somewhat notoriously, there are many different versions of natural number inequality.
+Somewhat notoriously, there are many versions of natural number inequality.
 The version needed here is a data type |m ≤↑ n| where |m|~remains fixed throughout the definition and serves as an `origin', and an inhabitant of |m ≤↑ n| is the distance (which is essentially a natural number) that |n|~is away from the origin~|m|:
 \begin{code}
 data _≤↑_ : ℕ → ℕ → Set where
@@ -863,7 +864,7 @@ ImmediateSublistInduction =
 \end{code}
 add the dummy |⊤|~argument to |blank| (while suppressing the inequality argument from now on),
 \begin{code}
-blank : (n k : ℕ) → (SUPPRESSED(k ≤↑ n)) → ⊤ → BT(C n k) (const ⊤) xs
+blank : (n k : ℕ) → (SUPPRESSED(k ≤↑ n)) → {xs : Vec n a} → ⊤ → BT(C n k) (const ⊤) xs
 \end{code}
 and get my beautiful point-free |td|:
 \begin{code}
@@ -902,7 +903,7 @@ The |loop| function performs induction on the distance |k ↓≤ n|; the counter
 The remaining goal |0 ↓≤ n| in |bu| is actually non-trivial, but the Agda standard library covers that.
 
 Another beautiful (by which I mean point-free) implementation of |ImmediateSublistInduction|!%
-\Josh{The obsession with the point-free style actually helps to transit to the categorical development.}
+\Josh{The obsession with the point-free style actually helps to transit to the categorical development (but I want to tone it down a bit).}
 
 Okay, I've made the type of both |td| and |bu| precise.
 How does this help me prove |td| equals |bu|?
@@ -963,75 +964,80 @@ Despite having a proof now, I think I'm going to delve into the definitions anyw
 
 \section{Categories of Families of Types and Functions}
 
-All the type indices are getting annoying, and they are distorting the types to an extent that makes me afraid that I've deviated too far from Richard's paper.
-Have I taken a completely new path?
-That would be exciting, but also frightening: I'd be on my own, and not able to rely on Richard's insights anymore.
+\todo[inline]{Not a category theory tutorial; more like a companion to a tutorial or a textbook, or an invitation to learn categorical tools (as well as dependent types and string diagrams for that matter) by providing intuitions and practical examples from the immediate-sublist computation; mention this meta-level goal in the abstract and the afterword.}
 
-I've definitely done something radically new that Richard wouldn't have imagined: proving two non-trivial programs equal just by showing that they have the same type.
-On the other hand, I don't think I'm in a totally uncharted territory yet, because I still see vaguely familiar patterns if I squint at my Agda code.
-The programs are still essentially the same as their Haskell counterparts; in particular, like \lstinline{cd}, roughly speaking my |retabulate| still transforms a tree of |p|'s into a tree of lists/trees of |p|'s.
+Another important hint Richard left was \emph{naturality}, a category-theoretic notion which he used a lot in his proofs.
+In functional programming, naturality usually stems from parametric polymorphism:
+All parametric functions, such as \lstinline{cd} and \lstinline{unTip}, satisfy naturality.
+I've got some parametric functions too, such as |retabulate| and |unTip|, but their dependent function types with all the (somewhat annoying) indices are making me disoriented.
+I need to reorient myself by figuring out which \emph{category} I'm in now.%
+\Josh{Can we make it clearer what `disoriented' and `reorient' means?}
 
-Hm, does it even make sense to say `a tree of |p|'s'?
-Usually when a functional programmer says `a tree of something', that `tree' is a parametric data type, and that `something' is a type, but here |p|~is a type family rather than a type\ldots
-
-And then I see it: \emph{I'm in a different category.}
-
-Functional programmers are familiar with types and functions, and knows when functions can be composed sequentially --- when adjacent functions meet at the same type.
+Functional programmers are familiar with types and functions, and know when functions can be composed sequentially --- when adjacent functions meet at the same type.
+And it's possible to compose an empty sequence of functions, in which case the result is an identify function.
 Categories are settings in which the same intuition about sequential composition works:
-Instead of types and functions, the categorical programmer can switch to work with some \emph{objects} and \emph{morphisms} specified by a category, where each morphism is labelled with a source object and a target object (like the source and target types of a function), and morphisms can be composed sequentially when adjacent morphisms meet at the same object.%
-\Josh{Most interestingly, some notions that prove to be useful in functional programming, such as functors and natural transformations, can be defined generically on categories and transported to other settings.}
+Instead of types and functions, the categorical programmer can switch to work with some \emph{objects} and \emph{morphisms} specified by a category, where each morphism is labelled with a source object and a target object (like the source and target types of a function), and morphisms can be composed sequentially when adjacent morphisms meet at the same object.
+And, like identity functions, there are identity morphisms too.
 Working in a new setting that's identified as a category (or some crazier variant that supports more operations in addition to sequential composition) is a blessing for the functional programmer: It means that the programmer can still rely on some of their intuitions about types and functions to navigate in the new setting.
 (And the formal definitions of various kinds of category make precise which intuitions remain reliable.)
+More importantly, some notions that prove to be useful in functional programming can be defined generically on categories and systematically transported to other settings.
 
-In my case, I've left the category of types and functions and landed in a kind of category where the objects are type families.
-A bit of notation will make it clearer:
+A clue about the kind of category I'm in is that I'm tempted to say `|retabulate| transforms a tree of |p|'s to a tree of trees of |p|'s':
+When a simply typed functional programmer says `a tree of something', that `something' is a type, that is, an object in the category |Fun| of types and functions, but here |p|~is a type family.
+So I've left |Fun| and landed in a kind of category where the objects are type families.
+
+There are quite a few versions of `categories of families' with different functionalities.
+I go through the types of the components (such as |retabulate|) used in the algorithms to determine what I need, and it seems that the simplest version suffices:
+%\Jeremy{or ``is the simplest one''?}
+Given an index type |a : Set|, a category of families |Fam' a| has objects of type
 \begin{code}
 Fam : Set → Set₁
 Fam a = a → Set
 \end{code}
-Now I can write
-\begin{code}
-BT(C n k) : Fam (Vec k a) → Fam (Vec n a)
-\end{code}
-This makes a lot of sense:
-In a simply typed setting, a parametric data type~|D| maps a type~|a| to a type |D a|; categorically, it should map objects to objects, and indeed |BT(C n k)| maps type families to type families.
-
-\todo[inline]{Explain the relationship between parametric data types and functors; independence of data at functor level from those at parameter level (foreshadowing natural transformations?)}
-
-What about morphisms?
-A clue can be found in the type of the standard function |map(sub D) : (a → b) → (D a → D b)| that comes with any (`reasonable') parametric data type~|D| for changing the type parameter.
-Looking through the categorical lens, |map(sub D)| takes a morphism/function from~|a| to~|b| and lifts it to a morphism/function from |D a| to |D b|.
-Then it is obvious from
-\begin{code}
-mapBT : (∀ {ys} → p ys → q ys) → ∀ {xs} → BT(C n k) p xs → BT(C n k) q xs
-\end{code}
-that the morphisms of the kind of category I'm in should be families of functions,
+and morphisms of type
 \begin{code}
 _⇉_ : Fam a → Fam a → Set
 p ⇉ q = ∀ {x} → p x → q x
 \end{code}
-so that the type of |mapBT| can be rewritten into the familiar form --- just like the type of |map(sub D)|:
-\begin{code}
-mapBT : (p ⇉ q) → (BT(C n k) p ⇉ BT(C n k) q)
-\end{code}
+That is, a morphism from~|p| to~|q| is a family of functions between corresponding types (with the same index) in |p|~and~|q|.
+Everything in the definition is parametrised by~|a|, so actually I'm working in not just one but many related categories of families, with different index types.
+These categories are still inherently types and functions, so it's no surprise that their sequential composition works in the way familiar to the functional programmer.
 
-There are quite a few versions of `categories of families', and the version I'm looking at is one of the simplest:\Jeremy{or ``is the simplest one''?}
-Given an index type~|a|, a category of families has objects of type |Fam a| and morphisms of type |p ⇉ q| between objects |p|~and~|q| --- I'll call such a category |Fam' a|.
-So actually I'm working in not just one but many related categories of families, with different index types.
-For example, |BT(C n k)| (together with |mapBT|), as a functor, goes from |Fam' (Vec a k)| to |Fam' (Vec a n)|.
-But I'd better check if all the other functions used in the two algorithms fit into these categories.
-Sure enough:
+With the definition of |Fam'|, now I can rewrite the parametric function types of |retabulate| and |unTip| to look more like the ones in Haskell:
 \begin{code}
-retabulate     :  BT(C n k) p   ⇉'  BT(C n sk) (BT(C sk k) p)
-unTip          :  BT(C n n) p   ⇉'  p
-blanks(C n k)  :  const ⊤       ⇉'  BT(C n k) (const ⊤)
-g              :  BT(C sk k) s  ⇉'  s
-e              :  const ⊤       ⇉'  s
+retabulate  :  BT(C n k) p   ⇉' BT(C n sk) (BT(C sk k) p)
+unTip       :  BT(C n n) p   ⇉' p
 \end{code}
-where the |⊤|~arguments of |blanks| and~|e| need to be lifted to a type family |const ⊤| to fit into the picture.
-The usual side conditions apply (|n > k| for |retabulate| and |n GEQ k| for |blanks(C n k)|), and |e|~is defined only in |Fam' (Vec a 0)|.
+I can fit |blank(C n k)| into |Fam' (Vec a n)| by lifting its |⊤|~argument to a type family |const ⊤| (that is, an object of the category):
+\begin{code}
+blank(C n k) : const ⊤ ⇉ BT(C n k) (const ⊤)
+\end{code}
+The base and inductive cases of |ImmediateSublistInduction| fit into these |Fam'| categories too:
+Given |a : Set| and |s : ∀ {k} → Fam (Vec k a)|, I can write
+\begin{code}
+g  : BT(C sk k) s  ⇉' s
+e  : const ⊤       ⇉' s
+\end{code}
+It's important to add that |e|~is a morphism in |Fam' (Vec 0 a)|, so that |e|~gives a solution for (only) the empty list.
+%Alternatively, writing |e : const ⊤ ⇉ s {0}| also makes it clear that the morphism is in |Fam' (Vec 0 a)| (because |s {0} : Fam (Vec 0 a)| is an object in |Fam' (Vec 0 a)|), but that looks slightly more verbose.
 
-\todo[inline]{Not a purely categorical treatment, but just using categories as an abstraction that highlights certain structures of the programs}
+All I've done is merely a bit of abstraction that hides part of the indices, which might even be described as cosmetic.
+However, by rephrasing the types in the categorical language, now I can start talking about \emph{functors} and \emph{natural transformations} sensibly.
+
+Normally a data type |D a| that's parametric in~|a| can be thought of as the type of containers that are made up of the constructors of~|D| and hold elements of type~|a|.
+Categorically, |D|~is the object part of a \emph{functor}, which maps an object~|a| in one category to an object |D a| in a possibly different category.
+The two layers of data, that is, constructors and elements, are independent in the sense that each layer can be arbitrarily transformed without affecting the other layer.
+
+The independent transformation of the inner layer is described by the morphism part of a functor.
+Functional programmers are familiar with the function |map(sub D) : (a → b) → (D a → D b)| that (normally) comes with~|D| and applies a function to all the elements (the inner layer) without changing the constructors of~|D| (the outer layer).
+Categorically, `arbitrary transformation' means anything that can happen within a category, namely morphisms and their sequential composition.
+So any morphism~|f| from~|a| to~|b| should give rise to a morphism |map(sub D) f| from |D a| to |D b| that's essentially still just~|f| because it does nothing to the outer |D|-layer; in particular, if the morphism is a composition |f · f'|, then |map(sub D) (f · f')| should still be a composition |map(sub D) f · map(sub D) f'| (and, in the special case of composing an empty sequence of morphisms, |map(sub D) id = id|).
+A functor consists of an object part (such as~|D|) and a morphism part (|map(sub D)|), with properties that establish the independence of the functor layer from whatever happens in the inner layer.
+
+On the other hand, the independent transformation of the outer layer is performed by \emph{natural transformations}.%
+\todo{\ldots}
+
+\todo[inline]{Make all these less abstract by mixing in concrete stuff such as |BT|?}
 
 %\todo[inline]{One source of complexity is the indices, which are getting annoying and need a bit of management.
 %In a sense, |retabulate| is still a familiar functional program that transforms a tree of~|p|'s to a tree of trees of~|p|'s, parametrically in~|p|.
@@ -1041,24 +1047,25 @@ The usual side conditions apply (|n > k| for |retabulate| and |n GEQ k| for |bla
 
 \section{String-Diagrammatic Algorithms}
 
-Now I see that I'm pretty much still writing ordinary functional programs, so there's a better chance that I can transfer what Richard did with his programs to my setting.
-An important clue Richard left was \emph{naturality}, a categorical notion which he used a lot in his proofs.
-In functional programming, naturality usually stems from parametricity:
-All parametrically polymorphic functions (such as |retabulate| and |unTip|) are \emph{natural transformations}.
-Now I know in which categories I should talk about them.
+%Now I see that I'm pretty much still writing ordinary functional programs, so there's a better chance that I can transfer what Richard did with his programs to my setting.
+%Now I know in which categories I should talk about them.
 
-But I have an additional tool that Richard didn't: \emph{string diagrams}.
+I have an additional tool that Richard didn't: \emph{string diagrams}.
 I've seen how dramatically string diagrams simplify proofs about natural transformations (and indeed other stuff, for which the simplification can be even more dramatic), so it's probably worthwhile to take a look at the two algorithms from a string-diagrammatic perspective.
 
 So I had better refresh my memory of string diagrams\ldots
 
 %\todo[inline]{Richard already pointed out that naturality is the key; try string diagrams!}
 
+\todo[inline]{Revise these to highlight the diagrammatic intuition about layer independence, which is already discussed in the previous section.}
+
 At a higher abstraction level, what a natural transformation does is transform one functor into another.
-For example, |retabulate| transforms the functor |BT(C n k)| into the composition of functors |BT(C n sk) ∘ BT(C sk k)|, while |unTip| transforms the functor |BT(C n n)| into the identity functor.
+For example, |retabulate| transforms the functor |BT(C n k)| into the composition of functors |BT(C n sk) ∘ BT(C sk k)|, while |unTip| transforms the functor |BT(C n n)| into the identity functor.%
+\Josh{Cover these in the previous section; this section focuses on string diagrams.}
 String diagrams present such `type information' as two-dimensional pictures:
 Natural transformations are represented as dots, with input wires attached below and output wires above, where the wires represent functors.
-(I learned string diagrams mainly from \citet{Coecke-PQP}, so my string diagrams have inputs below and outputs on top.)
+(I learned string diagrams mainly from \citet{Coecke-PQP}, so my string diagrams have inputs below and outputs on top.)%
+\Josh{Maybe draw these `live' rather than present them as facts.}
 \[ \tikzfig{pics/retabulate-unTip} \]
 Functor composition is represented as juxtaposition of wires, and the identity functor is omitted (being the unit of functor composition). So |retabulate| has two output wires, and |unTip| has none.
 
