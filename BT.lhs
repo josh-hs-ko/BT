@@ -301,7 +301,7 @@ data B a = Tip a || Bin (B a) (B a)
 And presumably \lstinline{mapB} and \lstinline{zipBWith} are the usual \lstinline{map} and \lstinline{zipWith} functions for these trees, and \lstinline{L} is the standard data type of lists.
 But how did Richard come up with such an incomprehensible function definition?
 %\Jeremy{We should be more consistent about whether to call him Richard or Bird. Shin: does it work if we say "Richard" when we refer to the person and say Bird (2008) when we refer to the paper?}
-He didn't bother to explain it in the paper.
+He didn't\Jeremy{Such contractions are fine, when ``in character''.} bother to explain it in the paper.
 
 \section{Simply Typed Algorithms}
 
@@ -341,7 +341,7 @@ dc (xs ++ [x]) = [xs] ++ [ys ++ [x] || ys <- dc xs]
 (This assumes that a list can be matched with a snoc pattern \lstinline{xs ++ [x]}.)
 To compute \lstinline{td "abcd"}, for example, we need to compute \lstinline{td "abc"}, \lstinline{td "abd"}, \lstinline{td "acd"}, and \lstinline{td "bcd"}, as seen in \cref{fig:td-call-tree}.
 To compute \lstinline{td "abc"} in turn, we need \lstinline{td "ab"}, \lstinline{td "ac"}, and \lstinline{td "bc"}.
-Notice, however, that \lstinline{td "ab"} is invoked again when computing \lstinline{td "abd"}:
+Notice, however, that \lstinline{td "ab"} is invoked again when computing \lstinline{td "abd"}:\Jeremy{use semicolons sparingly!}
 following this top-down computation, many sub-computations are repeated.
 
 \begin{figure}[t]
@@ -378,7 +378,7 @@ bu f g = head . loop . map f
     loop [y] = [y]
     loop ys  = loop (map g (cd ys))
 \end{lstlisting}
-That is, level $1$ is obtained by applying \lstinline{f} to each element of the input list. Then we keep applying \lstinline{map g . cd} to get the next level, stopping when we get a level with a single element, which will be our result.
+That is, level $1$ is obtained by applying \lstinline{f} to each element of the input list. Then we keep applying \lstinline{map g . cd} to get the next level, stopping when we get a level with a single element, which will be our result.\Jeremy{``\ldots next level. We stop when\ldots''---and generally, shorter sentences is punchier, and more plausible as direct speech/thought.}
 
 The \lstinline{bu} given above is much simpler than Richard's: to cope with more general problems, he had to store not just values but tables of values in each level.
 I'm puzzled at first by why Richard starts from singleton lists instead of the empty list (missing the bottom of the lattice). But then I realise that whereas a $2$-list is completely determined by its two $1$-element sublists, a $1$-list is not determined by its one $0$-element sublist~--- more context would be needed.
@@ -423,7 +423,7 @@ Indeed, with its clever mapping and zipping, \lstinline{cd} managed to bring tog
 SCM: But I think we need an input with 5 elements to see more structure in the tree. I'd rather update previous examples to \lstinline{"abcde"} if we have to...
 It's probably too much to use \lstinline{"abcde"} in S3, however.}
 
-This still does not give me much intuition for why \lstinline{cd} works.
+This still does not give me much insight into why \lstinline{cd} works.
 Presumably \lstinline{cd} does not do something useful on arbitrary binary trees, only the trees built by \lstinline{cvt} and \lstinline{cd} itself.
 What are the constraints on these trees, and how does \lstinline{cd} exploit them?
 %\Josh{To be explicitly responded at the end of S3}
@@ -446,7 +446,7 @@ I fear that there will be plenty of complex proofs waiting ahead for me.
 
 \section{Indexed Data Types of Binomial Trees}
 
-To start off with something easier:
+To start with something easier:
 One thing in \lstinline{cd} that's been bothering me is the use of \lstinline{zipBWith}.
 Why is the zip justified~--- what if the two trees have different shapes?
 A reasonable guess is that the two trees \emph{cannot} have different shapes.
@@ -496,7 +496,7 @@ zipBWith : (a → b → c) → B(C n k) a → B(C n k) b → B(C n k) c
 \end{code}
 %In fact, that type is so informative that only one program inhabits it, and that program can be found automatically by proof search.
 %(Well, at least the positive clauses are automatic. Proving absurdity of the other clauses takes a little effort.)
-The transcription finishes without any problem, so my guess is correct, and it's conveniently verified just by type checking.
+The transcription finishes without any problem, so my guess is correct. And it's conveniently verified just by type checking.
 However, the transcription does involve a bit of extra proof burden about the two (greyed out) `side conditions' |1 ≤ k| and |k < n| of |cd|, which I temporarily ignore whenever I call |cd| (as in |cd u|, as if |cd| were a function with only one explicit argument).
 Agda ensures that I don't forget about these ignored conditions in the final code though.
 
@@ -551,7 +551,7 @@ I suppose I could force a tree to be the result of \lstinline{mapB h (choose k x
     bin   :   B' n (suc  k)  b    h            xs
           →'  B' n       k   b (  h ∘ (x ∷_))  xs  → B' (suc  n) (  suc k)  b h (x ∷ xs)
 \end{code}
-This is a somewhat complex extension to |B(C n k)|, but the programming methodology is still the same:
+This is a rather complex extension to |B(C n k)|, but the programming methodology is still the same:
 Perform `pattern matching' on the indices, and specify what should be in the tree in each case.
 The pattern-matching structure follows the definition of \lstinline{choose}.
 In the first case, \lstinline{choose} returns~\lstinline{Tip []}, so the tree should be a |tipZ| whose element~|y| should be accompanied with a proof~|e| that |y|~equals |h []|, so that |tipZ y e| `is' \lstinline{mapB h (Tip [])}.
@@ -574,8 +574,9 @@ As expected, all the constructors are determined by the indices.
 The goal types of the even-numbered holes are all~|b|, and the odd-numbered holes require proofs that the even-numbered holes are equal to |h zs| for all the |2|-sublists |zs| of |"abcd"|.
 It does work!
 
-|B'|~doesn't look bad, but I can't help raising my eyebrow.
-With some more effort, I suppose I could refine the type of |cd| to use~|B'| and encode the full specification, but the refined |cd| would need to manipulate the equality proofs in those trees, and maybe eventually I'd still be doing essentially the same tedious equational reasoning that I want to avoid.
+|B'|~doesn't look bad, but I can't help raising an eyebrow.
+With some more effort, I suppose I could refine the type of |cd| to use~|B'| and encode the full specification. 
+But the refined |cd| would need to manipulate the equality proofs in those trees, and maybe eventually I'd still be doing essentially the same tedious equational reasoning that I want to avoid.
 Another problem is that the upgraded |cd| would only work on trees of sublists, whereas the original \lstinline{cd} works on trees of \emph{any} type of values.
 Indeed, the specification talks about the behaviour of \lstinline{cd} on trees of sublists only; by encoding the specification in the type, I'd actually restrict |cd| to trees of sublists.
 That doesn't sound too useful.
@@ -584,7 +585,7 @@ Still, I can't take my eyes off the definition of~|B'|.
 The way it absorbs the definition of \lstinline{choose} looks right.
 If only the elements aren't restricted to pairs of the form |y : b| and |e : y ≡ h zs|\ldots
 
-A lightbulb lights up over my head.
+A lightbulb lights up above my head.
 \begin{code}
 data BT : (n k : ℕ) → (Vec k a → Set) → Vec n a → Set where
   tipZ  :   p []                             → BT n           zero    p xs
@@ -952,7 +953,7 @@ Now choose the invariant that any proof of |p m| is equal to the one produced by
 The same argument works for |ImmediateSublistInduction| --- any function of the type satisfying unary parametricity is pointwise equal to a variant of |td|.
 I finish the Agda proofs for both induction principles in a dreamlike state.
 
-Yeah, I have a proof that |td| equals |bu|.
+Yeah, I have a proof that |td| equals |bu|.\Jeremy{Julie thought these one-line paragraphs look a bit messy. She suggested adding some space above and below---I guess more like a \texttt{quote}. Not sure how I feel.}
 
 Well, strictly speaking I don't have one yet.
 (Vanilla) Agda doesn't have internal parametricity, so I'd need to prove the parametricity of both |td| and |bu|, painfully.
@@ -1321,7 +1322,7 @@ All these are for another day, however.%
 
 \todo[inline]{Largely follows the actual development, which we realise makes a nice story, going from the concrete to the abstract (`based on a true story')}
 
-\todo[inline]{`Socratic monologue' of a dependently typed programmer, going through what they think about (in an intuitive and colloquial style) when solving the problem/mystery (cf~the beginning of the science fiction novel \textit{Project Hail Mary}) rather than reporting a piece of already finished work; the format is more effective for presenting thought processes and focusing on ideas (people don't usually hurry to work out all the technical detail when first solving a problem)}
+\todo[inline]{`Socratic monologue' of a dependently typed programmer, going through what they think about (in an intuitive and colloquial style) when solving the problem/mystery (cf~the beginning of the science fiction novel \textit{Project Hail Mary}) rather than reporting a piece of already finished work; the format is more effective for presenting thought processes and focusing on ideas (people don't usually hurry to work out all the technical detail when first solving a problem)}\Jeremy{Julie recommended making this nod to \textit{Project Hail Mary} the first point in the Afterword. But I guess it could instead be the last point.}
 
 \todo[inline]{Resist the temptation to generalise (for example, to dynamic programming in general as \citet{Bird-zippy-tabulations} attempted to do), and keep the material simple (no graded comonads, for example) and self-contained (but not a detailed tutorial); loose ends here and there to point out generality and future work (exercises and papers)}
 
