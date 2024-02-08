@@ -46,6 +46,7 @@
 \newcommand{\Jeremy}[1]{\footnote{\color{blue}Jeremy: #1}}
 
 \newenvironment{aha}{\medskip}{\medskip} % for one-line paragraphs
+\newcommand{\pause}{\medskip\centerline{$\ast\quad\ast\quad\ast$}\medskip} % for a mid-section pause
 
 \newcommand{\equals}{\enskip=\enskip}
 
@@ -623,6 +624,8 @@ It's simpler to think of a tree of type |BT_ n k p xs| as a table with all the |
 (So the `T' in |BT| stands for both `tree' and `table'.)
 \Josh{We could explain in more detail how to find a key in a tree, but that doesn't seem too important because we don't work with individual entries but all the entries about all the sublists of a particular length at once, and the position of each entry in the tree is not important.}
 
+\pause
+
 This |BT| definition is really intriguing\ldots
 The ad hoc feeling I had with~|B'| is completely gone.
 This is probably because there's no arbitrary information in |BT| with respect to \lstinline{choose}.
@@ -645,6 +648,8 @@ data All : (a → Set) → Vec n a → Set where
 which should be derivable from the function that non-deterministically returns an element of a list.
 I'm onto something general --- maybe it's interesting enough for an ICFP paper!%
 \Josh{A paragraph about generality --- worth saying?}
+
+\pause
 
 That paper will have to wait though --- I've still got a problem to solve:
 How do I use |BT| to specify \lstinline{cd}?
