@@ -429,11 +429,10 @@ It's probably too much to use \lstinline{"abcde"} in S3, however.
 Josh: We don't see that the numbers are related to binomial coefficients ourselves --- Richard told us. So I'd say seeing more of the numbers is not more important than consistency. Ultimately the question may be: what's the necessary information in this example for figuring out the indexing of~|B|? I suspect five elements are not more useful than four.}
 
 This still does not give me much insight into why \lstinline{cd} works.
-Presumably \lstinline{cd} does not do something useful on arbitrary binary trees, only the trees built by \lstinline{cvt} and \lstinline{cd} itself.
+Presumably \lstinline{cd} does not always need to do something useful, as long as it works on the trees built by \lstinline{cvt} and \lstinline{cd} itself.
 What are the constraints on these trees, and how does \lstinline{cd} exploit them?
 %\Josh{To be explicitly responded at the end of S3}
-Richard did give some hint: if we compute the sizes of subtrees along their left spines (see the red numbers in Figure~\ref{fig:map_g_cd}),%
-\Jeremy{``Aha!''}
+Aha! Richard did give a hint: if we compute the sizes of subtrees along their left spines (see the red numbers in Figure~\ref{fig:map_g_cd}),%
 $[1,2,3,4,5]$, $[1,3,6,10]$, and $[1,4,10]$ are the first three diagonals of Pascal's triangle --- the trees are related to binomial coefficients!
 So the name \lstinline{B} could refer to `binomial' in addition to `binary'.
 
@@ -709,7 +708,6 @@ In fact, looking at the type more closely, I suspect that the extensional behavi
 The shape of the output table is completely determined by the indices; moreover, all the input elements have distinct types in general, so each element in the output table has to be the only input element with the required type --- there is no choice to make.
 Formally, the proof will most likely be based on parametricity.
 That'll probably be a fun exercise\ldots but I'll leave that for another day.%
-\Jeremy{Should this move to the Afterword?}
 
 \section{Dependently Typed Algorithms}
 
@@ -968,7 +966,7 @@ The same argument works for |ImmediateSublistInduction| --- any function of the 
 I finish the Agda proofs for both induction principles in a dreamlike state.
 
 \begin{aha}
-Yeah, I have a proof that |td| equals |bu|.\Jeremy{Julie thought these one-line paragraphs look a bit messy. She suggested adding some space above and below---I guess more like a \texttt{quote}. Not sure how I feel.}
+Yeah, I have a proof that |td| equals |bu|.\Jeremy{Julie thought these one-line paragraphs look a bit messy. She suggested adding some space above and below. How is this?}
 \end{aha}
 
 Well, strictly speaking I don't have one yet.
@@ -1271,7 +1269,7 @@ The type |BT(C n k) p xs| is propositional if the payload~|p| is pointwise propo
 BT-isProp : (∀ {ys} → isProp (p ys)) → isProp (BT(C n k) p xs)
 \end{code}
 And then the |rotation| equation can be proved trivially by invoking |BT-isProp| twice:
-\Jeremy{alternative line break--- ok? Josh: Alternatively, omit the suppressed arguments.}
+% \Jeremy{alternative line break--- ok? Josh: Alternatively, omit the suppressed arguments.}
 \begin{code}
 rotation : retabulate (blanks(C n k) tt) ≡ mapBT blanks(C sk k) (blanks(C n sk) tt)
 rotation = BT-isProp (BT-isProp refl)
