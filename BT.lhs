@@ -310,7 +310,8 @@ He didn't\Jeremy{Such contractions are fine, when ``in character''.} bother to e
 
 From the explanations that \emph{are} in the paper, I can make a pretty good guess at what \lstinline{cd} is doing at a high level.
 %
-\citet{Bird-zippy-tabulations} is studying the relationship between top-down and bottom-up algorithms. A generic top-down algorithm is specified by:%
+\citet{Bird-zippy-tabulations} is studying the relationship between top-down and bottom-up algorithms.
+A generic top-down algorithm is specified by:
 \todo{Make the function polymorphic}
 %\Josh{Include |f| and |g| as arguments (like |foldr| etc). Shin: Done.}
 %\Jeremy{Can we avoid using \lstinline{$}? Richard wouldn't have used it\ldots. Shin: Used application instead.}
@@ -322,9 +323,12 @@ td f g xs  = g (map (td f g) (dc xs))
 The input of \lstinline{td} is a list of \lstinline{a}'s, and the output is a single value of type \lstinline{b}.
 Singleton lists form the base cases, processed by a function \lstinline{f}.
 A non-singleton list is decomposed into shorter lists by \lstinline{dc :: L a -> L (L a)}.
-Each shorter list is then recursively processed by \lstinline{td}, before \lstinline{g} combines the results.%
+Each shorter list is then recursively processed by \lstinline{td}, before \lstinline{g} combines the results.
+In fact, in order to cover a wider range of algorithms, Richard's specification is more abstract and general: \lstinline{L} needs not be a list, and \lstinline{dc} returns an \lstinline{F}-structure of lists.
+But I find it much easier to understand if I instantiate them to this specific scenario.
+\Shin{Hope this is sufficient and yet not too verbose.}
 %\Josh{\lstinline{F} is initially \lstinline{L} and later \lstinline{B}, but this changes the type of \lstinline{g} too (no need for \lstinline{cvt} etc)? Shin: removed \lstinline{F}. I think we still need \lstinline{cvt} after switching to \lstinline{B}.}
-\Shin{We need to somehow mention that ``The setting in \citet{Bird-zippy-tabulations} is more general: \lstinline{L} need not be a list, and \lstinline{dc} returns an \lstinline{F}-structure of lists. We simplified the setting for ease of discussion'' without being out-of-character.}
+%\Shin{We need to somehow mention that ``The setting in \citet{Bird-zippy-tabulations} is more general: \lstinline{L} need not be a list, and \lstinline{dc} returns an \lstinline{F}-structure of lists. We simplified the setting for ease of discussion'' without being out-of-character.}
 
 \begin{figure}[t]
 \centering
