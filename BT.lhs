@@ -45,6 +45,8 @@
 \newcommand{\Shin}[1]{\footnote{\color{blue}Shin: #1}}
 \newcommand{\Jeremy}[1]{\footnote{\color{blue}Jeremy: #1}}
 
+\newenvironment{aha}{\medskip}{\medskip} % for one-line paragraphs
+
 \newcommand{\equals}{\enskip=\enskip}
 
 \usepackage{tikzit}
@@ -960,7 +962,9 @@ Now choose the invariant that any proof of |p m| is equal to the one produced by
 The same argument works for |ImmediateSublistInduction| --- any function of the type satisfying unary parametricity is pointwise equal to a variant of |td|.
 I finish the Agda proofs for both induction principles in a dreamlike state.
 
+\begin{aha}
 Yeah, I have a proof that |td| equals |bu|.\Jeremy{Julie thought these one-line paragraphs look a bit messy. She suggested adding some space above and below---I guess more like a \texttt{quote}. Not sure how I feel.}
+\end{aha}
 
 Well, strictly speaking I don't have one yet.
 (Vanilla) Agda doesn't have internal parametricity, so I'd need to prove the parametricity of both |td| and |bu|, painfully.
