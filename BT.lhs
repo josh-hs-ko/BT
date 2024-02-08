@@ -430,11 +430,10 @@ Indeed, with its clever mapping and zipping, \lstinline{cd} managed to bring tog
 %SCM: changed the picture.}
 
 This still does not give me much insight into why \lstinline{cd} works.
-Presumably \lstinline{cd} does not do something useful on arbitrary binary trees, only the trees built by \lstinline{cvt} and \lstinline{cd} itself.
+Presumably \lstinline{cd} does not always need to do something useful, as long as it works on the trees built by \lstinline{cvt} and \lstinline{cd} itself.
 What are the constraints on these trees, and how does \lstinline{cd} exploit them?
 %\Josh{To be explicitly responded at the end of S3}
-Richard did give some hint: if we compute the sizes of subtrees along their left spines (see the red numbers in Figure~\ref{fig:map_g_cd}),%
-\Jeremy{``Aha!''}
+Aha! Richard did give a hint: if we compute the sizes of subtrees along their left spines (see the red numbers in Figure~\ref{fig:map_g_cd}),%
 $[1,2,3,4]$, $[1,3,6]$, and $[1,4]$ are the first three diagonals of Pascal's triangle --- the trees are related to binomial coefficients!
 So the name \lstinline{B} could refer to `binomial' in addition to `binary'.
 
@@ -480,14 +479,14 @@ data B : ℕ → ℕ → Set → Set where
   bin   :   B n (suc  k)  a
         →'  B n       k   a  → B (suc  n) (  suc k)  a
 \end{code}
-The idea is that the \emph{size} of a tree of type |B n k a| with $k \le n$ is precisely the binomial coefficient~|CHOOSE n k|, and there are no trees of type |B n k a| when $k > n$.
+The idea is that the \emph{size} of a tree of type |B n k a| with $k \le n$ is precisely the binomial coefficient~|CHOOSE n k|. Naturally, there are no trees of type |B n k a| when $k > n$.
 Like |Vec|, the indices $n, k$ determine the constructors:%
-\footnote{It would seem that both |tipS| and |bin| are possible for the case |B(C sk sk) a| (so that the indices don't determine the constructor), but |bin| is actually impossible because its left sub-tree would have type |B(C sk ssk) a|, which can be shown to be uninhabited.}
+\footnote{It would seem that both |tipS| and |bin| are possible for the case |B(C sk sk) a| (so that the indices don't determine the constructor), but |bin| is actually impossible because its left sub-tree would have type |B(C sk ssk) a|, which is uninhabited.}\Jeremy{inline this footnote?}
 If |k|~is |zero|, then the tree is a |tipZ| with one element (|CHOOSE n 0 =' 1|).
-Otherwise, if |n|~is |suc k|, then the tree is a |tipS| with also one element (|CHOOSE sk sk =' 1|).
+Otherwise, if |n|~is |suc k|, then the tree is a |tipS| also with one element (|CHOOSE sk sk =' 1|).
 Otherwise the tree is a |bin|, and the sizes |CHOOSE n sk| and |CHOOSE n k| of the two sub-trees add up to the intended size |CHOOSE sn sk| of the whole tree.
 The trees are now truly \emph{binomial} rather than just binary, formalising Richard's hint about sizes.
-I should probably write |B(C n k)| for |B n k| to relate it to |CHOOSE n k| notationally.
+I will write |B(C n k)| for |B n k| to relate it to |CHOOSE n k| notationally.
 
 And now I can give a more precise type to \lstinline{cd}:
 \begin{code}
@@ -496,15 +495,15 @@ cd : (SUPPRESSED(1 ≤ k)) → (SUPPRESSED(k < n)) → B(C n k) a → B(C n sk) 
 It takes as input the data for level~$k$ out of $n$~levels in the sublist lattice~(\cref{fig:sublists-lattice}), with $1 \le k < n$; these are the results for each of the |CHOOSE n k| $k$-sublists of the original $n$-list.
 And it returns as output the components for level~|1 + k|; there are |CHOOSE n (sk)| of these, each a |(1 + k)|-list (to be fed into \lstinline{g}).
 %The input data can conveniently be stored in a tree indexed by $n,k$, and the output indexed by $n,1+k$.
-As I transcribe \lstinline{cd} interactively with Agda, the tree shapes are automatically kept track of in the indices all the time.
-For example, in the |bin t u| case, Agda tells me that |t : B(C sn ssk) a| and |u : B(C sn sk) a|, so |cd u : B(C sn ssk) (Vec (2 + k) a)|, and it's indeed safe to zip |t|~and |cd u| together using the zip function that takes only two trees \emph{of the same shape} and returns another tree of that shape:
+As I transcribe \lstinline{cd} interactively in Agda, the indices automatically keep track of the tree shapes.
+In particular, in the |bin t u| case, Agda tells me that |t : B(C sn ssk) a| and |u : B(C sn sk) a|, so |cd u : B(C sn ssk) (Vec (2 + k) a)|, which is the same shape as~|t|. So it is indeed safe to zip |t|~and |cd u| together using a shape-preserving zip function:
 \begin{code}
 zipBWith : (a → b → c) → B(C n k) a → B(C n k) b → B(C n k) c
 \end{code}
 %In fact, that type is so informative that only one program inhabits it, and that program can be found automatically by proof search.
 %(Well, at least the positive clauses are automatic. Proving absurdity of the other clauses takes a little effort.)
 The transcription finishes without any problem, so my guess is correct. And it's conveniently verified just by type checking.
-However, the transcription does involve a bit of extra proof burden about the two (greyed out) `side conditions' |1 ≤ k| and |k < n| of |cd|, which I temporarily ignore whenever I call |cd| (as in |cd u|, as if |cd| were a function with only one explicit argument).
+However, the transcription does involve a bit of extra proof burden about the two (greyed out) `side conditions' |1 ≤ k| and |k < n| of |cd|, which I temporarily ignore whenever I call |cd|. That is, I write ``|cd u|'' as if |cd| were a function with only one explicit argument.
 Agda ensures that I don't forget about these ignored conditions in the final code though.
 
 So much for the shape.
@@ -544,11 +543,11 @@ Informally:
 Given all the \lstinline{k}-sublists of an \lstinline{n}-list \lstinline{xs}, \lstinline{cd} should rearrange and duplicate them into the appropriate positions for the \lstinline{(k+1)}-sublists, where in the position for a particular \lstinline{(k+1)}-sublist, the result should be the list of all its immediate sublists as computed by \lstinline{flatten . choose k}.
 
 I could go on and derive the definition of \lstinline{cd} from the specification, finishing what Richard could've done in his paper, and maybe switching to |B(C n k)| throughout to make the shapes clear.
-But I can already imagine that would involve a large amount of tedious equational reasoning, and I'm not thrilled.
+But I can already imagine that would involve a large amount of tedious equational reasoning, and I'm not thrilled by the prospect.
 
 My editor is still running Agda and showing the shape-indexed version of |cd|, with |B(C n k)| in its type.
 The whole point of programming with inductive families such as |B(C n k)| is to `say more and prove less':
-Encode more properties in the indices, so that those properties are automatically taken care of as programs construct and deconstruct indexed data, requiring less proofs.
+Encode more properties in the indices, so that those properties are automatically taken care of as programs construct and deconstruct indexed data, requiring fewer proofs.
 Instead of just the shapes, maybe it's possible to extend |B(C n k)| and encode the \emph{entire} specification of \lstinline{cd} in its type?
 
 What the specification says is basically that \lstinline{cd} should transform a tree produced by \lstinline{choose} into another one also produced by \lstinline{choose} and then processed using a \lstinline{mapB}.
@@ -584,8 +583,8 @@ The goal types of the even-numbered holes are all~|b|, and the odd-numbered hole
 It does work!
 
 |B'|~doesn't look bad, but I can't help raising an eyebrow.
-With some more effort, I suppose I could refine the type of |cd| to use~|B'| and encode the full specification.
-But the refined |cd| would need to manipulate the equality proofs in those trees, and maybe eventually I'd still be doing essentially the same tedious equational reasoning that I want to avoid.
+With yet more effort, I suppose I could refine the type of |cd| to use~|B'| and encode the full specification.
+But the refined |cd| would need to manipulate the equality proofs in those trees, and maybe eventually I'd still be doing essentially the same tedious equational reasoning that I wanted to avoid.
 Another problem is that the upgraded |cd| would only work on trees of sublists, whereas the original \lstinline{cd} works on trees of \emph{any} type of values.
 Indeed, the specification talks about the behaviour of \lstinline{cd} on trees of sublists only; by encoding the specification in the type, I'd actually restrict |cd| to trees of sublists.
 That doesn't sound too useful.
@@ -710,7 +709,6 @@ In fact, looking at the type more closely, I suspect that the extensional behavi
 The shape of the output table is completely determined by the indices; moreover, all the input elements have distinct types in general, so each element in the output table has to be the only input element with the required type --- there is no choice to make.
 Formally, the proof will most likely be based on parametricity.
 That'll probably be a fun exercise\ldots but I'll leave that for another day.%
-\Jeremy{Should this move to the Afterword?}
 
 \section{Dependently Typed Algorithms}
 
@@ -969,7 +967,7 @@ The same argument works for |ImmediateSublistInduction| --- any function of the 
 I finish the Agda proofs for both induction principles in a dreamlike state.
 
 \begin{aha}
-Yeah, I have a proof that |td| equals |bu|.\Jeremy{Julie thought these one-line paragraphs look a bit messy. She suggested adding some space above and below---I guess more like a \texttt{quote}. Not sure how I feel.}
+Yeah, I have a proof that |td| equals |bu|.\Jeremy{Julie thought these one-line paragraphs look a bit messy. She suggested adding some space above and below. How is this?}
 \end{aha}
 
 Well, strictly speaking I don't have one yet.
@@ -1272,7 +1270,7 @@ The type |BT(C n k) p xs| is propositional if the payload~|p| is pointwise propo
 BT-isProp : (∀ {ys} → isProp (p ys)) → isProp (BT(C n k) p xs)
 \end{code}
 And then the |rotation| equation can be proved trivially by invoking |BT-isProp| twice:
-\Jeremy{alternative line break--- ok? Josh: Alternatively, omit the suppressed arguments.}
+% \Jeremy{alternative line break--- ok? Josh: Alternatively, omit the suppressed arguments.}
 \begin{code}
 rotation : retabulate (blanks(C n k) tt) ≡ mapBT blanks(C sk k) (blanks(C n sk) tt)
 rotation = BT-isProp (BT-isProp refl)
