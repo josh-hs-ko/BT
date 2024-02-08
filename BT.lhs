@@ -409,7 +409,7 @@ Again, \lstinline{ab}, \lstinline{ac}... etc. denote results of \lstinline{td}, 
 
 I try to trace Richard's \lstinline{cd} to find out how it works.
 Given input \lstinline{"abcde"}, the function \lstinline{cvt} yields a tree that is slanted to the left as level $1$:
-%\Josh{Wrong order? Shin: Richard's \lstinline{cvt} is \lstinline{foldl1 Bin . map Tip}.. so it is his order. If that's not consistant with ours... let's think about what to do. :(}
+%\Josh{Wrong order? Shin: Richard's \lstinline{cvt} is \lstinline{foldl1 Bin . map Tip}.. so it is his order. If that's not consistent with ours... let's think about what to do. :(}
 \begin{lstlisting}
 Bin (Bin (Bin (Bin (Tip 'a') (Tip 'b')) (Tip 'c')) (Tip 'd')) (Tip 'e')
 \end{lstlisting}
@@ -418,10 +418,12 @@ in Figure~\ref{fig:map_g_cd}.
 Applying \lstinline{mapB g . cd} to this, I get level $2$, labelled (2) in the figure.
 For a closer look, I apply \lstinline{cd} to level $2$.
 Indeed, with its clever mapping and zipping, \lstinline{cd} managed to bring together precisely the right elements (labelled (2.5) in Figure~\ref{fig:map_g_cd}), so that when we apply \lstinline{mapB g}, we get level $3$.
-\Shin{I added the second sentence in the caption of Figure~\ref{fig:map_g_cd}. I think it's probably necessary because I myself got confused from time to time.}
+\Shin{I added the second sentence in the caption of Figure~\ref{fig:map_g_cd}. I think it's probably necessary because I myself got confused from time to time.
+Josh: This might be related to the question about the role of~|p| in |BT|.}
 \Josh{Should update this paragraph and \cref{fig:map_g_cd} for just \lstinline{"abcd"}.
 SCM: But I think we need an input with 5 elements to see more structure in the tree. I'd rather update previous examples to \lstinline{"abcde"} if we have to...
-It's probably too much to use \lstinline{"abcde"} in S3, however.}
+It's probably too much to use \lstinline{"abcde"} in S3, however.
+Josh: We don't see that the numbers are related to binomial coefficients ourselves --- Richard told us. So I'd say seeing more of the numbers is not more important than consistency. Ultimately the question may be: what's the necessary information in this example for figuring out the indexing of~|B|? I suspect five elements are not more useful than four.}
 
 This still does not give me much insight into why \lstinline{cd} works.
 Presumably \lstinline{cd} does not do something useful on arbitrary binary trees, only the trees built by \lstinline{cvt} and \lstinline{cd} itself.
@@ -464,8 +466,9 @@ The constructors used in a list of type |Vec n a| are completely determined by t
 The data type definition could even be understood as if it were performing pattern matching on the index:
 If the index is |zero|, then the list has to be nil; otherwise the index is a |suc|, and the list has to start with a cons.
 (A gang of people~\citep{Chapman-levitation, Ko-pcOrn, Dagand-functional-ornaments} did develop theories for defining data types by pattern matching on indices.)
-In the same vein, I write down a shape-indexed version of Richard's \lstinline{B} data type:%
+In the same vein, I write down a shape-indexed version of Richard's \lstinline{B} data type:
 \Jeremy{For consistency here, we should talk earlier about ``level $k$'' rather than ``level $n$''}
+\Josh{How do we figure out this indexing from the hint about diagonals? Maybe explain why binomial coefficients arise back in S2, and refer to that here.}
 \begin{code}
 data B : ℕ → ℕ → Set → Set where
   tipZ  :   a                → B n           zero    a
@@ -505,7 +508,9 @@ But how do I know that the contents are correct~--- that \lstinline{cd} is corre
 \Jeremy{I don't really understand the TODO: ``What to say? Need a spec: the equational one using \lstinline{choose} (marking the element positions with sub-lists and specifying where the elements should go); but requires a lot of proving''. Update 20240124: A lot of equational reasoning. Do we mention Shin's paper? Josh: This has to be in the Afterword.}
 
 Most likely, the key is parametricity.
-The input to \lstinline{cd} is a tree of values associated with $k$-sublists (for some $1 \le k < n$), and these values are rearranged in relation to |(1 + k)|-sublists.
+The input to \lstinline{cd} is a tree of values associated with $k$-sublists%
+\Josh{Switch to this term instead of `length-|k| sublists'?}
+(for some $1 \le k < n$), and these values are rearranged in relation to |(1 + k)|-sublists.
 Since \lstinline{cd} is parametric in the type of these values, I can just take |k|-sublists themselves and specify how \lstinline{cd} should rearrange them, and then \lstinline{cd} will have to do the same rearrangement for any type of values.
 
 Formally, the first thing to do is define `|k|-sublists' for arbitrary~|k|.
@@ -613,8 +618,8 @@ testBT = bin  (bin  (tipS  (GOAL(p "cd")(G0))  )
                     (tipZ  (GOAL(p "ab")(G5))  ))
 \end{code}
 It's simpler to think of a tree of type |BT_ n k p xs| as a table with all the |k|-sublists of~|xs| as the keys, and for each key~|ys| there's an entry of type |p ys|.
-(So the `T' in |BT| stands for both `tree' and `table'.)%
-\todo{how to find an entry}
+(So the `T' in |BT| stands for both `tree' and `table'.)
+\Josh{We could explain in more detail how to find a key in a tree, but that doesn't seem too important because we don't work with individual entries but all the entries about all the sublists of a particular length at once, and the position of each entry in the tree is not important.}
 
 This |BT| definition is really intriguing\ldots
 The ad hoc feeling I had with~|B'| is completely gone.
@@ -637,7 +642,7 @@ data All : (a → Set) → Vec n a → Set where
 \end{code}
 which should be derivable from the function that non-deterministically returns an element of a list.
 I'm onto something general --- maybe it's interesting enough for an ICFP paper!%
-\todo{Optional paragraph about generality}
+\Josh{A paragraph about generality --- worth saying?}
 
 That paper will have to wait though --- I've still got a problem to solve:
 How do I use |BT| to specify \lstinline{cd}?
@@ -660,7 +665,7 @@ I think it's time to rename \lstinline{cd} to something more meaningful, and dec
 \Jeremy{I'd like to think of a better name.}
 And a side condition |k < n| is needed to guarantee that the output shape |BT_ n sk| is possible.
 
-I go on to transcribe \lstinline{cd} into |retabulate|,
+I go on and transcribe \lstinline{cd} into |retabulate|,
 \begin{code}
 retabulate : (SUPPRESSED(k < n)) → BT(C n k) p xs → BT(C n sk) (BT(C sk k) p) xs
 retabulate {xs =' _ ∷ []     }  (tipZ y)  =  tipS  (tipZ y)
@@ -683,7 +688,7 @@ _∷ᴮᵀ_ : p xs → BT(C sk k) (p ∘ (x ∷_)) xs → BT(C ssk sk) p (x ∷ 
 y ∷ᴮᵀ t = bin (tipS y) t
 \end{code}
 (The type of |_∷ᴮᵀ_| is slightly complex, but Agda pretty much infers it for me.)
-Everything related to the side condition |k < n| is omitted to make it easier to compare with \lstinline{cd}; also omitted are the two cases |tipS _| and |bin _ (tipS _)|, whose shapes are proved to be impossible.
+Everything related to the side condition |k < n| is omitted to make it easier to compare |retabulate| with \lstinline{cd}; also omitted are the two cases |tipS _| and |bin _ (tipS _)|, whose shapes are proved to be impossible.
 I forgot about another side condition |1 ≤ k|, but that leads to two additional |tipZ| cases (which are fairly easy to figure out from the type information) instead of preventing me from completing the definition.
 
 \todo[inline]{Compare \lstinline{cd} and |retabulate|.
@@ -706,7 +711,9 @@ Will dependent types continue to be helpful?
 I should try and find out by transcribing the two algorithms into Agda too.
 
 I go back to the type of the combining function~\lstinline{g}.
-This type \lstinline{L b -> b} has been making me blink involuntarily whenever I see it, because it says so little that \lstinline{g}~can have arbitrarily wild behaviour, which is unsettling.
+This type \lstinline{L b -> b}%
+\Josh{This type is actually not parametric in~\lstinline{b}, but \lstinline{b}~is parametrically quantified in a bigger context; worth clarifying (throughout the paper, and for Agda code too)?}
+has been making me blink involuntarily whenever I see it, because it says so little that \lstinline{g}~can have arbitrarily wild behaviour, which is unsettling.
 The intention that \lstinline{g}~should combine solutions for all the immediate sublists of a list into a solution for the list is nowhere to be seen.
 
 But now I have the right vocabulary to say the intention precisely in Agda:
@@ -1019,8 +1026,8 @@ Given |a : Set| and |s : ∀ {k} → Fam (Vec k a)|, I can write
 g  : BT(C sk k) s  ⇉' s
 e  : const ⊤       ⇉' s
 \end{code}
-It's important to add that |e|~is a morphism in |Fam' (Vec 0 a)|, so that |e|~gives a solution for (only) the empty list.
-%Alternatively, writing |e : const ⊤ ⇉ s {0}| also makes it clear that the morphism is in |Fam' (Vec 0 a)| (because |s {0} : Fam (Vec 0 a)| is an object in |Fam' (Vec 0 a)|), but that looks slightly more verbose.
+It's important to add that |e|~is a morphism in |Fam' (Vec 0 a)|, so that |e|~gives a solution for (only) the empty list.%
+\Josh{Probably switch to the alternative typing |e : const ⊤ ⇉ s {0}| to avoid talking about faces in string diagrams.}
 
 All I've done is merely a bit of abstraction that hides part of the indices, which might even be described as cosmetic.
 However, by rephrasing the types in the categorical language, now I can start talking about \emph{functors} and \emph{natural transformations} sensibly.
@@ -1255,13 +1262,14 @@ The type |BT(C n k) p xs| is propositional if the payload~|p| is pointwise propo
 BT-isProp : (∀ {ys} → isProp (p ys)) → isProp (BT(C n k) p xs)
 \end{code}
 And then the |rotation| equation can be proved trivially by invoking |BT-isProp| twice:
-\Jeremy{alternative line break--- ok?}
+\Jeremy{alternative line break--- ok? Josh: Alternatively, omit the suppressed arguments.}
 \begin{code}
-rotation :  retabulate (SUPPRESSED n>k) (blanks(C n k) (SUPPRESSED nGEQk) tt)
-              ≡ mapBT (blanks(C sk k) (SUPPRESSED(skGEQk))) (blanks(C n sk) (SUPPRESSED nGEQsk) tt)
+rotation : retabulate (blanks(C n k) tt) ≡ mapBT blanks(C sk k) (blanks(C n sk) tt)
 rotation = BT-isProp (BT-isProp refl)
 \end{code}
-All the inequality arguments are universally quantified, but they don't make the proof any more complex, because the proof doesn't look into any of the function definitions.
+As usual, the side conditions of |retabulate| and |blank| are omitted.
+In full detail, they are all universally quantified.
+Usually they make proofs more complex, but not in this case because the proof doesn't look into any of the function definitions.
 As long as the type is blank nested tables, the two sides of an equation can be arbitrarily complicated, and I can still prove them equal just by using |BT-isProp|.
 
 Wait, blank nested tables --- aren't those what the construction phases of both algorithms produce?
@@ -1317,7 +1325,6 @@ All these are for another day, however.%
 %(Two layers of tables only appear due to |retabulate|, which only duplicates and redistributes already computed solutions and doesn't recompute them.)}
 
 
-
 \section*{Afterword}
 
 \todo[inline]{Largely follows the actual development, which we realise makes a nice story, going from the concrete to the abstract (`based on a true story')}
@@ -1334,7 +1341,10 @@ Specifically:
 Fancy types can replace traditional specs and proofs (for example, equality between programs can be proved simply by showing that they have the same, uniquely inhabited type), and are a still under-explored methodology (going beyond length/shape indexing).
 Category theory offers useful abstraction (for sometimes comprehending indexed definitions as if they were simply typed); in particular, the categorical abstraction enables the use of string diagrams to make reasoning with naturality transparent (and in this case the main proof is entirely about naturality and rendered trivial).}
 
+\begin{acks}
 \todo[inline]{We'll eventually need acknowledgements, although presumably they should be omitted for double-blind review. This is a placeholder to remember to thank Julie Summers, Royal Literary Fund Fellow at Kellogg College.}
+\todo[inline]{Liang-Ting offered some helpful suggestions too.}
+\end{acks}
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{bib}
