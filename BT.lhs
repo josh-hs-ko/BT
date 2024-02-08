@@ -324,7 +324,7 @@ Singleton lists form the base cases, processed by a function \lstinline{f}.
 A non-singleton list is decomposed into shorter lists by \lstinline{dc :: L a -> L (L a)}.
 Each shorter list is then recursively processed by \lstinline{td}, before \lstinline{g} combines the results.%
 %\Josh{\lstinline{F} is initially \lstinline{L} and later \lstinline{B}, but this changes the type of \lstinline{g} too (no need for \lstinline{cvt} etc)? Shin: removed \lstinline{F}. I think we still need \lstinline{cvt} after switching to \lstinline{B}.}
-\footnote{The setting in \citet{Bird-zippy-tabulations} is more general: \lstinline{L} need not be a list, and \lstinline{dc} returns an \lstinline{F}-structure of lists. We simplified the setting for ease of discussion.}
+\Shin{We need to somehow mention that ``The setting in \citet{Bird-zippy-tabulations} is more general: \lstinline{L} need not be a list, and \lstinline{dc} returns an \lstinline{F}-structure of lists. We simplified the setting for ease of discussion'' without being out-of-character.}
 
 \begin{figure}[t]
 \centering
@@ -344,19 +344,19 @@ dc (xs ++ [x]) = [xs] ++ [ys ++ [x] || ys <- dc xs]
 (This assumes that a list can be matched with a snoc pattern \lstinline{xs ++ [x]}.)
 To compute \lstinline{td "abcd"}, for example, we need to compute \lstinline{td "abc"}, \lstinline{td "abd"}, \lstinline{td "acd"}, and \lstinline{td "bcd"}, as seen in \cref{fig:td-call-tree}.
 To compute \lstinline{td "abc"} in turn, we need \lstinline{td "ab"}, \lstinline{td "ac"}, and \lstinline{td "bc"}.
-Notice, however, that \lstinline{td "ab"} is invoked again when computing \lstinline{td "abd"}:\Jeremy{use semicolons sparingly!}
-following this top-down computation, many sub-computations are repeated.
+Notice, however, that \lstinline{td "ab"} is invoked again when computing \lstinline{td "abd"}.
+Following this top-down computation, many sub-computations are repeated.
+\Jeremy{use semicolons sparingly! SCM: used a full-stop instead.}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.43\textwidth]{pics/sublists-lattice.pdf}
-\caption{Computing \lstinline{td "abcd"} bottom-up.
-To save space we omitted the \lstinline{td}s.}
+\includegraphics[width=0.75\textwidth]{pics/sublists-lattice.pdf}
+\caption{Computing \lstinline{td "abcd"} bottom-up.}
 \label{fig:sublists-lattice}
 \end{figure}
 
 It is better to proceed bottom-up instead, as depicted in Figure~\ref{fig:sublists-lattice}.%
-\Josh{Maybe add a greyed-out 0-th level.}
+\Josh{Maybe add a greyed-out 0-th level. SCM: Done. Do we need to explain the greying out somewhere?}
 The $n$-th level consists of values of \lstinline{td} at lists of length~$n$.
 We start from level~$1$, and compute level $n+1$ from level~$n$ by reusing the values stored in the latter, until we reach the top level consisting of only one value.
 If the levels are lists, level~$2$ will be
@@ -404,29 +404,30 @@ The function \lstinline{cvt :: L a -> B a} prepares the first level.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.8\textwidth]{pics/map_g_cd.pdf}
+\includegraphics[width=0.68\textwidth]{pics/map_g_cd.pdf}
 \caption{How \lstinline{mapB g . cd} constructs a new level.
-Again, \lstinline{ab}, \lstinline{ac}... etc. denote results of \lstinline{td}, not the sublists themselves.}
+Note that to save space we omit \lstinline{td}, thus \lstinline{ab}, \lstinline{ac}... etc. denote results of \lstinline{td}, not the sublists themselves.}
 \label{fig:map_g_cd}
 \end{figure}
 
 I try to trace Richard's \lstinline{cd} to find out how it works.
-Given input \lstinline{"abcde"}, the function \lstinline{cvt} yields a tree that is slanted to the left as level $1$:
+Given input \lstinline{"abcd"}, the function \lstinline{cvt} yields a tree that is slanted to the left as level $1$:
 %\Josh{Wrong order? Shin: Richard's \lstinline{cvt} is \lstinline{foldl1 Bin . map Tip}.. so it is his order. If that's not consistent with ours... let's think about what to do. :(}
 \begin{lstlisting}
-Bin (Bin (Bin (Bin (Tip 'a') (Tip 'b')) (Tip 'c')) (Tip 'd')) (Tip 'e')
+Bin (Bin (Bin (Tip 'a') (Tip 'b')) (Tip 'c')) (Tip 'd')
 \end{lstlisting}
 Following Richard's convention, I draw a \lstinline{Tip x} as \lstinline{x}, and draw \lstinline{Bin t u} as a dot with \lstinline{t} to its left and \lstinline{u} below, resulting in the tree labelled (1)
 in Figure~\ref{fig:map_g_cd}.
 Applying \lstinline{mapB g . cd} to this, I get level $2$, labelled (2) in the figure.
 For a closer look, I apply \lstinline{cd} to level $2$.
 Indeed, with its clever mapping and zipping, \lstinline{cd} managed to bring together precisely the right elements (labelled (2.5) in Figure~\ref{fig:map_g_cd}), so that when we apply \lstinline{mapB g}, we get level $3$.
-\Shin{I added the second sentence in the caption of Figure~\ref{fig:map_g_cd}. I think it's probably necessary because I myself got confused from time to time.
-Josh: This might be related to the question about the role of~|p| in |BT|.}
-\Josh{Should update this paragraph and \cref{fig:map_g_cd} for just \lstinline{"abcd"}.
-SCM: But I think we need an input with 5 elements to see more structure in the tree. I'd rather update previous examples to \lstinline{"abcde"} if we have to...
-It's probably too much to use \lstinline{"abcde"} in S3, however.
-Josh: We don't see that the numbers are related to binomial coefficients ourselves --- Richard told us. So I'd say seeing more of the numbers is not more important than consistency. Ultimately the question may be: what's the necessary information in this example for figuring out the indexing of~|B|? I suspect five elements are not more useful than four.}
+%\Shin{I added the second sentence in the caption of Figure~\ref{fig:map_g_cd}. I think it's probably necessary because I myself got confused from time to time.
+%Josh: This might be related to the question about the role of~|p| in |BT|.}
+%\Josh{Should update this paragraph and \cref{fig:map_g_cd} for just \lstinline{"abcd"}.
+%SCM: But I think we need an input with 5 elements to see more structure in the tree. I'd rather update previous examples to \lstinline{"abcde"} if we have to...
+%It's probably too much to use \lstinline{"abcde"} in S3, however.
+%Josh: We don't see that the numbers are related to binomial coefficients ourselves --- Richard told us. So I'd say seeing more of the numbers is not more important than consistency. Ultimately the question may be: what's the necessary information in this example for figuring out the indexing of~|B|? I suspect five elements are not more useful than four.
+%SCM: changed the picture.}
 
 This still does not give me much insight into why \lstinline{cd} works.
 Presumably \lstinline{cd} does not do something useful on arbitrary binary trees, only the trees built by \lstinline{cvt} and \lstinline{cd} itself.
@@ -434,7 +435,7 @@ What are the constraints on these trees, and how does \lstinline{cd} exploit the
 %\Josh{To be explicitly responded at the end of S3}
 Richard did give some hint: if we compute the sizes of subtrees along their left spines (see the red numbers in Figure~\ref{fig:map_g_cd}),%
 \Jeremy{``Aha!''}
-$[1,2,3,4,5]$, $[1,3,6,10]$, and $[1,4,10]$ are the first three diagonals of Pascal's triangle --- the trees are related to binomial coefficients!
+$[1,2,3,4]$, $[1,3,6]$, and $[1,4]$ are the first three diagonals of Pascal's triangle --- the trees are related to binomial coefficients!
 So the name \lstinline{B} could refer to `binomial' in addition to `binary'.
 
 Given these clues, how do we prove that \lstinline{cd} indeed does the job --- bringing values about related immediate sublists together?
@@ -583,7 +584,7 @@ The goal types of the even-numbered holes are all~|b|, and the odd-numbered hole
 It does work!
 
 |B'|~doesn't look bad, but I can't help raising an eyebrow.
-With some more effort, I suppose I could refine the type of |cd| to use~|B'| and encode the full specification. 
+With some more effort, I suppose I could refine the type of |cd| to use~|B'| and encode the full specification.
 But the refined |cd| would need to manipulate the equality proofs in those trees, and maybe eventually I'd still be doing essentially the same tedious equational reasoning that I want to avoid.
 Another problem is that the upgraded |cd| would only work on trees of sublists, whereas the original \lstinline{cd} works on trees of \emph{any} type of values.
 Indeed, the specification talks about the behaviour of \lstinline{cd} on trees of sublists only; by encoding the specification in the type, I'd actually restrict |cd| to trees of sublists.
