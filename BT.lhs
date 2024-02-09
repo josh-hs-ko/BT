@@ -702,6 +702,18 @@ y ∷ᴮᵀ t = bin (tipS y) t
 Everything related to the side condition |k < n| is omitted to make it easier to compare |retabulate| with \lstinline{cd}; also omitted are the two cases |tipS _| and |bin _ (tipS _)|, whose shapes are proved to be impossible.
 I forgot about another side condition |1 ≤ k|, but that leads to two additional |tipZ| cases (which are fairly easy to figure out from the type information) instead of preventing me from completing the definition.
 
+The first two cases of \lstinline{cd} are subsumed by the third case, |bin (tipS y) u|, of |retabulate|.
+The second case of \lstinline{cd} recursively traverses the given tree to convert it to a list, which is not needed in |retabulate|, which yields a tree of trees.
+Therefore the first two cases of \lstinline{cd} can be unified into one.
+Meanwhile, the first two cases of |retabulate| concerning |tipZ| are new.
+While \lstinline{cd} has to start from level-1,
+these two cases of |retabulate| is capable of producing a level-1 table (with as many elements as |xs|) from a level-0 table, which is a |tipZ|.
+This is due to that |xs|~is now available as an index, providing enough information for |retabulate|.
+The definition has been verified simply by finding the (or rather, a) right type for it!
+There's actually no need to understand the definition of \lstinline{cd}/|retabulate| now, but I can still go through a case or two to see how well type-directed programming works.
+\Shin{Are these what we intent to say here?
+BTW, perhaps ``The definition has been verified simply by finding the [type] ... There's actually no need to understand the definition...'' should not be said right after we just examined the definition, but be integrated into the next paragraph instead.}
+
 \todo[inline]{Compare \lstinline{cd} and |retabulate|.
 (In particular, the additional |tipZ| cases of |retabulate| are responsible for producing a level-1 table (with as many elements as |xs|) from a level-0 table, which is a |tipZ|.
 Since |xs|~is available as an index, there's now enough information for going from level~0 to level~1 (on the sublist lattice).)
