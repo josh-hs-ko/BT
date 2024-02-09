@@ -242,7 +242,7 @@
 \title{Binomial Tabulation: A Short Story (Functional Pearl)}
 
 \begin{abstract}
-\todo[inline]{Abstract: a demonstration of dependent types and string diagrams for the functional programmer (ideally already with a bit exposure to dependent types and category theory and not put off by basic concepts like indexed types, functors, and so on)}
+\todo[inline]{Abstract: a demonstration of dependent types and string diagrams for the functional programmer (ideally already with a bit exposure to dependent types and category theory and not put off by basic concepts like indexed types, functors, and so on); an outline of the paper}
 \end{abstract}
 
 %\begin{CCSXML}
@@ -290,11 +290,11 @@
 I stare at the late Richard Bird's `Zippy Tabulations of Recursive Functions'~\citeyearpar{Bird-zippy-tabulations}, frowning.
 
 \begin{lstlisting}
-cd                        :: B a -> B (L a)
-cd (Bin (Tip x) (Tip y))  =  Tip [x, y]
-cd (Bin t (Tip y))        =  Bin (cd t) (mapB (: [y]) t)
-cd (Bin (Tip y) u)        =  Tip (y : ys) where Tip ys = cd u
-cd (Bin t u)              =  Bin (cd t) (zipBWith (:) t (cd u))
+cd :: B a -> B (L a)
+cd (Bin (Tip x) (Tip y)) = Tip [x, y]
+cd (Bin (Tip y) u)       = Tip (y : ys) where Tip ys = cd u
+cd (Bin t (Tip y))       = Bin (cd t) (mapB (: [y]) t)
+cd (Bin t u)             = Bin (cd t) (zipBWith (:) t (cd u))
 \end{lstlisting}
 
 I know \lstinline{B} is this Haskell datatype of trees,
@@ -485,7 +485,7 @@ data B : ℕ → ℕ → Set → Set where
 \end{code}
 The idea is that the \emph{size} of a tree of type |B n k a| with $k \le n$ is precisely the binomial coefficient~|CHOOSE n k|. Naturally, there are no trees of type |B n k a| when $k > n$.
 Like |Vec|, the indices $n, k$ determine the constructors:%
-\footnote{It would seem that both |tipS| and |bin| are possible for the case |B(C sk sk) a| (so that the indices don't determine the constructor), but |bin| is actually impossible because its left sub-tree would have type |B(C sk ssk) a|, which is uninhabited.}\Jeremy{inline this footnote?}
+\footnote{It would seem that both |tipS| and |bin| are possible for the case |B(C sk sk) a| (so that the indices don't determine the constructor), but |bin| is actually impossible because its left sub-tree would have type |B(C sk ssk) a|, which can be shown to be uninhabited.}\Jeremy{inline this footnote?}
 If |k|~is |zero|, then the tree is a |tipZ| with one element (|CHOOSE n 0 =' 1|).
 Otherwise, if |n|~is |suc k|, then the tree is a |tipS| also with one element (|CHOOSE sk sk =' 1|).
 Otherwise the tree is a |bin|, and the sizes |CHOOSE n sk| and |CHOOSE n k| of the two sub-trees add up to the intended size |CHOOSE sn sk| of the whole tree.
@@ -651,7 +651,7 @@ data All : (a → Set) → Vec n a → Set where
 \end{code}
 which should be derivable from the function that non-deterministically returns an element of a list.
 I'm onto something general --- maybe it's interesting enough for an ICFP paper!%
-\Josh{A paragraph about generality --- worth saying?}
+\Josh{A paragraph about generality --- worth saying? Make it clear that the paragraph is about future work.}
 
 \pause
 
@@ -681,8 +681,8 @@ I go on and transcribe \lstinline{cd} into |retabulate|,
 retabulate : (SUPPRESSED(k < n)) → BT(C n k) p xs → BT(C n sk) (BT(C sk k) p) xs
 retabulate {xs =' _ ∷ []     }  (tipZ y)  =  tipS  (tipZ y)
 retabulate {xs =' _ ∷ _ ∷ _  }  (tipZ y)  =  bin   (retabulate (tipZ y)) (tipZ (tipZ y))
-retabulate (bin t         (tipZ y)  )     =  bin   (retabulate t) (mapBT (_∷ᴮᵀ (tipZ y)) t)
 retabulate (bin (tipS y)  u         )     =  tipS  (y ∷ᴮᵀ u)
+retabulate (bin t         (tipZ y)  )     =  bin   (retabulate t) (mapBT (_∷ᴮᵀ (tipZ y)) t)
 retabulate (bin t         u         )     =  bin   (retabulate t)
                                                    (zipBTWith _∷ᴮᵀ_ t (retabulate u))
 \end{code}
