@@ -9,8 +9,8 @@
 		\node [style=none] (6) at (0, -2) {};
 		\node [style=none] (7) at (0, -2.5) {$\mathit{F}$};
 		\node [style=none] (8) at (0, 2.5) {$\mathit{H}$};
-		\node [style=none] (9) at (-1, -1.125) {$\alpha$};
-		\node [style=none] (10) at (-1, 1.125) {$\beta$};
+		\node [style=none] (9) at (1, -1.125) {$\alpha$};
+		\node [style=none] (10) at (1, 1.125) {$\beta$};
 	\end{pgfonlayer}
 	\begin{pgfonlayer}{edgelayer}
 		\draw [style=Wire] (6.center) to (4);

@@ -19,9 +19,9 @@
 		\node [style=none] (17) at (3, 8) {};
 		\node [style=none] (18) at (3, 8.5) {$\top$};
 		\node [style=none] (19) at (1, 8.5) {$\mathsf{BT}^1_0$};
-		\node [style=none] (20) at (4.5, 7) {$\mathsf{blanks}^1_0$};
-		\node [style=none] (21) at (3.5, 4.5) {$\mathsf{blanks}^2_1$};
-		\node [style=none] (22) at (2.5, 2) {$\mathsf{blanks}^3_2$};
+		\node [style=none] (20) at (4.5, 7) {$\mathsf{blank}^1_0$};
+		\node [style=none] (21) at (3.5, 4.5) {$\mathsf{blank}^2_1$};
+		\node [style=none] (22) at (2.5, 2) {$\mathsf{blank}^3_2$};
 		\node [style=none] (26) at (3, 9) {};
 		\node [style=none] (29) at (3, 10.5) {};
 		\node [style=none] (30) at (3, 11) {$\mathit{s}$};

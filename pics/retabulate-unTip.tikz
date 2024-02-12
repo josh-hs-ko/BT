@@ -7,11 +7,11 @@
 		\node [style=none] (5) at (-1, 1.5) {$\mathsf{BT}^\mathit{n}_{1+\mathit{k}}$};
 		\node [style=none] (6) at (1.25, 1.5) {$\mathsf{BT}^{1+\mathit{k}}_\mathit{k}$};
 		\node [style=none] (7) at (0.125, -1.5) {$\mathsf{BT}^\mathit{n}_\mathit{k}$};
-		\node [style=Natural transformation] (11) at (5, 0) {};
-		\node [style=none] (12) at (5, -1) {};
-		\node [style=none] (13) at (5.125, -1.5) {$\mathsf{BT}^\mathit{n}_\mathit{n}$};
+		\node [style=Natural transformation] (11) at (6, 0) {};
+		\node [style=none] (12) at (6, -1) {};
+		\node [style=none] (13) at (6.125, -1.5) {$\mathsf{BT}^\mathit{n}_\mathit{n}$};
 		\node [style=none] (15) at (-3, 0) {$\mathsf{retabulate}$};
-		\node [style=none] (16) at (7, 0) {$\mathsf{unTip}$};
+		\node [style=none] (16) at (8, 0) {$\mathsf{unTip}$};
 	\end{pgfonlayer}
 	\begin{pgfonlayer}{edgelayer}
 		\draw [style=Wire] (3.center) to (0);

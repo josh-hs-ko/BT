@@ -204,10 +204,10 @@ retabulate-natural (s≤s 1+n>1+k) h (bin t@(bin t' _) u@(bin _ _)) = cong₂ bi
 
 module Algorithms
   {A : Set} (S : {k : ℕ} → Fam (Vec A k))
-  (e : ∀[ Vec A 0 ] const ⊤ ⇉ S) (g : {k : ℕ} → BT (suc k) k S ⇉ S)
+  (e : const ⊤ ⇉ S {0}) (g : {k : ℕ} → BT (suc k) k S ⇉ S)
   where
 
-  td : (n : ℕ) → ∀[ Vec A n ] const ⊤ ⇉ S
+  td : (n : ℕ) → const ⊤ ⇉ S {n}
   td  zero   = e
   td (suc n) = g ∘ mapBT (td n) ∘ blanks (suc n) n 1+n≥n
     where 1+n≥n = ≤′-step ≤′-refl
@@ -216,7 +216,7 @@ module Algorithms
   bu-loop  ≤‴-refl        = id
   bu-loop (≤‴-step n≥1+k) = bu-loop n≥1+k ∘ mapBT g ∘ retabulate (≤‴⇒≤ n≥1+k)
 
-  bu : (n : ℕ) → ∀[ Vec A n ] const ⊤ ⇉ S
+  bu : (n : ℕ) → const ⊤ ⇉ S {n}
   bu n = unTip ∘ bu-loop (≤⇒≤‴ z≤n) ∘ mapBT e ∘ blanks n 0 (≤⇒≤′ z≤n)
   -- bu n = unTip ∘ bu-loop (≤⇒≤‴ z≤n) ∘ tipZ ∘ e
 
@@ -308,7 +308,7 @@ module Production where
 
 module Consumption-and-Correctness
   {A : Set} (S : {k : ℕ} → Fam (Vec A k))
-  (e : ∀[ Vec A 0 ] const ⊤ ⇉ S) (g : {k : ℕ} → BT (suc k) k S ⇉ S)
+  (e : const ⊤ ⇉ S {0}) (g : {k : ℕ} → BT (suc k) k S ⇉ S)
   where
 
   open Algorithms S e g
