@@ -1,4 +1,10 @@
-\documentclass[acmsmall,fleqn,screen,review]{acmart}
+%let anonymous = True
+
+\documentclass[%
+%if anonymous
+anonymous,
+%endif
+acmsmall,fleqn,screen,review]{acmart}
 
 \settopmatter{printccs=false, printacmref=false}
 \setcopyright{none}
@@ -1434,7 +1440,8 @@ Fancy types can replace traditional specs and proofs (for example, equality betw
 Category theory offers useful abstraction (for sometimes comprehending indexed definitions as if they were simply typed); in particular, the categorical abstraction enables the use of string diagrams to make reasoning with naturality transparent (and in this case the main proof is entirely about naturality and rendered trivial).}
 
 \begin{acks}
-\todo[inline]{We'll eventually need acknowledgements, although presumably they should be omitted for double-blind review. This is a placeholder to remember to thank Julie Summers, Royal Literary Fund Fellow at Kellogg College.}
+% omitted automatically in anonymous mode
+\todo[inline]{We'll eventually need acknowledgements. This is a placeholder to remember to thank Julie Summers, Royal Literary Fund Fellow at Kellogg College.}
 \todo[inline]{Liang-Ting offered some helpful suggestions too.}
 \end{acks}
 
