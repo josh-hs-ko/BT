@@ -483,6 +483,8 @@ I'm worried that there will be many complex proofs waiting ahead for me.
 
 \section{Types}
 
+\subsection{Shapes in Types}
+
 To start with something easier:
 One thing in \lstinline{cd} that's been bothering me is the use of \lstinline{zipBWith}.
 Why is the zip justified~--- what if the two trees have different shapes?
@@ -490,8 +492,6 @@ Perhaps the two trees \emph{cannot} have different shapes\ldots
 Proving that seems to be a good first exercise, because there's a standard solution: capturing the tree shape in its type.
 Shape-indexed data types are so common now that I'm tempted to say that they should count as simple types, and they are common even in Haskell.
 I prefer a proper dependently typed language though, so I open my favourite editor, and switch to Agda.
-
-\subsection{Shapes in Types}
 
 The classic example of shape-indexing is, of course, length-indexed lists:%
 \todo{using variable declarations}
@@ -579,8 +579,8 @@ But I can already imagine that would involve a large amount of tedious equationa
 
 My editor is still running Agda and showing the shape-indexed version of |cd|, with |B(C n k)| in its type.
 The whole point of programming with inductive families such as |B(C n k)| is to `say more and prove less':
-Encode more properties in the indices, so that those properties are automatically taken care of as programs construct and deconstruct indexed data, requiring fewer proofs.
-\Jeremy{Well: the same proofs, but relegating them to the typechecker.}
+Encode more properties in the indices, so that those properties are automatically taken care of as programs construct and deconstruct indexed data, requiring fewer manual proofs.
+%\Jeremy{Well: the same proofs, but relegating them to the typechecker.}
 Instead of just the shapes, maybe it's possible to extend |B(C n k)| and encode the \emph{entire} specification of \lstinline{cd} in its type?
 
 What the specification says is basically that \lstinline{cd} should transform a tree produced by \lstinline{choose} into another one also produced by \lstinline{choose} and then processed using a \lstinline{mapB}.
@@ -673,9 +673,9 @@ Take the (expanded) type of |bin| for example:
 bin  :   BT n (suc  k)  (λ ys  → p ys)        xs
      →'  BT n       k   (λ zs  → p (x ∷ zs))  xs  → BT (suc n) (suc k) p (x ∷ xs)
 \end{code}
-I can read it as `to compute a |(1 + k)|-sublist of |x ∷ xs| and pass it to continuation~|p|, either compute a |(1 + k)|-sublist |ys| of |xs| and pass |ys| to |p| directly, or compute a |k|-sublist |zs| of |xs| and pass |x ∷ zs|' to |p|.
-All the `returned results' from |p| are then collected in a tree as the indices of the element types.
-\Shin{Changed some ``return'' to ``pass'' and added ``to |p|'', ``from |p|'' etc., to make it clearer --- if my understanding is correct.}
+I can read it as `to compute a |(1 + k)|-sublist of |x ∷ xs| and pass it to continuation~|p|, either compute a |(1 + k)|-sublist |ys| of |xs| and pass |ys| to |p| directly, or compute a |k|-sublist |zs| of |xs| and pass |x ∷ zs| to~|p|'.
+All the results from |p| are then collected in a tree as the indices of the element types.
+%\Shin{Changed some ``return'' to ``pass'' and added ``to |p|'', ``from |p|'' etc., to make it clearer --- if my understanding is correct.}
 Another similar and familiar example is
 \begin{code}
 data All : (a → Set) → Vec n a → Set where
@@ -737,7 +737,7 @@ Therefore the first two cases of \lstinline{cd} can be unified into one.
 Meanwhile, the first two cases of |retabulate| concerning |tipZ| are new.
 While \lstinline{cd} has to start from level-1,
 this pair of cases of |retabulate| is capable
-\Jeremy{``these two cases \emph{are} capable'', if either of them alone is capable; but ``this pair of cases \emph{is} capable'' if it requires both of them together. SCM: It should be the latter case. Fixed.}
+%\Jeremy{``these two cases \emph{are} capable'', if either of them alone is capable; but ``this pair of cases \emph{is} capable'' if it requires both of them together. SCM: It should be the latter case. Fixed.}
 of producing a level-1 table (with as many elements as |xs|) from a level-0 table, which is a |tipZ|.
 This is due to |xs| now being available as an index, providing the missing context for |retabulate|.
 The definition has been verified simply by finding the (or rather, a) right type for it!
@@ -781,10 +781,8 @@ So
 g : ∀ {k} → {ys : Vec (2 + k) a} → BT(C ssk sk) s ys → s ys
 \end{code}
 \end{temp}
-I look at this with an involuntary
-\Jeremy{that's the second ``involuntary'': ``knowing smile''? ``satisfied smile''?}
-smile --- now that's what I call
-\Jeremy{British pop-cultural reference}
+I look at this with a satisfied smile --- now that's what I call
+%\Jeremy{British pop-cultural reference}
 a nice and informative type!
 It says concisely and precisely what |g|~does: compute a solution for any |ys : Vec (2 + k) a| from a table of solutions for all the length-|(1 + k)| (that is, immediate) sublists of |ys|.
 
@@ -1013,8 +1011,7 @@ Now choose the invariant that any proof of |p m| is equal to the one produced by
   param (λ {m} x → x ≡ ind p pz ps m) refl (cong ps)
   -- |cong : (f : a → b) → x ≡ y → f x ≡ f y|
 \end{code}
-The same argument works for |ImmediateSublistInduction| --- any function of the type satisfying unary parametricity is pointwise equal to |td|.%
-\todo{update code}
+The same argument works for |ImmediateSublistInduction| --- any function of the type satisfying unary parametricity is pointwise equal to |td|.
 I finish the Agda proofs for both induction principles in a dreamlike state.
 
 \begin{aha}
@@ -1061,7 +1058,8 @@ More importantly, some notions that prove to be useful in functional programming
 
 A clue about the kind of category I'm in is that I'm tempted to say `|retabulate| transforms a tree of |p|'s to a tree of trees of |p|'s'.
 When a simply typed functional programmer says `a tree of something', that `something' is a type, that is, an object in the category |Fun| of types and functions.
-But here |p|~is a type family.
+But here |p|~is not a type.
+It's a type family.
 So I've left |Fun| and landed in a kind of category where the objects are type families.
 
 There are quite a few versions of `categories of families'.

@@ -1,6 +1,6 @@
-{-# OPTIONS --safe --large-indices --no-forced-argument-recursion #-}
-
 -- Checked with Agda 2.6.4.1 and Standard Library 2.0
+
+{-# OPTIONS --safe --large-indices --no-forced-argument-recursion #-}
 
 module BinomialTabulation where
 
