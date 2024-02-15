@@ -287,9 +287,11 @@ acmsmall,fleqn,screen,review]{acmart}
 
 \maketitle
 
-\todo[inline]{Proposal of `chapter' headings (replacing the current sections): `Simple Types' for (the original) S1 \& S2, `Dependent Types' for S3 \& S4, and `String Diagrams' for S5 \& S6, which are the languages used in the chapters. JG: how about `Functions', `Types', `Diagrams'? or `Functional Programming', `Dependent Types', `Category Theory'? I think we \emph{do} need subsections now; \S2 is a rather indigestible 10pp lump.}
+\todo[inline]{Proposal of `chapter' headings (replacing the current sections): `Simple Types' for (the original) S1 \& S2, `Dependent Types' for S3 \& S4, and `String Diagrams' for S5 \& S6, which are the languages used in the chapters. JG: how about `Functions', `Types', `Diagrams'? or `Functional Programming', `Dependent Types', `Category Theory'? I think we \emph{do} need subsections now; \S2 is a rather indigestible 10pp lump. Josh: Added some subsections.}
 
-\section{Simple Types}
+\tableofcontents
+
+\section{Functions}
 
 `What on earth is this function doing?'
 
@@ -478,7 +480,7 @@ I'm worried that there will be many complex proofs waiting ahead for me.
 %But I still couldn’t see, \emph{formally}, how to make sense of the definition of \lstinline{cd} or get from the definition to a correctness proof of \lstinline{bu}.
 %\todo{Main question; even suggest there's a lot of proving ahead (actually not)}
 
-\section{Dependent Types}
+\section{Types}
 
 To start with something easier:
 One thing in \lstinline{cd} that's been bothering me is the use of \lstinline{zipBWith}.
@@ -488,7 +490,10 @@ Proving that seems to be a good first exercise, because there's a standard solut
 Shape-indexed data types are so common now that I'm tempted to say that they should count as simple types, and they are common even in Haskell.
 I prefer a proper dependently typed language though, so I open my favourite editor, and switch to Agda.
 
-The classic example of shape-indexing is, of course, length-indexed lists:
+\subsection{Shapes in Types}
+
+The classic example of shape-indexing is, of course, length-indexed lists:%
+\todo{using variable declarations}
 \begin{code}
 data Vec : ℕ → Set → Set where
   []   :                Vec    zero    a
@@ -535,7 +540,7 @@ I complete the transcription without any problem, so my guess is correct. And it
 However, the transcription does involve a bit of extra proof burden about the two (greyed out) `side conditions' |1 ≤ k| and |k < n| of |cd|, which I temporarily ignore whenever I call |cd|. That is, I write ``|cd u|'' as if |cd| were a function with only one explicit argument.
 Agda ensures that I don't forget about these ignored conditions in the final code though.
 
-\pause
+\subsection{Properties in Types}
 
 So much for the shape.
 But how do I know that the contents are correct~--- that \lstinline{cd} is correctly rearranging the values?
@@ -608,7 +613,8 @@ testB' = bin  (bin  (tipS  (GOAL(b)(G0)) (GOAL(?0 ≡ h "cd")(G1)))
 As I construct the tree interactively, I realise that the indices don't determine the constructor \emph{directly}.
 Whenever I instruct Agda to fill in a constructor for a type of the form |B'_ sk sk|\;\ldots, Agda complains that it cannot decide between |tipS| and |bin|.
 But |bin| is actually impossible because its left subtree would have type |B'_ sk ssk|\;\ldots, which can be proved to be uninhabited.
-So the indices do determine the constructor, although a bit more effort is needed to see that.
+So the indices do determine the constructor, although a bit more effort is needed to see that.%
+\todo{move this forward for~|B|}
 Other than this small problem, things work as expected:
 The goal types of the even-numbered holes are all~|b|, and the odd-numbered holes require proofs that the even-numbered holes are equal to |h zs| for all the |2|-sublists |zs| of |"abcd"|.
 
@@ -678,7 +684,7 @@ which should be derivable from the function that non-deterministically returns a
 I'm onto something general --- maybe it's interesting enough for an ICFP paper!
 %\Josh{A paragraph about generality --- worth saying? Make it clear that the paragraph is about future work.}
 
-\pause
+\subsection{Specifications as Types}
 
 That paper will have to wait though --- I've still got a problem to solve:
 How do I use |BT| to specify \lstinline{cd}?
@@ -753,7 +759,7 @@ The shape of the output table is completely determined by the indices; moreover,
 Formally, the proof will most likely be based on parametricity.
 That'll probably be a fun exercise\ldots but I'll leave that for another day.
 
-\pause
+\subsection{Equality from Types}
 
 Right now I'm more eager to find out why the bottom-up algorithm \lstinline{bu} equals the top-down \lstinline{td}.
 Will dependent types continue to be helpful?
@@ -889,9 +895,9 @@ So, instead of |choose|, I can use
 \begin{temp}
 \begin{code}
 blank : (n k : ℕ) → k ≤↑ n → {xs : Vec n a} → BT(C n k) (const ⊤) xs
-blank _          zero    _          = tipZ tt
-blank (suc k) (  suc k)     zero    = tipS tt
-blank (suc n) (  suc k)  (  suc d)  = bin (blank n (suc k) d) (blank n k (incr d))
+blank _          zero    _                  = tipZ tt
+blank (suc k) (  suc k)     zero            = tipS tt
+blank (suc n) (  suc k)  (  suc d) {_ ∷ _}  = bin (blank n (suc k) d) (blank n k (incr d))
 \end{code}
 \end{temp}
 to construct a blank table indexed by all the immediate sublists in the inductive case of |td|, where I'll then compute and fill in solutions for all the immediate sublists by invoking |td| inductively, and finally invoke~|g| to combine all those solutions.
@@ -965,8 +971,6 @@ The remaining goal |0 ↓≤ n| in |bu| is actually non-trivial, but the Agda st
 
 Another nice-looking implementation of |ImmediateSublistInduction|!
 
-\pause
-
 Okay, I've made the type of both |td| and |bu| precise.
 How does this help me prove |td| equals |bu|?
 The definitions still look rather different except for their type.
@@ -1027,7 +1031,7 @@ Somehow I feel empty though.
 I was expecting a more traditional proof based on equational reasoning, which may require more work, but allows me to compare what |td| and |bu| do \emph{intensionally}, which is an aspect overlooked from the parametricity perspective.
 Despite having a proof now, I think I'm going to have to delve into the definitions anyway to get a clearer picture of their relationship.
 
-\section{String Diagrams}
+\section{Diagrams}
 
 %\todo[inline]{Not a category theory tutorial; more like a companion to a tutorial or a textbook, or an invitation to learn categorical tools (as well as dependent types and string diagrams for that matter) by providing intuitions and practical examples from the immediate-sublist computation; mention this meta-level goal in the abstract and the afterword.}
 
@@ -1044,7 +1048,7 @@ I've seen how dramatically string diagrams simplify proofs about natural transfo
 
 But before I get to string diagrams, I need to work through some basic category theory\ldots
 
-\pause
+\subsection{From Categories to String Diagrams}
 
 Functional programmers are familiar with types and functions, and know when functions can be composed sequentially --- when adjacent functions meet at the same type.
 And it's possible to compose an empty sequence of functions, in which case the result is an identify function.
@@ -1187,7 +1191,7 @@ It's kind of technical, but in the end these diagrams are okay.
 %\todo[inline]{Recap of string diagrams for 2-categories, i.e., layered type structure (composition of functors); layers may be transformed independently of others, and this intuition is captured by the definition of natural transformations.
 %The two sides of a traditional naturality equation look rather different, whereas in a diagrammatic equation the two sides are `the same picture', allowing us to change perspectives effortlessly.}
 
-\pause
+\subsection{Diagrammatic Reasoning}
 
 All the abstract nonsense took me some time.
 But I still don't know whether string diagrams will actually help me understand the two algorithms.
@@ -1429,7 +1433,6 @@ All these are for another day, however.
 %Overlapping subproblems occur in two layers of tables, and they are solved repetitively when |g|~is used to produce two or more layers of tables, which is what the top-down algorithm does after creating deeply nested tables.
 %The bottom-up algorithm avoids the repetitive computation because it always uses~|g| to produce only one layer of table.
 %(Two layers of tables only appear due to |retabulate|, which only duplicates and redistributes already computed solutions and doesn't recompute them.)}
-
 
 \section*{Afterword}
 
