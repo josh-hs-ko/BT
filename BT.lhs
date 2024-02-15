@@ -446,7 +446,8 @@ Following Richard's convention, I draw a\csp\lstinline{Tip x}\csp as \lstinline{
 \Josh{(Caption of \cref{fig:map_g_cd}) `Note that to save space we omit \lstinline{td}, thus \lstinline{ab}, \lstinline{ac}... etc. denote results of \lstinline{td}, not the sublists themselves.' We have space now.}
 Applying\csp\lstinline{mapB g . cd}\csp to this, I get level~$2$. % labelled (2) in the figure.
 For a closer look, I apply only \lstinline{cd} to level~$2$.
-Indeed, with its clever mapping and zipping, \lstinline{cd} manages to bring together precisely the right elements, and produces a `level~$2.5$'.
+Indeed, with its clever mapping and zipping, \lstinline{cd} manages to bring together precisely the right elements, and produces a
+`level~$2{}^{1\!}/_{\!2}$'. % `level~$2.5$'.
 Then I reach level~$3$ by applying\csp\lstinline{mapB g}.
 %\Shin{I added the second sentence in the caption of Figure~\ref{fig:map_g_cd}. I think it's probably necessary because I myself got confused from time to time.
 %Josh: This might be related to the question about the role of~|p| in |BT|.}
