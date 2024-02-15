@@ -340,7 +340,7 @@ But I'm working with this simplified version as an easier starting point.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.5\textwidth]{pics/td-call-tree.pdf}
+\includegraphics[width=0.95\textwidth]{pics/td-call-tree.pdf}
 \caption{Computing\csp\lstinline{td "abcd"}\csp top-down.}
 \label{fig:td-call-tree}
 \end{figure}
@@ -358,7 +358,7 @@ In turn, computing a solution for \lstinline{"abc"} requires subsolutions for \l
 When the problem decomposition reaches length-$2$ sublists ---~that's a bit of a mouthful, so let me just say `$2$-sublists' for short~--- it becomes evident that this \lstinline{dc} leads to \emph{overlapping subproblems}, and \lstinline{td} deals with that very inefficiently.
 For example, a solution for \lstinline{"ab"} is required for solving the problem for \lstinline{"abc"} and \lstinline{"abd"}, and \lstinline{td} computes that solution twice.
 And it gets worse further down: A solution for each $1$-sublist is computed $6$~times!
-\Josh{We probably have space for the entire call tree. And how about making all the \lstinline{td}s in all the figures slightly transparent and less obtrusive?}
+\Josh{We probably have space for the entire call tree. And how about making all the \lstinline{td}s in all the figures slightly transparent and less obtrusive? SCM: Tried to fit them all in, and used grey for \lstinline{td}.}
 
 \begin{figure}[t]
 \centering
@@ -369,7 +369,7 @@ And it gets worse further down: A solution for each $1$-sublist is computed $6$~
 
 It's better to proceed bottom-up instead, working upwards through a lattice of sublists~(Figure~\ref{fig:sublists-lattice}), level by level.
 %\Josh{Maybe add a greyed-out 0-th level. SCM: Done. Do we need to explain the greying out somewhere?}
-\Josh{Maybe remove the links between levels $0$~and~$1$.}
+\Josh{Maybe remove the links between levels $0$~and~$1$. SCM: Done.}
 Level~$1$ consists of solutions for the $1$-sublists.
 Then solutions for the $(k+1)$-sublists in level $k+1$ are computed from subsolutions in level~$k$.
 Finally, the top level consists of a single solution, for the input list.
@@ -431,7 +431,7 @@ cvt (xs ++ [x]) = Bin (cvt xs) (Tip x)
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.68\textwidth]{pics/map_g_cd.pdf}
+\includegraphics[width=0.8\textwidth]{pics/map_g_cd.pdf}
 \caption{How\csp\lstinline{mapB g . cd}\csp constructs a new level.}
 \label{fig:map_g_cd}
 \end{figure}
@@ -443,7 +443,7 @@ Given input \lstinline{"abcd"}, the function\csp\lstinline{cvt . map f}\csp yiel
 Bin (Bin (Bin (Tip (td "a")) (Tip (td "b"))) (Tip (td "c"))) (Tip (td "d"))
 \end{lstlisting}
 Following Richard's convention, I draw a\csp\lstinline{Tip x}\csp as \lstinline{x}, and draw\csp\lstinline{Bin t u}\csp as a dot with~\lstinline{t} to its left and \lstinline{u}~below~(\cref{fig:map_g_cd}).
-\Josh{(Caption of \cref{fig:map_g_cd}) `Note that to save space we omit \lstinline{td}, thus \lstinline{ab}, \lstinline{ac}... etc. denote results of \lstinline{td}, not the sublists themselves.' We have space now.}
+\Josh{(Caption of \cref{fig:map_g_cd}) `Note that to save space we omit \lstinline{td}, thus \lstinline{ab}, \lstinline{ac}... etc. denote results of \lstinline{td}, not the sublists themselves.' We have space now. SCM: Put \lstinline{td}s back.}
 Applying\csp\lstinline{mapB g . cd}\csp to this, I get level~$2$. % labelled (2) in the figure.
 For a closer look, I apply only \lstinline{cd} to level~$2$.
 Indeed, with its clever mapping and zipping, \lstinline{cd} manages to bring together precisely the right elements, and produces a
