@@ -507,8 +507,8 @@ data B : ℕ → ℕ → Set → Set where
   bin   :   B n (suc  k)  a
         →'  B n       k   a  → B (suc  n) (  suc k)  a
 \end{code}
-The idea is that the \emph{size} of a tree of type |B n k a| with $k \le n$ is precisely the binomial coefficient~|CHOOSE n k|. Naturally, there are no 
-inhabitants % trees of type |B n k a| 
+The idea is that the \emph{size} of a tree of type |B n k a| with $k \le n$ is precisely the binomial coefficient~|CHOOSE n k|. Naturally, there are no
+inhabitants % trees of type |B n k a|
 when $k > n$.
 Like |Vec|, the indices $n, k$ determine the constructors:
 If |k|~is |zero|, then the tree is a |tipZ| with one element (|CHOOSE n 0 =' 1|).
@@ -666,8 +666,9 @@ Take the (expanded) type of |bin| for example:
 bin  :   BT n (suc  k)  (λ ys  → p ys)        xs
      →'  BT n       k   (λ zs  → p (x ∷ zs))  xs  → BT (suc n) (suc k) p (x ∷ xs)
 \end{code}
-I can read it as `to compute a |(1 + k)|-sublist of |x ∷ xs| and return it to continuation~|p|, either compute a |(1 + k)|-sublist |ys| of |xs| and return |ys| directly, or compute a |k|-sublist |zs| of |xs| and return |x ∷ zs|'.
-All the `returned results' are then collected in a tree as the indices of the element types.
+I can read it as `to compute a |(1 + k)|-sublist of |x ∷ xs| and pass it to continuation~|p|, either compute a |(1 + k)|-sublist |ys| of |xs| and pass |ys| to |p| directly, or compute a |k|-sublist |zs| of |xs| and pass |x ∷ zs|' to |p|.
+All the `returned results' from |p| are then collected in a tree as the indices of the element types.
+\Shin{Changed some ``return'' to ``pass'' and added ``to |p|'', ``from |p|'' etc., to make it clearer --- if my understanding is correct.}
 Another similar and familiar example is
 \begin{code}
 data All : (a → Set) → Vec n a → Set where
@@ -685,10 +686,6 @@ How do I use |BT| to specify \lstinline{cd}?
 
 What's special about |BT| is that the element types are indexed by sublists, so I know from the type of an element which sublist it is associated with.
 That is, I can now directly say `values associated with sublists' and how they should be rearranged, rather than indirectly specify the rearrangement in terms of sublists and then extend to other types of values through parametricity.
-%\Shin{Can we give some explanation why this type enforces $(\ast)$?
-%The way I understand it is that the input is a table containing all length |k| %sublists and they all satisfy |p|, thus matching \lstinline{choose n k};
-%the output chooses |sk| elements and, for each of them, chooses all length |k| %sublists, and they all satisfy |p|, thus kind of matching the two %\lstinline{choose}s. What is the significance of |p| here? And we might want to %mention that \lstinline{flatten} is gone.
-%SCM: it's much clearer now. Removing this comment.}
 |BT_ n k p xs| is the type of a table of |p|-typed values associated with the |k|-sublists of |xs|, and that's precisely the intended meaning of \lstinline{cd}'s input.
 What about the output?
 It should tabulate the |(1 + k)|-sublists of |xs|, so the type should be |BT_ n sk q xs| for some |q : Vec (1 + k) a → Set|; for each sublist |ys : Vec (1 + k) a|, I want a list of |p|-typed values associated with the immediate sublists of |ys|, which are |k|-sublists, and that's precisely a tree of type |BT_ sk k p ys| --- the shape of that tree is even a list!
@@ -697,7 +694,7 @@ Therefore the whole type is
 retabulate : (SUPPRESSED(k < n)) → (BT_ n k) p xs → (BT_ n sk) ((BT_ sk k) p) xs
 \end{code}
 which is parametric in~|p| (so, like \lstinline{cd}, the elements can have any types).
-I think it's time to rename \lstinline{cd} to something more meaningful, and decide to use `|retabulate|' because I'm moving values in a table into appropriate positions in a new (nested) table with a new tabulation scheme.%
+I think it's time to rename \lstinline{cd} to something more meaningful, and decide to use `|retabulate|' because I'm moving values in a table into appropriate positions in a new (nested) table with a new tabulation scheme.
 % \Jeremy{I'd like to think of a better name. } % Happy now!
 And a side condition |k < n| is needed to guarantee that the output shape |BT_ n sk| is valid.
 
@@ -732,8 +729,8 @@ The second case of \lstinline{cd} recursively traverses the given tree to conver
 Therefore the first two cases of \lstinline{cd} can be unified into one.
 Meanwhile, the first two cases of |retabulate| concerning |tipZ| are new.
 While \lstinline{cd} has to start from level-1,
-these two cases of |retabulate| are capable 
-\Jeremy{``these two cases \emph{are} capable'', if either of them alone is capable; but ``this pair of cases \emph{is} capable'' if it requires both of them together}
+this pair of cases of |retabulate| is capable
+\Jeremy{``these two cases \emph{are} capable'', if either of them alone is capable; but ``this pair of cases \emph{is} capable'' if it requires both of them together. SCM: It should be the latter case. Fixed.}
 of producing a level-1 table (with as many elements as |xs|) from a level-0 table, which is a |tipZ|.
 This is due to |xs| now being available as an index, providing the missing context for |retabulate|.
 The definition has been verified simply by finding the (or rather, a) right type for it!
@@ -777,9 +774,9 @@ So
 g : ∀ {k} → {ys : Vec (2 + k) a} → BT(C ssk sk) s ys → s ys
 \end{code}
 \end{temp}
-I look at this with an involuntary 
+I look at this with an involuntary
 \Jeremy{that's the second ``involuntary'': ``knowing smile''? ``satisfied smile''?}
-smile --- now that's what I call 
+smile --- now that's what I call
 \Jeremy{British pop-cultural reference}
 a nice and informative type!
 It says concisely and precisely what |g|~does: compute a solution for any |ys : Vec (2 + k) a| from a table of solutions for all the length-|(1 + k)| (that is, immediate) sublists of |ys|.
