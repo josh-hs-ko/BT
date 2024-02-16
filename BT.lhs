@@ -102,6 +102,7 @@ acmsmall,fleqn,screen,review]{acmart}
 %format (C(n)(k)) = "\unskip^{" n "}_{" k "}"
 %format (CHOOSE (n) (k)) = "C{}^{" n "}_{" k "}"
 
+%format @ = "\unskip@\ignorenext"
 %format =' = "\unskip=\ignorenext"
 %format →' = "\kern-.345em\mathrlap{\to}"
 %format ↝ = "\unskip\leadsto\ignorenext"
@@ -559,34 +560,31 @@ And it returns as output the components for level~|1 + k|; there are |CHOOSE n (
 I continue to transcribe the definition of |cd| interactively in Agda.
 \begin{code}
 cd : (SUPPRESSED(1 ≤ k)) → (SUPPRESSED(k < n)) → B(C n k) a → B(C n sk) (Vec (1 + k) a)
-cd (bin  (tipS y)  (tipZ z)  ) = tipS  (y ∷ z ∷ [])
-cd (bin  (tipS y)  u         ) = tipS  (y ∷ unTipB (cd u))
-cd (bin  t         (tipZ z)  ) = bin   (cd t) (mapB (_∷ (z ∷ [])) t)
-cd (bin  t         u         ) = bin   (cd t) (zipBWith _∷_ t (cd u))
+cd (bin       (tipS y)        (tipZ z)   ) = tipS  (y ∷ z ∷ [])
+cd (bin       (tipS y)   u @  (bin _ _)  ) = tipS  (y ∷ unTipB (cd u))
+cd (bin  t @  (bin _ _)       (tipZ z)   ) = bin   (cd t) (mapB (_∷ (z ∷ [])) t)
+cd (bin  t @  (bin _ _)  u @  (bin _ _)  ) = bin   (cd t) (zipBWith _∷_ t (cd u))
 \end{code}
 
 In the first |bin (tipS y) (tipZ z)| case, Agda conveniently figures out whether a \lstinline{Tip} in the pattern should be a |tipS| or |tipZ| for me.
-I expect Agda to fill in the right constructor for the goal type |B(C 2 2) (Vec 2 a)| too.
-However, Agda complains that it cannot decide between |tipS| and |bin|.
-Indeed, based on the indices in the result type alone, either |tipS| or |bin| could construct a tree of type |B(C 2 2) (Vec 2 a)|.
+I expect Agda to fill in the right constructor for the goal type |B(C 2 2) (Vec 2 a)| too, but Agda complains that it cannot decide between |tipS| and |bin|.
+Indeed, |B(C 2 2) (Vec 2 a)| matches the result type of both |tipS| and |bin|.
 But |bin| is actually impossible because its left subtree would have type |B(C sk ssk) a|, which can be proved to be uninhabited.
-So the indices of~|B| still determine the constructor, though not as directly as for |Vec|.
+So the indices of~|B| still determine the constructor, though not as directly as in the case of |Vec|.
 
 I go through the cases |bin (tipS y) u| and |bin t (tipZ z)| without difficulties, after supplying the definitions of |unTipB  : B(C n n) a → a| and |mapB : (a → b) → B(C n k) a → B(C n k) b|.
-The final |bin t u| case is the most complex one though.
-The result should be a |bin|, and the left subtree |cd t| is accepted by Agda.
+In the final |bin t u| case, the result should be a |bin|, and the left subtree |cd t| is accepted by Agda.
 Slightly anxiously, I start constructing the right subtree.
 Agda tells me that |t : B(C sn ssk) a| and |u : B(C sn sk) a|.
 When I ask what type |cd u| has, it responds with |B(C sn ssk) (Vec (2 + k) a)|.
-That's the same shape as~|t|.
-So |t|~and |cd u| can be safely zipped together using a shape-preserving |zipBWith : (a → b → c) → B(C n k) a → B(C n k) b → B(C n k) c|.
+That's the same shape as~|t|, so |t|~and |cd u| can be safely zipped together using a shape-preserving |zipBWith : (a → b → c) → B(C n k) a → B(C n k) b → B(C n k) c|.
 
 I've gone through the whole definition!
 So, as I guessed, the binomial shape constraint holds throughout |cd|.
 What's nice is that I didn't need to do much.
-The type checker took care of most of the proof, keeping track of the tree shapes in the indices throughout the transcription.
+The type checker took care of most of the proof, using the indices to keep track of the tree shapes throughout the transcription.
 
-I've still got a bit of extra proof burden about the two (greyed out) `side conditions' |1 ≤ k| and |k < n| of |cd|.
+I've still got a bit of extra proof burden about the two (greyed out) `side conditions' |1 ≤ k| and |k < n|.
 Whenever I called |cd|, I checked these conditions mentally and then ignored them.
 (I wrote `|cd u|' as if |cd| were a function with only one explicit argument.)
 Everything related to these conditions was also ignored, including cases that can be proved to be impossible.
@@ -755,12 +753,12 @@ And a side condition |k < n| is needed to guarantee that the output shape |BT_ n
 I go on and transcribe \lstinline{cd} into |retabulate|,
 \begin{code}
 retabulate : (SUPPRESSED(k < n)) → BT(C n k) p xs → BT(C n sk) (BT(C sk k) p) xs
-retabulate {xs =' _ ∷ []     }  (tipZ y)  =  tipS  (tipZ y)
-retabulate {xs =' _ ∷ _ ∷ _  }  (tipZ y)  =  bin   (retabulate (tipZ y)) (tipZ (tipZ y))
-retabulate (bin (tipS y)  u         )     =  tipS  (y ∷ᴮᵀ u)
-retabulate (bin t         (tipZ z)  )     =  bin   (retabulate t) (mapBT (_∷ᴮᵀ (tipZ z)) t)
-retabulate (bin t         u         )     =  bin   (retabulate t)
-                                                   (zipBTWith _∷ᴮᵀ_ t (retabulate u))
+retabulate {xs =' _ ∷ []     } (tipZ y) = tipS  (tipZ y)
+retabulate {xs =' _ ∷ _ ∷ _  } (tipZ y) = bin   (retabulate (tipZ y)) (tipZ (tipZ y))
+retabulate (bin       (tipS y)   u               ) = tipS  (y ∷ᴮᵀ u)
+retabulate (bin  t @  (bin _ _)       (tipZ z)   ) = bin   (retabulate t) (mapBT (_∷ᴮᵀ (tipZ z)) t)
+retabulate (bin  t @  (bin _ _)  u @  (bin _ _)  ) = bin   (retabulate t)
+                                                           (zipBTWith _∷ᴮᵀ_ t (retabulate u))
 \end{code}
 where the map function is the expected one,
 \begin{code}

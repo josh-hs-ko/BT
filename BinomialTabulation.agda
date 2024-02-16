@@ -57,7 +57,7 @@ module ShapeIndexing where
   cd () _      (tipZ _)
   cd _ 1+k<1+k (tipS _) = ⊥-elim (<-irrefl refl 1+k<1+k)
   cd _ _             (bin   (tipS y  )   (tipZ z )) = tipS (y ∷ z ∷ [])
-  cd _ _             (bin   (tipS y  ) u@(bin _ _)) = tipS (y ∷ unTip (cd (s≤s z≤n) ≤-refl u))
+  cd _ _             (bin   (tipS y  ) u@(bin _ _)) = tipS (y ∷ unTipB (cd (s≤s z≤n) ≤-refl u))
   cd _ _             (bin t@(bin t' _)   (tipZ z )) = bin (cd ≤-refl (s≤s (bounded t')) t) (mapB (_∷ (z ∷ [])) t)
   cd _ 2+n<2+n       (bin   (bin _ _ )   (tipS _ )) = ⊥-elim (<-irrefl refl 2+n<2+n)
   cd _ (s≤s 1+k<1+n) (bin t@(bin t' _) u@(bin _ _)) = bin (cd (s≤s z≤n) (s≤s (bounded t')) t) (zipBWith _∷_ t (cd (s≤s z≤n) 1+k<1+n u))
