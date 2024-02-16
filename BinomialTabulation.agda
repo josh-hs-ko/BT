@@ -42,14 +42,14 @@ module ShapeIndexing where
   mapB f (tipS x)  = tipS (f x)
   mapB f (bin t u) = bin (mapB f t) (mapB f u)
 
-  unTip : B n n a → a
-  unTip (tipZ x)  = x
-  unTip (tipS x)  = x
-  unTip (bin t _) = ⊥-elim (unbounded t)
+  unTipB : B n n a → a
+  unTipB (tipZ x)  = x
+  unTipB (tipS x)  = x
+  unTipB (bin t _) = ⊥-elim (unbounded t)
 
   zipBWith : (a → b → c) → B n k a → B n k b → B n k c
   zipBWith f (tipZ x)   (tipZ y)   = tipZ (f x y)
-  zipBWith f (tipS x)   u          = tipS (f x (unTip u))
+  zipBWith f (tipS x)   u          = tipS (f x (unTipB u))
   zipBWith f (bin t _)  (tipS _)   = ⊥-elim (unbounded t)
   zipBWith f (bin t t') (bin u u') = bin (zipBWith f t u) (zipBWith f t' u')
 
