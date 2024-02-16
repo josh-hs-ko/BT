@@ -371,7 +371,7 @@ And it gets worse further down: A solution for each $1$-sublist is computed $6$~
 It's better to proceed bottom-up instead, working upwards through a lattice of sublists~(\cref{fig:sublists-lattice}), level by level.
 %\Josh{Maybe add a greyed-out 0-th level. SCM: Done. Do we need to explain the greying out somewhere?}
 %\Josh{Maybe remove the links between levels $0$~and~$1$. SCM: Done.}
-\Josh{Use the Libertine font for the level numbers in \cref{fig:sublists-lattice}.}
+\Josh{Use the Libertine font for the level numbers in \cref{fig:sublists-lattice}. SCM: Done. Dunno why I missed it.}
 Level~$1$ consists of solutions for the $1$-sublists.
 Then solutions for the $(k+1)$-sublists in level $k+1$ are computed from subsolutions in level~$k$.
 Finally, the top level consists of a single solution, for the input list.
