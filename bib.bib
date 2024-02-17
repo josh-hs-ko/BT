@@ -1,12 +1,26 @@
 %% This BibTeX bibliography file was created using BibDesk.
 %% https://bibdesk.sourceforge.io/
 
-%% Created for Josh Ko at 2024-02-13 21:41:02 +0800 
+%% Created for Josh Ko at 2024-02-17 21:01:12 +0800 
 
 
 %% Saved with string encoding Unicode (UTF-8) 
 
 
+
+@article{Van-Muylder-internal-parametricity,
+	abstract = {Two approaches exist to incorporate parametricity into proof assistants based on dependent type theory. On the one hand, parametricity translations conveniently compute parametricity statements and their proofs solely based on individual well-typed polymorphic programs. But they do not offer internal parametricity: formal proofs that any polymorphic program of a certain type satisfies its parametricity statement. On the other hand, internally parametric type theories augment plain type theory with additional primitives out of which internal parametricity can be derived. But those type theories lack mature proof assistant implementations and deriving parametricity in them involves low-level intractable proofs. In this paper, we contribute \textsf{Agda --bridges}: the first practical internally parametric proof assistant. We provide the first mechanized proofs of crucial theorems for internal parametricity, like the relativity theorem. We identify a high-level sufficient condition for proving internal parametricity which we call the structure relatedness principle (SRP) by analogy with the structure identity principle (SIP) of HoTT/UF. We state and prove a general parametricity theorem for types that satisfy the SRP. Our parametricity theorem lets us obtain one-liner proofs of standard internal free theorems. We observe that the SRP is harder to prove than the SIP and provide in \textsf{Agda --bridges} a shallowly embedded type theory to compose types that satisfy the SRP. This type theory is an observational type theory of logical relations and our parametricity theorem ought to be one of its inference rules.},
+	author = {Van Muylder, Antoine and Nuyts, Andreas and Devriese, Dominique},
+	date-added = {2024-02-02 23:14:26 +0800},
+	date-modified = {2024-02-02 23:18:21 +0800},
+	doi = {10.1145/3632850},
+	journal = {Proceedings of the ACM on Programming Languages},
+	number = {POPL},
+	pages = {8:1--32},
+	title = {Internal and Observational Parametricity for {Cubical Agda}},
+	volume = {8},
+	year = {2024},
+	bdsk-file-1 = {YnBsaXN0MDDSAQIDBFxyZWxhdGl2ZVBhdGhZYWxpYXNEYXRhXxCxLi4vLi4vTGlicmFyeS9Nb2JpbGUgRG9jdW1lbnRzL0pGSldXUDY0UUR+Y29tfmdvb2Rpd2FyZX5Hb29kUmVhZGVyL0RvY3VtZW50cy9CaWJSZXBvc2l0b3J5L1ZhbiBNdXlsZGVyIGV0IGFsIDIwMjQgLSBJbnRlcm5hbCBhbmQgT2JzZXJ2YXRpb25hbCBQYXJhbWV0cmljaXR5IGZvciBDdWJpY2FsIEFnZGEucGRmTxEDAgAAAAADAgACAAAMTWFjaW50b3NoIEhEAAAAAAAAAAAAAAAAAAAA4eNFI0JEAAH/////H1ZhbiBNdXlsZGVyIGV0IGFsICNGRkZGRkZGRi5wZGYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/////h4ybLAAAAAAAAAAAAAgAGAAAKIGN1AAAAAAAAAAAAAAAAAA1CaWJSZXBvc2l0b3J5AAACALovOlVzZXJzOmpvc2hrbzpMaWJyYXJ5Ok1vYmlsZSBEb2N1bWVudHM6SkZKV1dQNjRRRH5jb21+Z29vZGl3YXJlfkdvb2RSZWFkZXI6RG9jdW1lbnRzOkJpYlJlcG9zaXRvcnk6VmFuIE11eWxkZXIgZXQgYWwgMjAyNCAtIEludGVybmFsIGFuZCBPYnNlcnZhdGlvbmFsIFBhcmFtZXRyaWNpdHkgZm9yIEN1YmljYWwgQWdkYS5wZGYADgCuAFYAVgBhAG4AIABNAHUAeQBsAGQAZQByACAAZQB0ACAAYQBsACAAMgAwADIANAAgAC0AIABJAG4AdABlAHIAbgBhAGwAIABhAG4AZAAgAE8AYgBzAGUAcgB2AGEAdABpAG8AbgBhAGwAIABQAGEAcgBhAG0AZQB0AHIAaQBjAGkAdAB5ACAAZgBvAHIAIABDAHUAYgBpAGMAYQBsACAAQQBnAGQAYQAuAHAAZABmAA8AGgAMAE0AYQBjAGkAbgB0AG8AcwBoACAASABEABIAuFVzZXJzL2pvc2hrby9MaWJyYXJ5L01vYmlsZSBEb2N1bWVudHMvSkZKV1dQNjRRRH5jb21+Z29vZGl3YXJlfkdvb2RSZWFkZXIvRG9jdW1lbnRzL0JpYlJlcG9zaXRvcnkvVmFuIE11eWxkZXIgZXQgYWwgMjAyNCAtIEludGVybmFsIGFuZCBPYnNlcnZhdGlvbmFsIFBhcmFtZXRyaWNpdHkgZm9yIEN1YmljYWwgQWdkYS5wZGYAEwABLwAAFQACAA3//wAAAAgADQAaACQA2AAAAAAAAAIBAAAAAAAAAAUAAAAAAAAAAAAAAAAAAAPe}}
 
 @misc{Mu-sublists,
 	abstract = {Some top-down problem specifications, if executed, may compute sub-problems repeatedly. Instead, we may want a bottom-up algorithm that stores solutions of sub-problems in a table to be reused. How the table can be represented and efficiently maintained, however, can be tricky. We study a special case: computing a function $h$ taking lists as inputs such that $h\;\mathit{xs}$ is defined in terms of all immediate sublists of $\mathit{xs}$. Richard Bird studied this problem in 2008, and presented a concise but cryptic algorithm without much explanation. We give this algorithm a proper derivation, and discovered a key property that allows it to work. The algorithm builds trees that have certain shapes -- the sizes along the left spine is a diagonal in Pascal's triangle. The crucial function we derive transforms one diagonal to the next.},
@@ -115,6 +129,20 @@
 	bdsk-file-1 = {YnBsaXN0MDDSAQIDBFxyZWxhdGl2ZVBhdGhZYWxpYXNEYXRhXxCQLi4vLi4vTGlicmFyeS9Nb2JpbGUgRG9jdW1lbnRzL0pGSldXUDY0UUR+Y29tfmdvb2Rpd2FyZX5Hb29kUmVhZGVyL0RvY3VtZW50cy9CaWJSZXBvc2l0b3J5L0NoYXBtYW4gZXQgYWwgMjAxMCAtIFRoZSBHZW50bGUgQXJ0IG9mIExldml0YXRpb24ucGRmTxECgAAAAAACgAACAAAMTWFjaW50b3NoIEhEAAAAAAAAAAAAAAAAAAAA4eNFI0JEAAH/////H0NoYXBtYW4gZXQgYWwgMjAxMCNGRkZGRkZGRi5wZGYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/////JFcikAAAAAAAAAAAAAgAGAAAKIGN1AAAAAAAAAAAAAAAAAA1CaWJSZXBvc2l0b3J5AAACAJkvOlVzZXJzOmpvc2hrbzpMaWJyYXJ5Ok1vYmlsZSBEb2N1bWVudHM6SkZKV1dQNjRRRH5jb21+Z29vZGl3YXJlfkdvb2RSZWFkZXI6RG9jdW1lbnRzOkJpYlJlcG9zaXRvcnk6Q2hhcG1hbiBldCBhbCAyMDEwIC0gVGhlIEdlbnRsZSBBcnQgb2YgTGV2aXRhdGlvbi5wZGYAAA4AbAA1AEMAaABhAHAAbQBhAG4AIABlAHQAIABhAGwAIAAyADAAMQAwACAALQAgAFQAaABlACAARwBlAG4AdABsAGUAIABBAHIAdAAgAG8AZgAgAEwAZQB2AGkAdABhAHQAaQBvAG4ALgBwAGQAZgAPABoADABNAGEAYwBpAG4AdABvAHMAaAAgAEgARAASAJdVc2Vycy9qb3Noa28vTGlicmFyeS9Nb2JpbGUgRG9jdW1lbnRzL0pGSldXUDY0UUR+Y29tfmdvb2Rpd2FyZX5Hb29kUmVhZGVyL0RvY3VtZW50cy9CaWJSZXBvc2l0b3J5L0NoYXBtYW4gZXQgYWwgMjAxMCAtIFRoZSBHZW50bGUgQXJ0IG9mIExldml0YXRpb24ucGRmAAATAAEvAAAVAAIADf//AAAACAANABoAJAC3AAAAAAAAAgEAAAAAAAAABQAAAAAAAAAAAAAAAAAAAzs=},
 	bdsk-url-1 = {https://doi.org/10.1145/1863543.1863547}}
 
+@inproceedings{Voigtlander-BX-for-free,
+	abstract = {A bidirectional transformation consists of a function $\mathit{get}$ that takes a source (document or value) to a view and a function $\mathit{put}$ that takes an updated view and the original source back to an updated source, governed by certain consistency conditions relating the two functions. Both the database and programming language communities have studied techniques that essentially allow a user to specify only one of $\mathit{get}$ and $\mathit{put}$ and have the other inferred automatically. All approaches so far to this bidirectionalization task have been syntactic in nature, either proposing a domain-specific language with limited expressiveness but built-in (and composable) backward components, or restricting $\mathit{get}$ to a simple syntactic form from which some algorithm can synthesize an appropriate definition for $\mathit{put}$. Here we present a semantic approach instead. The idea is to take a general-purpose language, Haskell, and write a higher-order function that takes (polymorphic) $\mathit{get}$-functions as arguments and returns appropriate $\mathit{put}$-functions. All this on the level of semantic values, without being willing, or even able, to inspect the definition of $\mathit{get}$, and thus liberated from syntactic restraints. Our solution is inspired by relational parametricity and uses free theorems for proving the consistency conditions. It works beautifully.},
+	author = {Voigtl{\"a}nder, Janis},
+	booktitle = {Symposium on Principles of Programming Languages (POPL)},
+	date-added = {2015-04-08 05:49:23 +0000},
+	date-modified = {2015-12-07 00:46:46 +0000},
+	doi = {10.1145/1480881.1480904},
+	pages = {165-176},
+	publisher = {ACM},
+	title = {Bidirectionalization for Free!},
+	year = {2009},
+	bdsk-file-1 = {YnBsaXN0MDDSAQIDBFxyZWxhdGl2ZVBhdGhZYWxpYXNEYXRhbxCSAC4ALgAvAC4ALgAvAEwAaQBiAHIAYQByAHkALwBNAG8AYgBpAGwAZQAgAEQAbwBjAHUAbQBlAG4AdABzAC8ASgBGAEoAVwBXAFAANgA0AFEARAB+AGMAbwBtAH4AZwBvAG8AZABpAHcAYQByAGUAfgBHAG8AbwBkAFIAZQBhAGQAZQByAC8ARABvAGMAdQBtAGUAbgB0AHMALwBCAGkAYgBSAGUAcABvAHMAaQB0AG8AcgB5AC8AVgBvAGkAZwB0AGwAYQMIAG4AZABlAHIAIAAyADAAMAA5ACAALQAgAEIAaQBkAGkAcgBlAGMAdABpAG8AbgBhAGwAaQB6AGEAdABpAG8AbgAgAGYAbwByACAARgByAGUAZQAhAGEALgBwAGQAZk8RAogAAAAAAogAAgAADE1hY2ludG9zaCBIRAAAAAAAAAAAAAAAAAAAAOHjRSNCRAAB/////x9Wb2lndKFabmRlciAyMDA5IC0jRkZGRkZGRkYucGRmAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/////0aS99AAAAAAAAAAAAAIABgAACiBjdQAAAAAAAAAAAAAAAAANQmliUmVwb3NpdG9yeQAAAgCcLzpVc2Vyczpqb3Noa286TGlicmFyeTpNb2JpbGUgRG9jdW1lbnRzOkpGSldXUDY0UUR+Y29tfmdvb2Rpd2FyZX5Hb29kUmVhZGVyOkRvY3VtZW50czpCaWJSZXBvc2l0b3J5OlZvaWd0bGHMiG5kZXIgMjAwOSAtIEJpZGlyZWN0aW9uYWxpemF0aW9uIGZvciBGcmVlIWEucGRmAA4AcAA3AFYAbwBpAGcAdABsAGEDCABuAGQAZQByACAAMgAwADAAOQAgAC0AIABCAGkAZABpAHIAZQBjAHQAaQBvAG4AYQBsAGkAegBhAHQAaQBvAG4AIABmAG8AcgAgAEYAcgBlAGUAIQBhAC4AcABkAGYADwAaAAwATQBhAGMAaQBuAHQAbwBzAGgAIABIAEQAEgCaVXNlcnMvam9zaGtvL0xpYnJhcnkvTW9iaWxlIERvY3VtZW50cy9KRkpXV1A2NFFEfmNvbX5nb29kaXdhcmV+R29vZFJlYWRlci9Eb2N1bWVudHMvQmliUmVwb3NpdG9yeS9Wb2lndGxhzIhuZGVyIDIwMDkgLSBCaWRpcmVjdGlvbmFsaXphdGlvbiBmb3IgRnJlZSFhLnBkZgATAAEvAAAVAAIADf//AAAACAANABoAJAFLAAAAAAAAAgEAAAAAAAAABQAAAAAAAAAAAAAAAAAAA9c=},
+	bdsk-url-1 = {https://doi.org/10.1145/1480881.1480904}}
+
 @inproceedings{Bird-zippy-tabulations,
 	abstract = {This paper is devoted to the statement and proof of a theorem showing how recursive definitions whose associated call graphs satisfy certain shape conditions can be converted systematically into efficient bottom-up tabulation schemes. The increase in efficiency can be dramatic, typically transforming an exponential time algorithm into one that takes only quadratic time. The proof of the theorem relies heavily on the theory of zips developed by Roland Backhouse and Paul Hoogendijk.},
 	author = {Bird, Richard S.},
@@ -130,3 +158,22 @@
 	year = {2008},
 	bdsk-file-1 = {YnBsaXN0MDDSAQIDBFxyZWxhdGl2ZVBhdGhZYWxpYXNEYXRhXxCTLi4vLi4vTGlicmFyeS9Nb2JpbGUgRG9jdW1lbnRzL0pGSldXUDY0UUR+Y29tfmdvb2Rpd2FyZX5Hb29kUmVhZGVyL0RvY3VtZW50cy9CaWJSZXBvc2l0b3J5L0JpcmQgMjAwOCAtIFppcHB5IFRhYnVsYXRpb25zIG9mIFJlY3Vyc2l2ZSBGdW5jdGlvbnMucGRmTxECigAAAAACigACAAAMTWFjaW50b3NoIEhEAAAAAAAAAAAAAAAAAAAA4eNFI0JEAAH/////H0JpcmQgMjAwOCAtIFppcHB5ICNGRkZGRkZGRi5wZGYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/////evtPmAAAAAAAAAAAAAgAGAAAKIGN1AAAAAAAAAAAAAAAAAA1CaWJSZXBvc2l0b3J5AAACAJwvOlVzZXJzOmpvc2hrbzpMaWJyYXJ5Ok1vYmlsZSBEb2N1bWVudHM6SkZKV1dQNjRRRH5jb21+Z29vZGl3YXJlfkdvb2RSZWFkZXI6RG9jdW1lbnRzOkJpYlJlcG9zaXRvcnk6QmlyZCAyMDA4IC0gWmlwcHkgVGFidWxhdGlvbnMgb2YgUmVjdXJzaXZlIEZ1bmN0aW9ucy5wZGYADgByADgAQgBpAHIAZAAgADIAMAAwADgAIAAtACAAWgBpAHAAcAB5ACAAVABhAGIAdQBsAGEAdABpAG8AbgBzACAAbwBmACAAUgBlAGMAdQByAHMAaQB2AGUAIABGAHUAbgBjAHQAaQBvAG4AcwAuAHAAZABmAA8AGgAMAE0AYQBjAGkAbgB0AG8AcwBoACAASABEABIAmlVzZXJzL2pvc2hrby9MaWJyYXJ5L01vYmlsZSBEb2N1bWVudHMvSkZKV1dQNjRRRH5jb21+Z29vZGl3YXJlfkdvb2RSZWFkZXIvRG9jdW1lbnRzL0JpYlJlcG9zaXRvcnkvQmlyZCAyMDA4IC0gWmlwcHkgVGFidWxhdGlvbnMgb2YgUmVjdXJzaXZlIEZ1bmN0aW9ucy5wZGYAEwABLwAAFQACAA3//wAAAAgADQAaACQAugAAAAAAAAIBAAAAAAAAAAUAAAAAAAAAAAAAAAAAAANI},
 	bdsk-url-1 = {https://doi.org/10.1007/978-3-540-70594-9_7}}
+
+@article{Dybjer-inductive-families,
+	abstract = {A general formulation of inductive and recursive definitions in Martin-L{\"o}f's type theory is presented. It extends Backhouse's `Do-It-Yourself Type Theory' to include inductive definitions of families of sets and definitions of functions by recursion on the way elements of such sets are generated. The formulation is in natural deduction and is intended to be a natural generalisation to type theory of Martin-L{\"o}f's theory of iterated inductive definitions in predicate logic.\par
+
+Formal criteria are given for correct formation and introduction rules of a new set former capturing definition by strictly positive, iterated, generalised induction. Moreover, there is an inversion principle for deriving elimination and equality rules from the formation and introduction rules. Finally, there is an alternative schematic presentation of definition by recursion.\par
+
+The resulting theory is a flexible and powerful language for programming and constructive mathematics. We hint at the wealth of possible applications by showing several basic examples: predicate logic, generalised induction, and a formalisation of the untyped lambda calculus.},
+	author = {Peter Dybjer},
+	date-added = {2011-05-04 10:12:27 +0100},
+	date-modified = {2019-05-13 22:52:07 +0900},
+	doi = {10.1007/BF01211308},
+	journal = {Formal Aspects of Computing},
+	number = {4},
+	pages = {440-465},
+	title = {Inductive Families},
+	volume = 6,
+	year = 1994,
+	bdsk-file-1 = {YnBsaXN0MDDSAQIDBFxyZWxhdGl2ZVBhdGhZYWxpYXNEYXRhXxB/Li4vLi4vTGlicmFyeS9Nb2JpbGUgRG9jdW1lbnRzL0pGSldXUDY0UUR+Y29tfmdvb2Rpd2FyZX5Hb29kUmVhZGVyL0RvY3VtZW50cy9CaWJSZXBvc2l0b3J5L0R5YmplciAxOTk0IC0gSW5kdWN0aXZlIEZhbWlsaWVzLnBkZk8RAjoAAAAAAjoAAgAADE1hY2ludG9zaCBIRAAAAAAAAAAAAAAAAAAAAOHjRSNCRAAB/////x9EeWJqZXIgMTk5NCAtIEluZHUjRkZGRkZGRkYucGRmAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/////yec5aAAAAAAAAAAAAAIABgAACiBjdQAAAAAAAAAAAAAAAAANQmliUmVwb3NpdG9yeQAAAgCILzpVc2Vyczpqb3Noa286TGlicmFyeTpNb2JpbGUgRG9jdW1lbnRzOkpGSldXUDY0UUR+Y29tfmdvb2Rpd2FyZX5Hb29kUmVhZGVyOkRvY3VtZW50czpCaWJSZXBvc2l0b3J5OkR5YmplciAxOTk0IC0gSW5kdWN0aXZlIEZhbWlsaWVzLnBkZgAOAEoAJABEAHkAYgBqAGUAcgAgADEAOQA5ADQAIAAtACAASQBuAGQAdQBjAHQAaQB2AGUAIABGAGEAbQBpAGwAaQBlAHMALgBwAGQAZgAPABoADABNAGEAYwBpAG4AdABvAHMAaAAgAEgARAASAIZVc2Vycy9qb3Noa28vTGlicmFyeS9Nb2JpbGUgRG9jdW1lbnRzL0pGSldXUDY0UUR+Y29tfmdvb2Rpd2FyZX5Hb29kUmVhZGVyL0RvY3VtZW50cy9CaWJSZXBvc2l0b3J5L0R5YmplciAxOTk0IC0gSW5kdWN0aXZlIEZhbWlsaWVzLnBkZgATAAEvAAAVAAIADf//AAAACAANABoAJACmAAAAAAAAAgEAAAAAAAAABQAAAAAAAAAAAAAAAAAAAuQ=},
+	bdsk-url-1 = {https://doi.org/10.1007/BF01211308}}
