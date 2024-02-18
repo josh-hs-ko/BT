@@ -18,8 +18,11 @@ variable
   a b c          : Set
   k m n          : ℕ
   x              : a
-  xs ys          : Vec a k
+  xs             : Vec a k
   p p' q q' r r' : a → Set
+
+--------
+-- Section 2.1
 
 module ShapeIndexing where
 
@@ -64,6 +67,9 @@ module ShapeIndexing where
 
   -- end of module ShapeIndexing
 
+--------
+-- Section 2.2
+
 module RestrictedSpecification where
 
   variable h : Vec a k → b
@@ -97,6 +103,9 @@ data BT : (n k : ℕ) → (Vec a k → Set) → Vec a n → Set where
 --              (bin (bin (tipS {!   !})
 --                        (tipZ {!   !}))
 --                   (tipZ {!   !}))
+
+--------
+-- Section 2.3
 
 bounded : BT n k p xs → k ≤ n
 bounded (tipZ _)  = z≤n
@@ -133,6 +142,9 @@ retabulate _             (bin   (tipS y  ) u          ) = tipS (y ∷ᴮᵀ u)
 retabulate _             (bin t@(bin t' _)   (tipZ z )) = bin (retabulate (s≤s (bounded t')) t) (mapBT (_∷ᴮᵀ (tipZ z)) t)
 retabulate 2+n<2+n       (bin   (bin _  _)   (tipS _ )) = ⊥-elim (<-irrefl refl 2+n<2+n)
 retabulate (s≤s 1+k<1+n) (bin t@(bin t' _) u@(bin _ _)) = bin (retabulate (s≤s (bounded t')) t) (zipBTWith _∷ᴮᵀ_ t (retabulate 1+k<1+n u))
+
+--------
+-- Section 2.4
 
 incr : suc m ≤′ n → m ≤′ n
 incr  ≤′-refl    = ≤′-step ≤′-refl
@@ -195,12 +207,12 @@ td s e g (suc n) = g ∘ mapBT (td s e g n) ∘ blank (1 + n) n (≤′-step ≤
 --   where
 --     loop : (k : ℕ) → k ≤‴ n → BT n k s xs → BT n n s xs
 --     loop n  ≤‴-refl        = id
---     loop k (≤‴-step n≥1+k) = loop (1 + k) n≥1+k ∘ mapBT g ∘ retabulate (≤‴⇒≤ n≥1+k)
+--     loop k (≤‴-step d) = loop (1 + k) d ∘ mapBT g ∘ retabulate (≤‴⇒≤ d)
 
 bu-loop : {s : ∀ {k} → Vec a k → Set} (g : ∀ {k} → {ys : Vec a (1 + k)} → BT (1 + k) k s ys → s ys) {n : ℕ}
           (k : ℕ) → k ≤‴ n → {xs : Vec a n} → BT n k s xs → BT n n s xs
 bu-loop g n  ≤‴-refl        = id
-bu-loop g k (≤‴-step n≥1+k) = bu-loop g (1 + k) n≥1+k ∘ mapBT g ∘ retabulate (≤‴⇒≤ n≥1+k)
+bu-loop g k (≤‴-step d) = bu-loop g (1 + k) d ∘ mapBT g ∘ retabulate (≤‴⇒≤ d)
 
 bu : ImmediateSublistInduction
 bu s e g n = unTip ∘ bu-loop g 0 (≤⇒≤‴ z≤n) ∘ mapBT e ∘ blank n 0 (≤⇒≤′ z≤n)
@@ -260,6 +272,9 @@ ISI-uniqueness-from-parametricity f param {a} s e g n =
     see-below ss h (bin (tipS _) t) (eq , ss') = cong₂ bin (cong tipS eq) (see-below (ss ∘ (_ ∷_)) (h ∘ (_ ∷_)) t ss')
     see-below ss h (bin (bin t _) _) _         = ⊥-elim (unbounded t)
 
+--------
+-- Section 3.1
+
 Fam : Set → Set₁
 Fam a = a → Set
 
@@ -268,11 +283,8 @@ p ⇉ q = ∀ {x} → p x → q x
 
 infix 2 _⇉_
 
--- exponential objects
-_⇒_ : Fam a → Fam a → Fam a
-(p ⇒ q) x = p x → q x
-
-infixr 3 _⇒_
+--------
+-- Section 3.2
 
 IsProp : Set → Set
 IsProp a = {x y : a} → x ≡ y
@@ -295,7 +307,43 @@ rotation : ∀ {k<n k≤n k≤1+k 1+k≤n}
          → retabulate k<n (blank n k k≤n {xs} tt) ≡ mapBT (blank (1 + k) k k≤1+k) (blank n (1 + k) 1+k≤n tt)
 rotation = BT-isProp (BT-isProp refl)
 
--- basic properties
+--------
+-- ‘Whining, I finish the entire proof in Agda.’
+
+-- more categorical definitions
+
+-- families of functions with an explicit index type
+∀[_]_⇉_ : (A : Set) → Fam A → Fam A → Set
+∀[ A ] P ⇉ Q = P ⇉ Q
+
+infix 2 ∀[_]_⇉_
+
+-- exponential objects in Fam
+_⇒_ : Fam a → Fam a → Fam a
+(p ⇒ q) x = p x → q x
+
+-- table construction phases
+
+tdRec : (n : ℕ) → Fam (Vec a n)
+tdRec  zero   = const ⊤
+tdRec (suc n) = BT (suc n) n (tdRec n)
+
+td-construct : (n : ℕ) → ∀[ Vec a n ] const ⊤ ⇉ tdRec n
+td-construct  zero   = id
+td-construct (suc n) = mapBT (td-construct n) ∘ blank (suc n) n (≤′-step ≤′-refl)
+
+buRec : k ≤‴ n → Fam (Vec a k) → Fam (Vec a n)
+buRec          ≤‴-refl    = id
+buRec {k = k} (≤‴-step d) = buRec d ∘ BT (suc k) k
+
+bu-construct-loop : (k≤n : k ≤‴ n) → BT n k p ⇉ BT n n (buRec k≤n p)
+bu-construct-loop  ≤‴-refl    = id
+bu-construct-loop (≤‴-step d) = bu-construct-loop d ∘ retabulate (≤‴⇒≤ d)
+
+bu-construct : (n : ℕ) → ∀[ Vec a n ] const ⊤ ⇉ buRec (≤⇒≤‴ z≤n) (const ⊤)
+bu-construct n = unTip ∘ bu-construct-loop (≤⇒≤‴ z≤n) ∘ blank n 0 (≤⇒≤′ z≤n)
+
+-- functoriality
 
 cong-mapBT : {f g : p ⇉ q} → (∀ {ys} (x : p ys) → f x ≡ g x)
            → (t : BT n k p xs) → mapBT f t ≡ mapBT g t
@@ -309,12 +357,35 @@ mapBT-∘ f g (tipZ _)  = refl
 mapBT-∘ f g (tipS _)  = refl
 mapBT-∘ f g (bin t u) = cong₂ bin (mapBT-∘ f g t) (mapBT-∘ f g u)
 
+map-buRec : (k≤n : k ≤‴ n) → p ⇉ q → buRec k≤n p ⇉ buRec k≤n q
+map-buRec  ≤‴-refl    f = f
+map-buRec (≤‴-step d) f = map-buRec d (mapBT f)
+
+cong-map-buRec :
+    (k≤n : k ≤‴ n) {f g : p ⇉ q} → (∀ {ys} (p : p ys) → f p ≡ g p)
+  → {xs : Vec a n} (t : buRec k≤n p xs) → map-buRec k≤n f t ≡ map-buRec k≤n g t
+cong-map-buRec  ≤‴-refl    f≗g t = f≗g t
+cong-map-buRec (≤‴-step d) f≗g t = cong-map-buRec d (cong-mapBT f≗g) t
+
+map-buRec-∘ : (k≤n : k ≤‴ n) (f : q ⇉ r) (g : p ⇉ q)
+            → {xs : Vec a n} (t : buRec k≤n p xs)
+            → map-buRec k≤n (f ∘ g) $ t ≡ map-buRec k≤n f ∘ map-buRec k≤n g $ t
+map-buRec-∘  ≤‴-refl    f g t = refl
+map-buRec-∘ (≤‴-step d) f g t =
+  trans (cong-map-buRec d (mapBT-∘ f g) t) (map-buRec-∘ d (mapBT f) (mapBT g) t)
+
+-- propositionality
+
 ≤-isProp' : {m n : ℕ} → IsProp' (m ≤ n)
 ≤-isProp'  z≤n       z≤n       = refl
 ≤-isProp' (s≤s m≤n) (s≤s m≤n') = cong s≤s (≤-isProp' m≤n m≤n')
 
 ≤-isProp : {m n : ℕ} → IsProp (m ≤ n)
 ≤-isProp = ≤-isProp' _ _
+
+tdRec-isProp : (n : ℕ) {xs : Vec a n} → IsProp (tdRec n xs)
+tdRec-isProp  zero   = refl
+tdRec-isProp (suc n) = BT-isProp (tdRec-isProp n)
 
 -- naturality
 
@@ -336,239 +407,187 @@ zipBTWith-natural P Q R f f' f∼f' (bin t _)  (tipS _)   = ⊥-elim (unbounded 
 zipBTWith-natural P Q R f f' f∼f' (bin t t') (bin u u') = cong₂ bin (zipBTWith-natural P Q R f f' f∼f' t  u )
                                                                     (zipBTWith-natural P Q R f f' f∼f' t' u')
 
--- retabulate-natural : (k<n : k < n) {xs : Vec a n} (h : p ⇉ q) (t : BT n k p xs)
---                    → mapBT (mapBT h) ∘ retabulate k<n $ t ≡ retabulate k<n ∘ mapBT h $ t
--- retabulate-natural 1+n<1+n       h (tipS p)                       = ⊥-elim (<-irrefl refl 1+n<1+n)
--- retabulate-natural _ {_ ∷ []   } h (tipZ p)                       = refl
--- retabulate-natural _ {_ ∷ _ ∷ _} h (tipZ p)                       = cong₂ bin (retabulate-natural 1+n>0 h (tipZ p)) refl where 1+n>0 = s≤s z≤n
--- retabulate-natural _             h (bin   (tipS p)   u)           = refl
--- retabulate-natural _             h (bin t@(bin t' _)   (tipZ q))  = cong₂ bin (trans (retabulate-natural 1+n>1 h t) (cong (λ ineq → retabulate ineq (mapBT h t)) ≤-isProp)) (trans (sym (mapBT-∘ (mapBT h) (λ p → bin (tipS p) (tipZ q)) t)) (mapBT-∘ (λ p → bin (tipS p) (tipZ (h q))) h t)) where 1+n>1 = s≤s (bounded t')
--- retabulate-natural _             h (bin t@(bin _  _)   (tipS q))  = ⊥-elim (unbounded t)
--- retabulate-natural (s≤s 1+k<1+n) h (bin t@(bin t' _) u@(bin _ _)) = cong₂ bin (trans (retabulate-natural 1+n>2+k h t) (cong (λ ineq → retabulate ineq (mapBT h t)) ≤-isProp)) (trans (zipBTWith-natural h (mapBT h) (mapBT h) (λ p → bin (tipS p)) (λ p → bin (tipS p)) refl t (retabulate 1+n>1+k u)) (cong (zipBTWith (λ p → bin (tipS p)) (mapBT h t)) (retabulate-natural 1+n>1+k h u))) where 1+n>2+k = s≤s (bounded t')
+retabulate-natural : (k<n : k < n) {xs : Vec a n} (h : p ⇉ q) (t : BT n k p xs)
+                   → mapBT (mapBT h) ∘ retabulate k<n $ t ≡ retabulate k<n ∘ mapBT h $ t
+retabulate-natural 1+n<1+n       h (tipS p)                       = ⊥-elim (<-irrefl refl 1+n<1+n)
+retabulate-natural _ {_ ∷ []   } h (tipZ p)                       = refl
+retabulate-natural _ {_ ∷ _ ∷ _} h (tipZ p)                       = cong₂ bin (retabulate-natural (s≤s z≤n) h (tipZ p)) refl
+retabulate-natural _             h (bin   (tipS p)   u)           = refl
+retabulate-natural _             h (bin t@(bin t' _)   (tipZ q))  = cong₂ bin (trans (retabulate-natural (s≤s (bounded t')) h t) (cong (λ ineq → retabulate ineq (mapBT h t)) ≤-isProp)) (trans (sym (mapBT-∘ (mapBT h) (_∷ᴮᵀ (tipZ q)) t)) (mapBT-∘ (_∷ᴮᵀ (tipZ (h q))) h t))
+retabulate-natural _             h (bin t@(bin _  _)   (tipS q))  = ⊥-elim (unbounded t)
+retabulate-natural (s≤s 1+k<1+n) h (bin t@(bin t' _) u@(bin _ _)) = cong₂ bin (trans (retabulate-natural (s≤s (bounded t')) h t) (cong (λ ineq → retabulate ineq (mapBT h t)) ≤-isProp)) (trans (zipBTWith-natural h (mapBT h) (mapBT h) _∷ᴮᵀ_ _∷ᴮᵀ_ refl t (retabulate 1+k<1+n u)) (cong (zipBTWith _∷ᴮᵀ_ (mapBT h t)) (retabulate-natural 1+k<1+n h u)))
 
+bu-construct-loop-natural :
+    (k≤n : k ≤‴ n) (h : p ⇉ q) {xs : Vec a n} (t : BT n k p xs)
+  → mapBT (map-buRec k≤n h) ∘ bu-construct-loop k≤n $ t ≡ bu-construct-loop k≤n ∘ mapBT h $ t
+bu-construct-loop-natural  ≤‴-refl    h t = refl
+bu-construct-loop-natural (≤‴-step d) h t =
+  begin
+    mapBT (map-buRec (≤‴-step d) h) ∘ bu-construct-loop (≤‴-step d)           $ t
+      ≡⟨ refl ⟩
+    mapBT (map-buRec d (mapBT h)) ∘ bu-construct-loop d ∘ retabulate (≤‴⇒≤ d) $ t
+      ≡⟨ bu-construct-loop-natural d (mapBT h) _ ⟩
+    bu-construct-loop d ∘ mapBT (mapBT h) ∘ retabulate (≤‴⇒≤ d)               $ t
+      ≡⟨ cong (bu-construct-loop d) (retabulate-natural (≤‴⇒≤ d) h t) ⟩
+    bu-construct-loop d ∘ retabulate (≤‴⇒≤ d) ∘ mapBT h                       $ t
+      ≡⟨ refl ⟩
+    bu-construct-loop (≤‴-step d) ∘ mapBT h                                   $ t
+  ∎
+  where open ≡-Reasoning
 
+unTip∘bu-construct-loop-natural :
+    (k≤n : k ≤‴ n) (h : p ⇉ q) {xs : Vec a n} (t : BT n k p xs)
+  → map-buRec k≤n h ∘ unTip ∘ bu-construct-loop k≤n           $ t
+  ≡                   unTip ∘ bu-construct-loop k≤n ∘ mapBT h $ t
+unTip∘bu-construct-loop-natural k≤n h t =
+  begin
+    map-buRec k≤n h ∘ unTip ∘ bu-construct-loop k≤n         $ t
+      ≡⟨ unTip-natural (map-buRec k≤n h) (bu-construct-loop k≤n t) ⟩
+    unTip ∘ mapBT (map-buRec k≤n h) ∘ bu-construct-loop k≤n $ t
+      ≡⟨ cong unTip (bu-construct-loop-natural k≤n h _) ⟩
+    unTip ∘ bu-construct-loop k≤n ∘ mapBT h                 $ t
+  ∎
+  where open ≡-Reasoning
 
+-- overall structure of the equality proof
+overall : {A A' B : Set}
+        → (f : A → B) (f' : A' → B)
+        → ((Σ[ X ∈ Set ] (X → B)) ∋ (A , f)) ≡ (A' , f')
+        → IsProp A
+        → (a : A) (a' : A') → f a ≡ f' a'
+overall f .f refl A-isProp a a' = cong f A-isProp
 
+module DemolitionAndEquality
+  {a : Set} (s : ∀ {k} → Fam (Vec a k))
+  (e : const ⊤ ⇉ s {0}) (g : ∀ {k} → BT (1 + k) k s ⇉ s)
+  where
 
+  -- table demolition phases
 
--- --------
--- -- Notations for understanding indexed types as if they were simple types
--- -- Or: switching to the categories of families
+  td-demolish : (n : ℕ) → tdRec n ⇉ s
+  td-demolish  zero   = e
+  td-demolish (suc n) = g ∘ mapBT (td-demolish n)
 
--- ∀[_]_⇉_ : (A : Set) → Fam A → Fam A → Set
--- ∀[ A ] P ⇉ Q = P ⇉ Q
+  bu-demolish-loop : (k≤n : k ≤‴ n) → buRec k≤n s ⇉ s
+  bu-demolish-loop  ≤‴-refl    = id
+  bu-demolish-loop (≤‴-step d) = bu-demolish-loop d ∘ map-buRec d g
 
--- infix 2 ∀[_]_⇉_
+  bu-demolish : (n : ℕ) → ∀[ Vec a n ] buRec (≤⇒≤‴ z≤n) (const ⊤) ⇉ s
+  bu-demolish n = bu-demolish-loop 0≤n ∘ map-buRec 0≤n e
+    where 0≤n = ≤⇒≤‴ z≤n
 
--- --------
--- -- Correctness: separating both algorithms into production and consumption phases
+  -- separation into two phases
 
--- module Production where
+  td-separation : (n : ℕ) {xs : Vec a n}
+                → td s e g n {xs} $ tt ≡ td-demolish n ∘ td-construct n $ tt
+  td-separation  zero   = refl
+  td-separation (suc n) =
+    begin
+      td s e g (suc n)                                                                       $ tt
+        ≡⟨ refl ⟩
+      g ∘ mapBT (td s e g n) ∘ blank (suc n) n (≤′-step ≤′-refl)                             $ tt
+        ≡⟨ cong g (cong-mapBT (λ _ → td-separation n) _) ⟩
+      g ∘ mapBT (td-demolish n ∘ td-construct n) ∘ blank (suc n) n (≤′-step ≤′-refl)         $ tt
+        ≡⟨ cong g (mapBT-∘ (td-demolish n) (td-construct n) _) ⟩
+      g ∘ mapBT (td-demolish n) ∘ mapBT (td-construct n) ∘ blank (suc n) n (≤′-step ≤′-refl) $ tt
+        ≡⟨ refl ⟩
+      td-demolish (suc n) ∘ td-construct (suc n)                                             $ tt
+    ∎
+    where open ≡-Reasoning
 
---   tdRec : (n : ℕ) → Fam (Vec A n)
---   tdRec  zero   = const ⊤
---   tdRec (suc n) = BT (suc n) n (tdRec n)
+  bu-loop-separation :
+      (k≤n : k ≤‴ n)
+    → {xs : Vec a n} (t : BT n k s xs)
+    → unTip ∘ bu-loop g k k≤n $ t ≡ bu-demolish-loop k≤n ∘ unTip ∘ bu-construct-loop k≤n $ t
+  bu-loop-separation  ≤‴-refl    t = refl
+  bu-loop-separation (≤‴-step d) t =
+    begin
+      unTip ∘ bu-loop g _ (≤‴-step d)                                                        $ t
+        ≡⟨ refl ⟩
+      unTip ∘ bu-loop g _ d ∘ mapBT g ∘ retabulate (≤‴⇒≤ d)                                  $ t
+        ≡⟨ bu-loop-separation d _ ⟩
+      bu-demolish-loop d ∘ unTip ∘ bu-construct-loop d ∘ mapBT g ∘ retabulate (≤‴⇒≤ d)       $ t
+        ≡⟨ cong (bu-demolish-loop d) (sym (unTip∘bu-construct-loop-natural d g _)) ⟩
+      bu-demolish-loop d ∘ map-buRec d g ∘ unTip ∘ bu-construct-loop d ∘ retabulate (≤‴⇒≤ d) $ t
+        ≡⟨ refl ⟩
+      bu-demolish-loop (≤‴-step d) ∘ unTip ∘ bu-construct-loop (≤‴-step d)                   $ t
+    ∎
+    where open ≡-Reasoning
 
---   td-construct : (n : ℕ) → ∀[ Vec A n ] const ⊤ ⇉ tdRec n
---   td-construct  zero   = id
---   td-construct (suc n) = mapBT (td-construct n) ∘ blanks (suc n) n 1+n≥n
---     where 1+n≥n = ≤′-step ≤′-refl
+  bu-separation : (n : ℕ) {xs : Vec a n} → bu s e g n {xs} $ tt ≡ bu-demolish n ∘ bu-construct n $ tt
+  bu-separation n =
+    begin
+      bu s e g n                                                                                    $ tt
+        ≡⟨ refl ⟩
+      unTip ∘ bu-loop g _ 0≤n ∘ mapBT e ∘ blank n 0 (≤⇒≤′ z≤n)                                      $ tt
+        ≡⟨ bu-loop-separation 0≤n _ ⟩
+      bu-demolish-loop 0≤n ∘ unTip ∘ bu-construct-loop 0≤n ∘ mapBT e ∘ blank n 0 (≤⇒≤′ z≤n)         $ tt
+        ≡⟨ cong (bu-demolish-loop 0≤n) (sym (unTip∘bu-construct-loop-natural 0≤n e _)) ⟩
+      bu-demolish-loop 0≤n ∘ map-buRec 0≤n e ∘ unTip ∘ bu-construct-loop 0≤n ∘ blank n 0 (≤⇒≤′ z≤n) $ tt
+        ≡⟨ refl ⟩
+      bu-demolish n ∘ bu-construct n                                                                $ tt
+    ∎
+    where 0≤n = ≤⇒≤‴ z≤n
+          open ≡-Reasoning
 
---   tdRec-isProp : (n : ℕ) {xs : Vec A n} → IsProp (tdRec n xs)
---   tdRec-isProp  zero   = refl
---   tdRec-isProp (suc n) = BT-isProp (tdRec-isProp n)
+  -- equality between the table demolition phases
 
---   buRec : n ≥‴ k → Fam (Vec A k) → Fam (Vec A n)
---   buRec          ≤‴-refl        = id
---   buRec {k = k} (≤‴-step n≥1+k) = buRec n≥1+k ∘ BT (suc k) k
+  -- an alternative form that can be proved equal to td-demolish without using functoriality
+  bu-demolish-loop' : (k≤n : k ≤‴ n) → r ⇉ s → buRec k≤n r ⇉ s
+  bu-demolish-loop'  ≤‴-refl    h = h
+  bu-demolish-loop' (≤‴-step d) h = bu-demolish-loop' d (g ∘ mapBT h)
 
---   bu-construct-loop : (n≥k : n ≥‴ k) → BT n k P ⇉ BT n n (buRec n≥k P)
---   bu-construct-loop  ≤‴-refl        = id
---   bu-construct-loop (≤‴-step n≥1+k) = bu-construct-loop n≥1+k ∘ retabulate (≤‴⇒≤ n≥1+k)
+  bu-demolish' : (n : ℕ) → ∀[ Vec a n ] buRec (≤⇒≤‴ z≤n) (const ⊤) ⇉ s
+  bu-demolish' n = bu-demolish-loop' (≤⇒≤‴ z≤n) e
 
---   bu-construct : (n : ℕ) → ∀[ Vec A n ] const ⊤ ⇉ buRec (≤⇒≤‴ z≤n) (const ⊤)
---   bu-construct n = unTip ∘ bu-construct-loop (≤⇒≤‴ z≤n) ∘ blanks n 0 (≤⇒≤′ z≤n)
+  bu-demolish-loop-equiv :
+      (k≤n : k ≤‴ n) (h : r ⇉ s) {xs : Vec a n} (t : buRec k≤n r xs)
+    → bu-demolish-loop' k≤n h $ t ≡ bu-demolish-loop k≤n ∘ map-buRec k≤n h $ t
+  bu-demolish-loop-equiv  ≤‴-refl    h t = refl
+  bu-demolish-loop-equiv (≤‴-step d) h t =
+    begin
+      bu-demolish-loop' (≤‴-step d) h                            $ t
+        ≡⟨ refl ⟩
+      bu-demolish-loop' d (g ∘ mapBT h)                          $ t
+        ≡⟨ bu-demolish-loop-equiv d (g ∘ mapBT h) _ ⟩
+      bu-demolish-loop d ∘ map-buRec d (g ∘ mapBT h)             $ t
+        ≡⟨ cong (bu-demolish-loop d) (map-buRec-∘ d g (mapBT h) _) ⟩
+      bu-demolish-loop d ∘ map-buRec d g ∘ map-buRec d (mapBT h) $ t
+        ≡⟨ refl ⟩
+      bu-demolish-loop (≤‴-step d) ∘ map-buRec (≤‴-step d) h     $ t
+    ∎
+    where open ≡-Reasoning
 
---   map-buRec : (n≥k : n ≥‴ k) → P ⇉ Q → buRec n≥k P ⇉ buRec n≥k Q
---   map-buRec  ≤‴-refl        f = f
---   map-buRec (≤‴-step n≥1+k) f = map-buRec n≥1+k (mapBT f)
+  bu-demolish-equiv :
+      (n : ℕ) {xs : Vec a n} (t : buRec (≤⇒≤‴ z≤n) (const ⊤) xs)
+    → bu-demolish' n t ≡ bu-demolish n t
+  bu-demolish-equiv n = bu-demolish-loop-equiv (≤⇒≤‴ z≤n) e
 
---   cong-map-buRec :
---       (n≥k : n ≥‴ k) {f g : P ⇉ Q} → (∀ {ys} (p : P ys) → f p ≡ g p)
---     → {xs : Vec A n} (t : buRec n≥k P xs) → map-buRec n≥k f t ≡ map-buRec n≥k g t
---   cong-map-buRec  ≤‴-refl        f≗g t = f≗g t
---   cong-map-buRec (≤‴-step n≥1+k) f≗g t = cong-map-buRec n≥1+k (cong-mapBT f≗g) t
+  td≗bu-demolish :
+      (k≤n : k ≤‴ n) {xs : Vec a n}
+    → ((Σ[ b ∈ Set ] (b → s xs))
+      ∋ (tdRec n xs             , td-demolish n))
+      ≡ (buRec k≤n (tdRec k) xs , bu-demolish-loop' k≤n (td-demolish k))
+  td≗bu-demolish  ≤‴-refl    = refl
+  td≗bu-demolish (≤‴-step d) = td≗bu-demolish d
 
---   map-buRec-∘ : (n≥k : n ≥‴ k) (f : Q ⇉ R) (g : P ⇉ Q)
---               → {xs : Vec A n} (t : buRec n≥k P xs)
---               → map-buRec n≥k (f ∘ g) $ t ≡ map-buRec n≥k f ∘ map-buRec n≥k g $ t
---   map-buRec-∘  ≤‴-refl        f g t = refl
---   map-buRec-∘ (≤‴-step n≥1+k) f g t =
---     trans (cong-map-buRec n≥1+k (mapBT-∘ f g) t) (map-buRec-∘ n≥1+k (mapBT f) (mapBT g) t)
+  -- equality between the top-down and bottom-up algorithms
 
---   bu-construct-loop-natural :
---       (n≥k : n ≥‴ k) (h : P ⇉ Q) {xs : Vec A n} (t : BT n k P xs)
---     → mapBT (map-buRec n≥k h) ∘ bu-construct-loop n≥k $ t ≡ bu-construct-loop n≥k ∘ mapBT h $ t
---   bu-construct-loop-natural  ≤‴-refl        h t = refl
---   bu-construct-loop-natural (≤‴-step n≥1+k) h t =
---     begin
---       mapBT (map-buRec (≤‴-step n≥1+k) h) ∘ bu-construct-loop (≤‴-step n≥1+k)               $ t
---         ≡⟨ refl ⟩
---       mapBT (map-buRec n≥1+k (mapBT h)) ∘ bu-construct-loop n≥1+k ∘ retabulate (≤‴⇒≤ n≥1+k) $ t
---         ≡⟨ bu-construct-loop-natural n≥1+k (mapBT h) _ ⟩
---       bu-construct-loop n≥1+k ∘ mapBT (mapBT h) ∘ retabulate (≤‴⇒≤ n≥1+k)                   $ t
---         ≡⟨ cong (bu-construct-loop n≥1+k) (retabulate-natural (≤‴⇒≤ n≥1+k) h t) ⟩
---       bu-construct-loop n≥1+k ∘ retabulate (≤‴⇒≤ n≥1+k) ∘ mapBT h                           $ t
---         ≡⟨ refl ⟩
---       bu-construct-loop (≤‴-step n≥1+k) ∘ mapBT h                                           $ t
---     ∎
---     where open ≡-Reasoning
+  td≗bu : (n : ℕ) {xs : Vec a n} → td s e g n {xs} $ tt ≡ bu s e g n $ tt
+  td≗bu n =
+    begin
+      td s e g n                      $ tt
+        ≡⟨ td-separation n ⟩
+      td-demolish n ∘ td-construct n  $ tt
+        ≡⟨ overall (td-demolish n) (bu-demolish-loop' 0≤n e) (td≗bu-demolish 0≤n)
+             (tdRec-isProp n) (td-construct n tt) (bu-construct n tt) ⟩
+      bu-demolish' n ∘ bu-construct n $ tt
+        ≡⟨ bu-demolish-equiv n _ ⟩
+      bu-demolish n ∘ bu-construct n  $ tt
+        ≡⟨ sym (bu-separation n) ⟩
+      bu s e g n                      $ tt
+    ∎
+    where 0≤n = ≤⇒≤‴ z≤n
+          open ≡-Reasoning
 
---   unTip∘bu-construct-loop-natural :
---       (n≥k : n ≥‴ k) (h : P ⇉ Q) {xs : Vec A n} (t : BT n k P xs)
---     → map-buRec n≥k h ∘ unTip ∘ bu-construct-loop n≥k           $ t
---     ≡                   unTip ∘ bu-construct-loop n≥k ∘ mapBT h $ t
---   unTip∘bu-construct-loop-natural n≥k h t =
---       begin
---         map-buRec n≥k h ∘ unTip ∘ bu-construct-loop n≥k         $ t
---           ≡⟨ unTip-natural (map-buRec n≥k h) (bu-construct-loop n≥k t) ⟩
---         unTip ∘ mapBT (map-buRec n≥k h) ∘ bu-construct-loop n≥k $ t
---           ≡⟨ cong unTip (bu-construct-loop-natural n≥k h _) ⟩
---         unTip ∘ bu-construct-loop n≥k ∘ mapBT h                 $ t
---       ∎
---     where open ≡-Reasoning
-
---   overall : {A A' B : Set}
---           → (f : A → B) (f' : A' → B)
---           → ((Σ[ X ∈ Set ] (X → B)) ∋ (A , f)) ≡ (A' , f')
---           → IsProp A
---           → (a : A) (a' : A') → f a ≡ f' a'
---   overall f .f refl A-isProp a a' = cong f A-isProp
-
--- module Consumption-and-Correctness
---   {A : Set} (S : {k : ℕ} → Fam (Vec A k))
---   (e : const ⊤ ⇉ S {0}) (g : {k : ℕ} → BT (suc k) k S ⇉ S)
---   where
-
---   open Algorithms S e g
---   open Production
-
---   td-demolish : (n : ℕ) → tdRec n ⇉ S
---   td-demolish  zero   = e
---   td-demolish (suc n) = g ∘ mapBT (td-demolish n)
-
---   td-separation : (n : ℕ) {xs : Vec A n}
---                 → td n {xs} $ tt ≡ td-demolish n ∘ td-construct n $ tt
---   td-separation  zero   = refl
---   td-separation (suc n) =
---     begin
---       td (suc n)                                                                  $ tt
---         ≡⟨ refl ⟩
---       g ∘ mapBT (td n) ∘ blanks (suc n) n 1+n≥n                                   $ tt
---         ≡⟨ cong g (cong-mapBT (λ _ → td-separation n) _) ⟩
---       g ∘ mapBT (td-demolish n ∘ td-construct n) ∘ blanks (suc n) n 1+n≥n         $ tt
---         ≡⟨ cong g (mapBT-∘ (td-demolish n) (td-construct n) _) ⟩
---       g ∘ mapBT (td-demolish n) ∘ mapBT (td-construct n) ∘ blanks (suc n) n 1+n≥n $ tt
---         ≡⟨ refl ⟩
---       td-demolish (suc n) ∘ td-construct (suc n)                                  $ tt
---     ∎
---     where 1+n≥n = ≤′-step ≤′-refl
---           open ≡-Reasoning
-
---   bu-demolish-loop : (n≥k : n ≥‴ k) → buRec n≥k S ⇉ S
---   bu-demolish-loop  ≤‴-refl        = id
---   bu-demolish-loop (≤‴-step n≥1+k) = bu-demolish-loop n≥1+k ∘ map-buRec n≥1+k g
-
---   bu-demolish : (n : ℕ) → ∀[ Vec A n ] buRec (≤⇒≤‴ z≤n) (const ⊤) ⇉ S
---   bu-demolish n = bu-demolish-loop n≥0 ∘ map-buRec n≥0 e
---     where n≥0 = ≤⇒≤‴ z≤n
-
---   bu-loop-separation :
---       (n≥k : n ≥‴ k)
---     → {xs : Vec A n} (t : BT n k S xs)
---     → unTip ∘ bu-loop n≥k $ t ≡ bu-demolish-loop n≥k ∘ unTip ∘ bu-construct-loop n≥k $ t
---   bu-loop-separation  ≤‴-refl        t = refl
---   bu-loop-separation (≤‴-step n≥1+k) t =
---     begin
---       unTip ∘ bu-loop (≤‴-step n≥1+k)                                                                        $ t
---         ≡⟨ refl ⟩
---       unTip ∘ bu-loop n≥1+k ∘ mapBT g ∘ retabulate (≤‴⇒≤ n≥1+k)                                              $ t
---         ≡⟨ bu-loop-separation n≥1+k _ ⟩
---       bu-demolish-loop n≥1+k ∘ unTip ∘ bu-construct-loop n≥1+k ∘ mapBT g ∘ retabulate (≤‴⇒≤ n≥1+k)           $ t
---         ≡⟨ cong (bu-demolish-loop n≥1+k) (sym (unTip∘bu-construct-loop-natural n≥1+k g _)) ⟩
---       bu-demolish-loop n≥1+k ∘ map-buRec n≥1+k g ∘ unTip ∘ bu-construct-loop n≥1+k ∘ retabulate (≤‴⇒≤ n≥1+k) $ t
---         ≡⟨ refl ⟩
---       bu-demolish-loop (≤‴-step n≥1+k) ∘ unTip ∘ bu-construct-loop (≤‴-step n≥1+k)                           $ t
---     ∎
---     where open ≡-Reasoning
-
---   bu-separation : (n : ℕ) {xs : Vec A n} → bu n {xs} $ tt ≡ bu-demolish n ∘ bu-construct n $ tt
---   bu-separation n =
---     begin
---       bu n                                                                                           $ tt
---         ≡⟨ refl ⟩
---       unTip ∘ bu-loop n≥0 ∘ mapBT e ∘ blanks n 0 (≤⇒≤′ z≤n)                                          $ tt
---         ≡⟨ bu-loop-separation n≥0 _ ⟩
---       bu-demolish-loop n≥0 ∘ unTip ∘ bu-construct-loop n≥0 ∘ mapBT e ∘ blanks n 0 (≤⇒≤′ z≤n)         $ tt
---         ≡⟨ cong (bu-demolish-loop n≥0) (sym (unTip∘bu-construct-loop-natural n≥0 e _)) ⟩
---       bu-demolish-loop n≥0 ∘ map-buRec n≥0 e ∘ unTip ∘ bu-construct-loop n≥0 ∘ blanks n 0 (≤⇒≤′ z≤n) $ tt
---         ≡⟨ refl ⟩
---       bu-demolish n ∘ bu-construct n                                                                 $ tt
---     ∎
---     where n≥0 = ≤⇒≤‴ z≤n
---           open ≡-Reasoning
-
---   bu-demolish-loop' : (n≥k : n ≥‴ k) → R ⇉ S → buRec n≥k R ⇉ S
---   bu-demolish-loop'  ≤‴-refl        h = h
---   bu-demolish-loop' (≤‴-step n≥1+k) h = bu-demolish-loop' n≥1+k (g ∘ mapBT h)
-
---   bu-demolish' : (n : ℕ) → ∀[ Vec A n ] buRec (≤⇒≤‴ z≤n) (const ⊤) ⇉ S
---   bu-demolish' n = bu-demolish-loop' (≤⇒≤‴ z≤n) e
-
---   bu-demolish-loop-equiv :
---       (n≥k : n ≥‴ k) (h : R ⇉ S) {xs : Vec A n} (r : buRec n≥k R xs)
---     → bu-demolish-loop' n≥k h $ r ≡ bu-demolish-loop n≥k ∘ map-buRec n≥k h $ r
---   bu-demolish-loop-equiv  ≤‴-refl        h r = refl
---   bu-demolish-loop-equiv (≤‴-step n≥1+k) h r =
---     begin
---       bu-demolish-loop' (≤‴-step n≥1+k) h                                    $ r
---         ≡⟨ refl ⟩
---       bu-demolish-loop' n≥1+k (g ∘ mapBT h)                                  $ r
---         ≡⟨ bu-demolish-loop-equiv n≥1+k (g ∘ mapBT h) _ ⟩
---       bu-demolish-loop n≥1+k ∘ map-buRec n≥1+k (g ∘ mapBT h)                 $ r
---         ≡⟨ cong (bu-demolish-loop n≥1+k) (map-buRec-∘ n≥1+k g (mapBT h) _) ⟩
---       bu-demolish-loop n≥1+k ∘ map-buRec n≥1+k g ∘ map-buRec n≥1+k (mapBT h) $ r
---         ≡⟨ refl ⟩
---       bu-demolish-loop (≤‴-step n≥1+k) ∘ map-buRec (≤‴-step n≥1+k) h         $ r
---     ∎
---     where open ≡-Reasoning
-
---   bu-demolish-equiv :
---       (n : ℕ) {xs : Vec A n} (r : buRec (≤⇒≤‴ z≤n) (const ⊤) xs)
---     → bu-demolish' n r ≡ bu-demolish n r
---   bu-demolish-equiv n = bu-demolish-loop-equiv (≤⇒≤‴ z≤n) e
-
---   td≗bu-demolish :
---       (n≥k : n ≥‴ k) {xs : Vec A n}
---     → ((Σ[ X ∈ Set ] (X → S xs))
---       ∋ (tdRec n xs             , td-demolish n))
---       ≡ (buRec n≥k (tdRec k) xs , bu-demolish-loop' n≥k (td-demolish k))
---   td≗bu-demolish  ≤‴-refl        = refl
---   td≗bu-demolish (≤‴-step n≥1+k) = td≗bu-demolish n≥1+k
-
---   td≗bu : (n : ℕ) {xs : Vec A n} → td n {xs} $ tt ≡ bu n $ tt
---   td≗bu n =
---     begin
---       td n                            $ tt
---         ≡⟨ td-separation n ⟩
---       td-demolish n ∘ td-construct n  $ tt
---         ≡⟨ overall (td-demolish n) (bu-demolish-loop' n≥0 e) (td≗bu-demolish n≥0)
---              (tdRec-isProp n) (td-construct n tt) (bu-construct n tt) ⟩
---       bu-demolish' n ∘ bu-construct n $ tt
---         ≡⟨ bu-demolish-equiv n _ ⟩
---       bu-demolish n ∘ bu-construct n  $ tt
---         ≡⟨ sym (bu-separation n) ⟩
---       bu n                            $ tt
---     ∎
---     where n≥0 = ≤⇒≤‴ z≤n
---           open ≡-Reasoning
+-- ‘But as usual, in the end there’s a dopamine hit from seeing everything checked.’

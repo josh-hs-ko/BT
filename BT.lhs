@@ -1498,7 +1498,8 @@ If I want to stick to string diagrams, I'll need to transcribe the algorithms in
 Moreover, the |BT-isProp| reasoning is formally an induction (on the length of the input list), which needs to be worked out.
 And actually, compared with a diagrammatic but unformalised proof, I prefer a full Agda formalisation.
 That means I'll need to spell out a lot of detail, including functoriality and naturality rewriting~(\cref{fig:functoriality-rewriting,fig:naturality-rewriting}).
-Whining, I finish the entire proof in Agda, but as usual, in the end there's a dopamine hit from seeing everything checked.
+Whining, I finish the entire proof in Agda.
+But as usual, in the end there's a dopamine hit from seeing everything checked.
 
 %\todo[inline]{Sketch inductive diagrammatic definitions and Agda formalisation}
 
