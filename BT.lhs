@@ -762,7 +762,7 @@ What's special about |BT| is that the element types are indexed by sublists, so 
 That is, I can now directly say `values associated with sublists' and how they should be rearranged, rather than indirectly specify the rearrangement in terms of sublists and then extend to other types of values through parametricity.
 |BT_ n k p xs| is the type of a table of |p|-typed values associated with the |k|-sublists of |xs|, and that's precisely the intended meaning of \lstinline{cd}'s input.
 What about the output?
-It should tabulate the |(1 + k)|-sublists of |xs|, so the type should be |BT_ n sk q xs| for some |q : Vec (1 + k) a → Set|; for each sublist |ys : Vec (1 + k) a|, I want a list of |p|-typed values associated with the immediate sublists of |ys|, which are |k|-sublists, and that's precisely a tree of type |BT_ sk k p ys| --- the shape of that tree is even a list!
+It should tabulate the |(1 + k)|-sublists of |xs|, so the type should be |BT_ n sk q xs| for some |q : Vec (1 + k) a → Set|; for each sublist |ys : Vec (1 + k) a|, I want a list of |p|-typed values associated with the immediate sublists of |ys|, which are |k|-sublists, and that's precisely a tree of type |BT_ sk k p ys|.
 Therefore the whole type is
 \begin{code}
 retabulate : (SUPPRESSED(k < n)) → (BT_ n k) p xs → (BT_ n sk) ((BT_ sk k) p) xs
@@ -771,9 +771,17 @@ which is parametric in~|p| (so, like \lstinline{cd}, the elements can have any t
 I think it's time to rename \lstinline{cd} to something more meaningful, and decide to use `|retabulate|' because I'm moving values in a table into appropriate positions in a new (nested) table with a new tabulation scheme.
 % \Jeremy{I'd like to think of a better name. } % Happy now!
 And a side condition |k < n| is needed to guarantee that the output shape |BT_ n sk| is valid.
+\Shin{In the following paragraphs I try to describe how |retabulate| can be constructed from its type. Some changes were made: 1. |_∷ᴮᵀ_| is introduced earlier and slightly more detailed because I will use it later. 2. definition of |mapBT| is omitted because I think it is probably not needed and now we might be running out of space. BTW, I don't know how to say ``everything related to |k < n| is omitted'' in an early stage, therefore all my calls to |retabulate| still have the |k < n| argument in underline. It is preferable to find a reason to omit it.}
+
+Letting |retabulate| return a tree of trees rather than a tree of lists may look like a drastic change, but I don't need another type for lists --- the shape of |BT_ sk k| is always a list! In fact, I can define a cons-like operation for |BT_ sk k|:
+\begin{code}
+_∷ᴮᵀ_ : p xs → BT(C sk k) (p ∘ (x ∷_)) xs → BT(C ssk sk) p (x ∷ xs)
+y ∷ᴮᵀ t = bin (tipS y) t
+\end{code}
+The type says that, to show that all immediate sublists of |x ∷ xs| satisfy a predicate |p|, one only needs to show that |xs| satisfies |p| and that, for all immediate sublist |ws| of |xs|, |x ∷ ws| satisfies |p|. The definition of |_∷ᴮᵀ_| is forced by its type.
 
 I should go on to define |retabulate|.
-Now that its type is much more informative than that of \lstinline{cd}, rather than transcribing \lstinline{cd}, can its type guide me through the implemenation?
+Now that its type is much more informative than that of \lstinline{cd}, rather than transcribing \lstinline{cd}, can its type guide me through the implementation?
 I typed the left hand side of |retabulate| into the editor, left the right hand side as a hole, and performed some case-splitting on the input tree, resulting in:
 \begin{spec}
 retabulate _ (tipZ _)                           = (GOAL(BLANK)(G0))
@@ -805,24 +813,14 @@ retabulate u : BT(C(1+n) (2+k)) (BT (C (2+k) (1+k)) (p ∘ (x ∷_))) (x₁ ∷ 
 Both |t| and |retabulate _ u| have the outer shape |BT(C (1+n) (2+k)) _ (x₁ ∷ xs)| that I want, but the element types do not match.
 
 To complete the program I really have to pay more attention to what the types say.
-All the types have the form |BT(C(1+n) (2+k)) _ (x₁ ∷ xs)|, which focuses on |2+k| sublists of |x₁ ∷ xs|.
+All the types have the form |BT(C(1+n) (2+k)) _ (x₁ ∷ xs)|, a predicate on |(2+k)|-sublists of |x₁ ∷ xs|.
 Denote such a list by |zs|.
 The predicate |BT(C (3+k) (2+k)) p ∘ (x ∷_)|, the element type of |(GOAL(BLANK)(G7))|, demands that all immediate sublists of |x ∷ zs| satisfy |p|.
 Meanwhile, |t| guarantees |p zs|, and the element type of |retabulate _ u|, |BT (C (2+k) (1+k)) (p ∘ (x ∷_))|, guarantees |p (x ∷ ws)| for each immediate sublist |ws| of |zs|.
-Surely from |p zs| and |p (x ∷ ws)| we can establish that |p| holds for all immediate sublists of |x ∷ zs|, can we?
+Surely from |p zs| and |p (x ∷ ws)| we can establish that |p| holds for all immediate sublists of |x ∷ zs| --- isn't that exactly what |_∷ᴮᵀ_| does?
+Indeed, |(GOAL(BLANK)(G7))| can be fulfilled by combining |t| and |retabulate _ u| pairwise using |_∷ᴮᵀ_|, that is, |zipBTWith _∷ᴮᵀ_ t (retabulate _ u)|!
 
-Indeed, I can define a function just for this purpose:
-\begin{code}
-_∷ᴮᵀ_ : p zs → BT(C sk k) (p ∘ (x ∷_)) zs → BT(C ssk sk) p (x ∷ zs)
-y ∷ᴮᵀ t = bin (tipS y) t
-\end{code}
-I am using the notation |_∷ᴮᵀ_| because it is a cons-like operation.
-The definition of |_∷ᴮᵀ_| is forced by its type.
-Having defined |_∷ᴮᵀ_|, |(GOAL(BLANK)(G7))| can be constructed by |zipBTWith _∷ᴮᵀ_ t (retabulate _ u)|!
-
-The more informative type of retabulate does help me to construct its definition.
-The rest of the cases are much easier.
-Everything related to the side condition |k < n| is omitted to make it easier to compare |retabulate| with \lstinline{cd}.
+The rest of the cases are much easier, and I come up with a definition of |retabulate|:
 \begin{code}
 retabulate : (SUPPRESSED(k < n)) → BT(C n k) p xs → BT(C n sk) (BT(C sk k) p) xs
 retabulate {xs =' _ ∷ []     } (tipZ y) = tipS  (tipZ y)
@@ -835,22 +833,8 @@ retabulate (bin  t @  (bin _ _)  u @  (bin _ _)  ) = bin   (retabulate t)
 where the map function is the expected one, having type
 \begin{spec}
 mapBT : (∀ {ys} → p ys → q ys) → ∀ {xs} → (BT_ n k) p xs → (BT_ n k) q xs
-<<<<<<< HEAD
 \end{spec}
-=======
-mapBT f (tipZ  x)  = tipZ  (f x)
-mapBT f (tipS  x)  = tipS  (f x)
-mapBT f (bin t u)  = bin   (mapBT f t) (mapBT f u)
-\end{code}
-and a cons function can be introduced for |BT_ sk k|-trees/lists:
-\begin{code}
-_∷ᴮᵀ_ : p xs → BT(C sk k) (p ∘ (x ∷_)) xs → BT(C ssk sk) p (x ∷ xs)
-y ∷ᴮᵀ t = bin (tipS y) t
-\end{code}
-(The type of |_∷ᴮᵀ_| is slightly complex, but Agda pretty much infers it for me.)
-Everything related to the side condition |k < n| is omitted to make it easier to compare |retabulate| with \lstinline{cd}; also omitted are the two cases |tipS _| and |bin _ (tipS _)|, whose shapes are proved to be impossible.
-I forgot about another side condition |1 ≤ k|, but that leads to two additional |tipZ| cases (which are fairly easy to figure out from the type information) instead of preventing me from completing the definition.
->>>>>>> 843903977a1db168608d498d1785add25642adca
+The impossible cases are omitted, so is everything related to the side condition |k < n|, to make it easier to compare with \lstinline{cd}.
 
 %I go on and transcribe \lstinline{cd} into |retabulate|,
 %\begin{code}
@@ -878,19 +862,18 @@ I forgot about another side condition |1 ≤ k|, but that leads to two additiona
 %Everything related to the side condition |k < n| is omitted to make it easier to compare |retabulate| with \lstinline{cd}; also omitted are the two cases |tipS _| and |bin _ (tipS _)|, whose shapes are proved to be impossible.
 %I forgot about another side condition |1 ≤ k|, but that leads to two additional |tipZ| cases (which are fairly easy to figure out from the type information) instead of preventing me from completing the definition.
 
-Comparing \lstinline{cd} and |retabulate|, the first two cases of \lstinline{cd} are subsumed by the third case, |bin (tipS y) u|, of |retabulate|.
+Amazingly, the more informative type of |retabulate| did help me to develop its definition.
+As I filled in the holes, I didn't feel I had much of a choice --- in a good way, because that reflected the precision of the type.
+Furthermore, I discovered a new algorithm that varies slightly from Richard's \lstinline{cd}!
+The first two cases of \lstinline{cd} are subsumed by the third case, |bin (tipS y) u|, of |retabulate|.
 The second case of \lstinline{cd} recursively traverses the given tree to convert it to a list, which is not needed in |retabulate|, because it yields a tree of trees.
 Therefore the first two cases of \lstinline{cd} can be unified into one.
 Meanwhile, the first two cases of |retabulate| concerning |tipZ| are new.
-While \lstinline{cd} has to start from level-1,
-this pair of cases of |retabulate| is capable
-%\Jeremy{``these two cases \emph{are} capable'', if either of them alone is capable; but ``this pair of cases \emph{is} capable'' if it requires both of them together. SCM: It should be the latter case. Fixed.}
+While \lstinline{cd} has to start from level-1, this pair of cases of |retabulate| is capable
 of producing a level-1 table (with as many elements as |xs|) from a level-0 table, which is a |tipZ|.
 This is due to |xs| now being available as an index, providing the missing context for |retabulate|.
 The definition has been verified simply by finding the (or rather, a) right type for it!
 %There's actually no need to understand the definition of \lstinline{cd}/|retabulate| now, but I can still go through a case or two to see how well type-directed programming works.
-%\Shin{Are these what we intent to say here?
-%BTW, perhaps ``The definition has been verified simply by finding the [type] ... There's actually no need to understand the definition...'' should not be said right after we just examined the definition, but be integrated into the next paragraph instead.}
 
 %\todo[inline]{Compare \lstinline{cd} and |retabulate|.
 %(In particular, the additional |tipZ| cases of |retabulate| are responsible for producing a level-1 table (with as many elements as |xs|) from a level-0 table, which is a |tipZ|.
@@ -898,7 +881,6 @@ The definition has been verified simply by finding the (or rather, a) right type
 %The definition has been verified simply by finding the (or rather, a) right type for it!
 %There's actually no need to understand the definition of \lstinline{cd}/|retabulate| now, but I can still go through a case or two to see how well type-directed programming works.}
 
-As I filled in the holes, I didn't feel I had much of a choice --- in a good way, because that reflected the precision of the type.
 In fact, looking at the type more closely, I suspect that the extensional behaviour of |retabulate| is completely determined by the type (so the type works as a nice and tight specification): the shape of the output table is completely determined by the indices; moreover, all the input elements have distinct types in general, so each element in the output table has to be the only input element with the required type --- there is no choice to make.
 Formally, the proof will most likely be based on parametricity (and might be similar to \varcitet{Voigtlander-BX-for-free}{'s}).
 That'll probably be a fun exercise\ldots but I'll leave that for another day.
