@@ -508,7 +508,7 @@ For example, level~$2$ has |CHOOSE 4 2 =' 6| values --- there are $6$~ways of ch
 
 Aha!
 I can even see a pattern related to element choosing in the tree representation of level~$2$~(\cref{fig:map_g_cd}): the right subtree is about all the 2-sublists that end with~\lstinline{'d'}, and the left subtree about the other 2-sublists not containing~\lstinline{'d'}.
-To choose $2$~elements from \lstinline{"abcd"}, I can choose to include the rightmost element~\lstinline{'d'} or not.
+To choose $2$~elements from \lstinline{"abcd"}, I can include the rightmost element~\lstinline{'d'} or not.
 If \lstinline{'d'}~is included, there are |CHOOSE 3 1| ways of choosing $1$~element from \lstinline{"abc"} to go with~\lstinline{'d'}.
 If \lstinline{'d'}~is not included, there are |CHOOSE 3 2| ways of choosing $2$~elements from \lstinline{"abc"}.
 And the total number of $2$-sublists is |(CHOOSE 3 2) + (CHOOSE 3 1) =' (CHOOSE 4 2)|.
@@ -603,7 +603,7 @@ The type checker took care of most of the proof, using the indices to keep track
 
 I've still got a bit of extra proof burden about the two (greyed out) `side conditions' |1 ≤ k| and |k < n|.
 Whenever I called |cd|, I checked these conditions mentally and then ignored them.
-(I wrote `|cd u|' as if |cd| were a function with only one explicit argument.)
+(I~wrote `|cd u|' as if |cd| were a function with only one explicit argument.)
 Everything related to these conditions was also ignored, including cases that can be proved to be impossible.
 Agda ensures that I don't forget about all the ignored stuff in the final code though.
 
@@ -772,7 +772,7 @@ That is, I can now directly say `values associated with sublists' and how they s
 |BT_ n k p xs| is the type of a tree of |p|-typed values associated with the |k|-sublists of |xs|, and that's precisely the intended meaning of \lstinline{cd}'s input.
 What about the output?
 It should tabulate the |(1 + k)|-sublists of |xs|, so the type should be |BT_ n sk q xs| for some |q : Vec (1 + k) a → Set|,
-For each sublist |ys : Vec (1 + k) a|, I want a list of |p|-typed values associated with the immediate sublists of |ys|, which are |k|-sublists.
+For each sublist |ys : Vec (1 + k) a|, I~want a list of |p|-typed values associated with the immediate sublists of |ys|, which are |k|-sublists.
 Or, instead of a list, I can just use a tree of type |BT_ sk k p ys|.
 Therefore the whole type is
 \begin{code}
@@ -784,21 +784,21 @@ I think it's time to rename \lstinline{cd} to something more meaningful, and dec
 And a side condition |k < n| is needed to guarantee that the output shape |BT_ n sk| is valid.
 \Shin{In the following paragraphs I try to describe how |retabulate| can be constructed from its type. Some changes were made: 1. |_∷ᴮᵀ_| is introduced earlier and slightly more detailed because I will use it later. 2. definition of |mapBT| is omitted because I think it is probably not needed and now we might be running out of space. BTW, I don't know how to say ``everything related to |k < n| is omitted'' in an early stage, therefore all my calls to |retabulate| still have the |k < n| argument in underline. It is preferable to find a reason to omit it. Josh: I think it's fine to assume that they're only managed mentally (and not formally in Agda) in the `first pass' presented in the paper, like what we did when transcribing \lstinline{cd}.}
 
-The type of |retabulate| looks like a sensible update of the type of \lstinline{cd}, except that I'm letting |retabulate| return a tree of trees, rather than a tree of lists.
+The type of |retabulate| looks like a sensible refinement of the type of \lstinline{cd}, except that I'm letting |retabulate| return a tree of trees, rather than a tree of lists.
 Could that change be too drastic?
 Hm\ldots actually, no --- the shape of |BT_ sk k| is always a (non-empty) list!
-When |k|~is |zero|, a |BT_ 1 0|-tree has to be a |tipZ|.
+If |k|~is |zero|, a |BT_ 1 0|-tree has to be a |tipZ|.
 Otherwise, a |BT_ ssk sk|-tree has to take the form |bin (tipS y) t|.
 This is in fact a cons-like operation:
 \begin{code}
 _∷ᴮᵀ_ : p xs → BT(C sk k) (p ∘ (x ∷_)) xs → BT(C ssk sk) p (x ∷ xs)
 y ∷ᴮᵀ t = bin (tipS y) t
 \end{code}
-To construct a table indexed by all the immediate sublists of |x ∷ xs|, I need an entry for |xs|, the immediate sublist without~|x|, and a table of entries for the other immediate sublists, which are |x ∷ ws| for all the immediate sublists |ws| of |xs|.
+To construct a table indexed by all the immediate sublists of |x ∷ xs|, I need an entry for |xs|, the immediate sublist without~|x|, and a table of entries for all the other immediate sublists, which are |x ∷ ws| for all the immediate sublists |ws| of |xs|.
 
 I go on to define |retabulate|.
 Its type is much more informative than that of \lstinline{cd}.
-Rather than transcribing \lstinline{cd}, can its type help me through the implementation?
+Rather than transcribing \lstinline{cd}, can its type guide me through the implementation?
 I type the left-hand side of |retabulate| into the editor, left the right-hand side as a hole, and perform some case splitting on the input tree:
 \begin{spec}
 retabulate (tipZ _)                                  = (GOAL(BLANK)(G0))
@@ -828,11 +828,11 @@ The induction hypothesis for~|u| has type
 \begin{spec}
 retabulate u : BT(C sn ssk) (BT (C ssk sk) (p ∘ (x ∷_))) (x₁ ∷ xs)
 \end{spec}
-The types of both |t|~and |retabulate u| have the same outer shape |BT(C sn ssk) _ (x₁ ∷ xs)| that I want in the goal type, but the element types don't match.
+The types of both |t|~and |retabulate u| have the same outer shape |BT(C sn ssk) _ (x₁ ∷ xs)| that I want in the goal type, but the element types don't match\ldots
 
-To complete the program I really have to pay more attention to what the types say.
+To fill out |(GOAL(BLANK)(G7))| I really have to pay more attention to what the types say.
 The outer shape |BT(C sn ssk) _ (x₁ ∷ xs)| tells me that I'm dealing with tables indexed by the |(2 + k)|-sublists |zs| of |x₁ ∷ xs|.
-For each |zs|, I need to construct a table of |p|-typed entries indexed by all the immediate sublists of |x ∷ zs|, because that's what the element types |BT(C sssk ssk) p ∘ (x ∷_)| in the goal type of |(GOAL(BLANK)(G7))| mean.
+For each |zs|, I need to construct a table of |p|-typed entries indexed by all the immediate sublists of |x ∷ zs|, because that's what the element types |BT(C sssk ssk) p ∘ (x ∷_)| in the goal type mean.
 What entries do I have in |t|~and |retabulate u|?
 \begin{itemize}
 \item I have an entry for (each) |zs| in~|t|.
@@ -842,7 +842,7 @@ Are these entries for all the immediate sublists of |x ∷ zs|?
 Yes!
 Because |zs| is the immediate sublist of |x ∷ zs| without~|x|, and the sublists |x ∷ ws| are all the others with~|x|.
 An entry and a table of entries --- aren't they exactly the arguments of |_∷ᴮᵀ_|\,?
-Indeed, I can fulfil |(GOAL(BLANK)(G7))| by combining corresponding entries in~|t| and |retabulate u| (with the same index |zs|) using |_∷ᴮᵀ_|\,, that is, |zipBTWith _∷ᴮᵀ_ t (retabulate u)|!
+Indeed, I can fulfil |(GOAL(BLANK)(G7))| by combining all the corresponding entries in~|t| and |retabulate u| (that share the same index |zs|) using |_∷ᴮᵀ_|\,, that is, |zipBTWith _∷ᴮᵀ_ t (retabulate u)|!
 
 The rest of the cases are much easier, and I come up with a definition of |retabulate|,
 \begin{code}
@@ -895,7 +895,7 @@ The first two cases of \lstinline{cd} are subsumed by the third case, |bin (tipS
 The second case of \lstinline{cd} recursively traverses the given tree to convert it to a list, which is not needed in |retabulate|, because it yields a tree of trees.
 Therefore the first two cases of \lstinline{cd} can be unified into one.
 Meanwhile, the first two cases of |retabulate| concerning |tipZ| are new.
-While \lstinline{cd} has to start from level~$1$~(\cref{fig:sublists-lattice}), this pair of cases of |retabulate| is capable of producing a level-1 table (with as many elements as |xs|) from a level-$0$ table, which is a |tipZ|.
+Whereas \lstinline{cd} has to start from level~$1$ of the sublist lattice~(\cref{fig:sublists-lattice}), this pair of cases of |retabulate| is capable of producing a level-$1$ table (with as many elements as |xs|) from a level-$0$ table, which is a |tipZ|.
 This is due to |xs| now being available as an index, providing the missing context for |retabulate|.
 %The definition has been verified simply by finding a right type for it!
 %There's actually no need to understand the definition of \lstinline{cd}/|retabulate| now, but I can still go through a case or two to see how well type-directed programming works.
@@ -913,7 +913,7 @@ That'll probably be a fun exercise\ldots but I'll leave that for another day.
 \subsection{Equality from Types}
 \label{sec:equality-from-types}
 
-Right now I'm more eager to find out why the bottom-up algorithm \lstinline{bu} equals the top-down \lstinline{td}~(\cref{sec:algorithms}).
+Right now I'm more eager to find out why the bottom-up algorithm \lstinline{bu} equals the top-down \lstinline{td}~(\cref{sec:algorithms,sec:bu}).
 Will dependent types continue to be helpful?
 I should try and find out by transcribing the two algorithms into Agda too.
 
@@ -960,16 +960,16 @@ In particular, when |k|~is~|0|, the type says that |g|~should compute a solution
 \ldots And indeed it is reasonable!
 \end{aha}
 
-When I discovered the extra |tipZ| cases of |retabulate|, I saw that the bottom of the sublist lattice~(\cref{fig:sublists-lattice}) may be retained after all.
-That observation is confirmed here.
+When I discovered the extra |tipZ| cases of |retabulate|~(\cref{sec:spec}), I saw that it may be possible to start from level~0 of the sublist lattice~(\cref{fig:sublists-lattice}) after all.
+Now it's confirmed.
 Instead of starting with solutions for singleton lists, I can start with a given solution for the empty list
 \begin{temp}
 \begin{code}
 e : s []
 \end{code}
 \end{temp}
-at level~0 of the completed lattice and work upwards using~|g|.
-In particular, there's no problem going from level~0 to level~1, because there's now additional context in the indices so that |g|~knows for which singleton list a solution should be computed.
+at level~0, and work upwards using~|g|.
+There's no problem going from level~0 to level~1, because there's now additional context in the indices so that |g|~knows for which singleton list a solution should be computed.
 Making types precise has helped me to find a more natural and general form of recursive computation over immediate sublists!
 
 And it's not just any recursive computation --- it's now an alternative \emph{induction principle} for lists where the inductive case assumes that the induction hypothesis holds for all the immediate sublists.
@@ -1050,7 +1050,7 @@ mapBT (λ { {ys} tt → exactly ys }): BT(C n k) (const ⊤) xs → BT(C n k) Ex
 to recover a table of |Exactly|s from just a blank table by replacing every |tt| (the unique inhabitant of~|⊤|) with the index |ys| there.
 What |choose| does is not really compute the sublists --- |BT| has already `computed' them.
 Instead, |choose| merely affirms that there is a table indexed by all the |k|-sublists of an |n|-list whenever |k ≤↑ n|.
-The elements in the table don't matter, and might as well be~|⊤|.
+The elements in the table don't matter, and might as well be |tt|.
 
 So, instead of |choose|, I can use
 %\Shin{I find |blank| clearer if we include |xs| as an simplcit argument\ldots\ Josh: Added.}
@@ -1074,7 +1074,8 @@ td s e g {suc n  } xs  = g (mapBT (λ { {ys} tt → td s e g {n} ys }) (blank(C 
 \end{temp}
 
 I look aghast at the monster I've created.
-Sure, the definition type-checks, but oh my\ldots it's terribly ugly, and for so many reasons.
+Sure, the definition type-checks, but oh my\ldots it's terribly ugly.
+The problems are cosmetic though, and should be easy to fix.
 \begin{inlineenum}
 \item The induction is on~|n|, which shouldn't have been an implicit argument.
 \item In the base case, I have to match |xs| with~|[]| to make it type-correct to return~|e|, but that could've been avoided if I set |e : {xs : Vec 0 a} → s xs|.
@@ -1123,7 +1124,6 @@ unTip : BT(C n n) p xs → p xs
 unTip             (tipS  p) = p
 unTip {xs =' []}  (tipZ  p) = p
 \end{code}
-(The |bin| case actually needs to be listed and proved impossible.)
 The counter/argument~|k| of |loop| should satisfy the invariant |k ↓≤ n|.
 The data type |m ↓≤ n| is another version of natural number inequality, which is dual to |_≤↑_| in the sense that |n|~is fixed throughout the new definition, and |m|~moves away from~|n|:
 \begin{code}
@@ -1341,7 +1341,7 @@ For example, suppose there are two layers |F|~and~|F'|, where the outer layer~|F
 There are two ways of doing this: either |map(sub G) α' ∘ α|, where the outer layer~|F| is transformed to~|G| first, or |α ∘ map(sub F) α'|, where the inner layer~|F'| is transformed to~|G'| first.
 The two ways can be proved equal using the naturality of~|α|, but the equality can be seen more directly with string diagrams:
 \[ \tikzfig{pics/horizontal-definitions} \]
-The |map| means skipping over the outer/left functor and transforming the inner functor; so in the diagrams, |α'|~is applied to the inner/right wire.
+The |map| means skipping over the outer/left functor and transforming the inner/right functor; so in the diagrams, |α'|~is applied to the inner/right wire.
 (The dashed lines are added to emphasise that both diagrams are constructed as the sequential composition of two transformations.)
 By placing layers of functors in a separate dimension, it's much easier to see which layers are being transformed, and determine whether two sequentially composed transformations are in fact applied independently, so that their order of application can be swapped.
 This is abstracted as a diagrammatic reasoning principle: dots in a diagram can be moved upwards or downwards, possibly changing their vertical positions relative to other dots (while stretching or shrinking the wires, which can be thought of as elastic strings), and the (extensional) meaning of the diagram will remain the same.
@@ -1614,7 +1614,7 @@ The bottom-up algorithm never gets to three layers of tables, and therefore avoi
 
 That reasoning doesn't sound too bad, although it's clear that there's much more to be done.
 The whole argument is still too informal and lacks detail.
-It's easy to poke holes in the reasoning --- for example, if the input list has duplicate elements, then the bottom-up algorithm won't be able to avoid solving overlapping subproblems entirely.
+It's easy to poke holes in the reasoning --- for example, if the input list has duplicate elements, then the bottom-up algorithm won't be able to entirely avoid solving overlapping subproblems repetitively.
 To fix this, the algorithm will need a redesign.
 And of course it's tempting to explore more problem-decomposing strategies other than immediate sublists.
 Eventually I may arrive at something general about dynamic programming, which was what Richard wanted to work out in his paper.
