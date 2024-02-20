@@ -18,7 +18,7 @@ variable
   a b c          : Set
   k m n          : ℕ
   x              : a
-  xs             : Vec a k
+  xs             : Vec a n
   p p' q q' r r' : a → Set
 
 --------
@@ -141,7 +141,7 @@ retabulate {xs = _ ∷ _ ∷ _} _ (tipZ y) = bin (retabulate (s≤s z≤n) (tipZ
 retabulate _             (bin   (tipS y  ) u          ) = tipS (y ∷ᴮᵀ u)
 retabulate _             (bin t@(bin t' _)   (tipZ z )) = bin (retabulate (s≤s (bounded t')) t) (mapBT (_∷ᴮᵀ (tipZ z)) t)
 retabulate 2+n<2+n       (bin   (bin _  _)   (tipS _ )) = ⊥-elim (<-irrefl refl 2+n<2+n)
-retabulate (s≤s 1+k<1+n) (bin t@(bin t' _) u@(bin _ _)) = bin (retabulate (s≤s (bounded t')) t) (zipBTWith _∷ᴮᵀ_ t (retabulate 1+k<1+n u))
+retabulate (s≤s 1+k<1+n) (bin t@(bin t' _) u@(bin _ _)) = bin {!   !} {!   !} -- bin (retabulate (s≤s (bounded t')) t) (zipBTWith _∷ᴮᵀ_ t (retabulate 1+k<1+n u))
 
 --------
 -- Section 2.4
@@ -206,12 +206,12 @@ td s e g (suc n) = g ∘ mapBT (td s e g n) ∘ blank (1 + n) n (≤′-step ≤
 -- bu s e g n = unTip ∘ loop 0 (≤⇒≤‴ z≤n) ∘ mapBT e ∘ blank n 0 (≤⇒≤′ z≤n)
 --   where
 --     loop : (k : ℕ) → k ≤‴ n → BT n k s xs → BT n n s xs
---     loop n  ≤‴-refl        = id
+--     loop n  ≤‴-refl    = id
 --     loop k (≤‴-step d) = loop (1 + k) d ∘ mapBT g ∘ retabulate (≤‴⇒≤ d)
 
 bu-loop : {s : ∀ {k} → Vec a k → Set} (g : ∀ {k} → {ys : Vec a (1 + k)} → BT (1 + k) k s ys → s ys) {n : ℕ}
           (k : ℕ) → k ≤‴ n → {xs : Vec a n} → BT n k s xs → BT n n s xs
-bu-loop g n  ≤‴-refl        = id
+bu-loop g n  ≤‴-refl    = id
 bu-loop g k (≤‴-step d) = bu-loop g (1 + k) d ∘ mapBT g ∘ retabulate (≤‴⇒≤ d)
 
 bu : ImmediateSublistInduction
@@ -313,12 +313,12 @@ rotation = BT-isProp (BT-isProp refl)
 -- more categorical definitions
 
 -- families of functions with an explicit index type
-∀[_]_⇉_ : (A : Set) → Fam A → Fam A → Set
-∀[ A ] P ⇉ Q = P ⇉ Q
+∀[_]_⇉_ : (a : Set) → Fam a → Fam a → Set
+∀[ a ] p ⇉ q = p ⇉ q
 
 infix 2 ∀[_]_⇉_
 
--- exponential objects in Fam
+-- exponential objects in Fam categories
 _⇒_ : Fam a → Fam a → Fam a
 (p ⇒ q) x = p x → q x
 
@@ -450,12 +450,12 @@ unTip∘bu-construct-loop-natural k≤n h t =
   where open ≡-Reasoning
 
 -- overall structure of the equality proof
-overall : {A A' B : Set}
-        → (f : A → B) (f' : A' → B)
-        → ((Σ[ X ∈ Set ] (X → B)) ∋ (A , f)) ≡ (A' , f')
-        → IsProp A
-        → (a : A) (a' : A') → f a ≡ f' a'
-overall f .f refl A-isProp a a' = cong f A-isProp
+overall : {a a' b : Set}
+        → (f : a → b) (f' : a' → b)
+        → ((Σ[ c ∈ Set ] (c → b)) ∋ (a , f)) ≡ (a' , f')
+        → IsProp a
+        → (x : a) (x' : a') → f x ≡ f' x'
+overall f .f refl a-isProp _ _ = cong f a-isProp
 
 module DemolitionAndEquality
   {a : Set} (s : ∀ {k} → Fam (Vec a k))
@@ -589,5 +589,7 @@ module DemolitionAndEquality
     ∎
     where 0≤n = ≤⇒≤‴ z≤n
           open ≡-Reasoning
+
+  -- end of module DemolitionAndEquality
 
 -- ‘But as usual, in the end there’s a dopamine hit from seeing everything checked.’

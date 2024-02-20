@@ -68,7 +68,7 @@ acmsmall,fleqn,screen,review]{acmart}
 
 \definecolor{suppressed}{RGB}{225,225,225}
 \definecolor{goal}{RGB}{209,243,205}
-\newcommand{\highlight}[2]{\smash{\text{\colorbox{#1}{\kern-.1em\vphantom{\vrule height 1.2ex depth 0.1ex}\smash{\ensuremath{#2}}\kern-.1em}}}}
+\newcommand{\highlight}[2]{\smash{\text{\colorbox{#1}{\kern-.1em\vphantom{\vrule height 1.35ex depth 0.16ex}\smash{\ensuremath{#2}}\kern-.1em}}}}
 
 %format (SUPPRESSED(t)) = "\highlight{suppressed}{" t "}"
 %format (GOAL(t)(i)) = "\highlight{goal}{\textbf\{\," t "\,\textbf\}_{\kern1pt" i "}}"
@@ -119,22 +119,21 @@ acmsmall,fleqn,screen,review]{acmart}
 %format ] = "\kern-2pt]"
 %format Σ[ = Σ [
 %format ∀[ = ∀ [
-%format _∷_ = _ ∷ _
+%format _∷_ = _ "\kern.5pt" ∷ _
 %format ∷_ = ∷ _
-%format _∷ = _ ∷
+%format _∷ = _ "\kern.5pt" ∷
 %format ᴮᵀ = "_{\Conid{BT}}"
 %format ∷ᴮᵀ = ∷ ᴮᵀ
-%format _∷ᴮᵀ_ = _ ∷ᴮᵀ _
-%format _∷ᴮᵀ = _ ∷ᴮᵀ
+%format _∷ᴮᵀ_ = _ "\kern.5pt" ∷ᴮᵀ _
+%format _∷ᴮᵀ = _ "\kern.5pt" ∷ᴮᵀ
 %format > = "\unskip>\ignorenext"
 %format GEQ = "\unskip\ge\ignorenext"
 %format ≤ = "\unskip\le\ignorenext"
-%format _≤_ = _ "{\le}" _
 %format < = "\unskip<\ignorenext"
 %format ≤↑ = "\unskip\mathrel{\le_\uparrow}\ignorenext"
-%format _≤↑_ = _ "{\le_\uparrow}" _
+%format _≤↑_ = _ "\kern.5pt{\le_\uparrow}" _
 %format ↓≤ = "\unskip\mathrel{_\downarrow\kern-.8pt{\le}}\ignorenext"
-%format _↓≤_ = _ "{_\downarrow\kern-.8pt{\le}}" _
+%format _↓≤_ = _ "\kern.5pt{_\downarrow\kern-.8pt{\le}}" _
 %format ↓≤' = "{_\downarrow\kern-.8pt{\le}}"
 %format CDOTS = "\cdots"
 
@@ -200,6 +199,7 @@ acmsmall,fleqn,screen,review]{acmart}
 %format t = "\Var t"
 %format u = "\Var u"
 %format v = "\Var v"
+%format ws = "\Var ws"
 %format x = "\Var x"
 %format x₁ = "{\Var x}_{1}"
 %format xs = "\Var xs"
@@ -214,8 +214,11 @@ acmsmall,fleqn,screen,review]{acmart}
 %format δ = "\delta"
 
 %format sn = 1 + n
+%format ssn = 2 + n
+%format sssn = 3 + n
 %format sk = 1 + k
 %format ssk = 2 + k
+%format sssk = 3 + k
 
 %format n>k = n "{>}" k
 %format nGEQk = n "{\geq}" k
@@ -257,7 +260,8 @@ acmsmall,fleqn,screen,review]{acmart}
 \title{Binomial Tabulation: A Short Story (Functional Pearl)}
 
 \begin{abstract}
-\todo[inline]{Abstract: a demonstration of dependent types and string diagrams for the functional programmer (ideally already with a bit exposure to dependent types and category theory and not put off by basic concepts like indexed types, functors, and so on); an outline of the paper}
+\todo[inline]{Abstract: a demonstration of dependent types and string diagrams for the functional programmer (ideally already with a bit exposure to dependent types and category theory and not put off by basic concepts like indexed types, functors, and so on); an outline of the paper
+\vspace{10\baselineskip}}
 \end{abstract}
 
 %\begin{CCSXML}
@@ -421,10 +425,15 @@ So\csp\lstinline{cd :: B a -> B (L a)}, and the (real) bottom-up algorithm \lsti
 bu :: (a -> s) -> (L s -> s) -> L a -> s
 bu f g = unTip . loop . cvt . map f
   where
-    loop (Tip y) = Tip y
-    loop ys      = loop (mapB g (cd ys))
+    loop (Tip x) = Tip x
+    loop xs      = loop (mapB g (cd xs))
 \end{lstlisting}
-where \lstinline{loop} has type\csp\lstinline{B s -> B s}, \csp\lstinline{unTip (Tip y) = y}, and \lstinline{cvt} converts a list to a tree:
+where \lstinline{unTip} extracts the element of a \lstinline{Tip} tree,
+\begin{lstlisting}
+unTip :: B a -> a
+unTip (Tip x) = x
+\end{lstlisting}
+and \lstinline{cvt} converts a list to a tree:
 \begin{lstlisting}
 cvt :: L a -> B a
 cvt [x]         = Tip x
@@ -660,7 +669,7 @@ I suppose I could force a tree to be the result of \lstinline{mapB h (choose k x
 It's a rather complex extension to |B(C n k)|, but I think I'll be fine if I stick to the same programming methodology: perform `pattern matching' on the indices, and specify what should be in the tree in each case.
 In the first case, \lstinline{choose} returns~\lstinline{Tip []}, so the tree should be a |tipZ|, and its element~|y| should be accompanied by a proof~|e| that |y|~equals |h []|, so that |tipZ y e| `is' \lstinline{mapB h (Tip [])}.
 The second case is similar.
-In the third case, the first thing I do is switch from Richard's snoc pattern \lstinline{xs ++ [x]} to a cons index |x ∷ xs| --- this just `reverses' the list and shouldn't break anything, as long as the snoc in \lstinline{mapB (++[x])} is also switched to a cons for consistency.
+In the third case, the first thing I do is switch from Richard's snoc pattern \lstinline{xs ++ [x]} to a cons index |x ∷ xs| --- this just `reverses' the list and shouldn't break anything, as long as the snoc in \lstinline{mapB (++[x])} is also switched to a cons consistently.
 The first inductive call of \lstinline{choose} easily translates into the type of the left subtree.
 The right subtree should be the result of \lstinline{map h (map (x:) (choose k xs))}.
 Luckily, the two maps can be fused into a single \lstinline{map (h . (x:))}.
@@ -758,69 +767,83 @@ I'm onto something general --- maybe it's interesting enough for an ICFP paper!
 That paper will have to wait though.
 I've still got a problem to solve: how do I use |BT| to specify \lstinline{cd}?
 
-What's special about |BT| is that the element types are indexed by sublists, so I know from the type of an element which sublist it is associated with.
+What's special about |BT| is that the element types are indexed by sublists, so I know from the type of an element with which sublist it is associated.
 That is, I can now directly say `values associated with sublists' and how they should be rearranged, rather than indirectly specify the rearrangement in terms of sublists and then extend to other types of values through parametricity.
-|BT_ n k p xs| is the type of a table of |p|-typed values associated with the |k|-sublists of |xs|, and that's precisely the intended meaning of \lstinline{cd}'s input.
+|BT_ n k p xs| is the type of a tree of |p|-typed values associated with the |k|-sublists of |xs|, and that's precisely the intended meaning of \lstinline{cd}'s input.
 What about the output?
-It should tabulate the |(1 + k)|-sublists of |xs|, so the type should be |BT_ n sk q xs| for some |q : Vec (1 + k) a → Set|; for each sublist |ys : Vec (1 + k) a|, I want a list of |p|-typed values associated with the immediate sublists of |ys|, which are |k|-sublists, and that's precisely a tree of type |BT_ sk k p ys|.
+It should tabulate the |(1 + k)|-sublists of |xs|, so the type should be |BT_ n sk q xs| for some |q : Vec (1 + k) a → Set|,
+For each sublist |ys : Vec (1 + k) a|, I want a list of |p|-typed values associated with the immediate sublists of |ys|, which are |k|-sublists.
+Or, instead of a list, I can just use a tree of type |BT_ sk k p ys|.
 Therefore the whole type is
 \begin{code}
 retabulate : (SUPPRESSED(k < n)) → (BT_ n k) p xs → (BT_ n sk) ((BT_ sk k) p) xs
 \end{code}
-which is parametric in~|p| (so, like \lstinline{cd}, the elements can have any types).
+which is parametric in~|p| (so, like the Haskell version of \lstinline{cd}, the elements can have any types).
 I think it's time to rename \lstinline{cd} to something more meaningful, and decide to use `|retabulate|' because I'm moving values in a table into appropriate positions in a new (nested) table with a new tabulation scheme.
 % \Jeremy{I'd like to think of a better name. } % Happy now!
 And a side condition |k < n| is needed to guarantee that the output shape |BT_ n sk| is valid.
-\Shin{In the following paragraphs I try to describe how |retabulate| can be constructed from its type. Some changes were made: 1. |_∷ᴮᵀ_| is introduced earlier and slightly more detailed because I will use it later. 2. definition of |mapBT| is omitted because I think it is probably not needed and now we might be running out of space. BTW, I don't know how to say ``everything related to |k < n| is omitted'' in an early stage, therefore all my calls to |retabulate| still have the |k < n| argument in underline. It is preferable to find a reason to omit it.}
+\Shin{In the following paragraphs I try to describe how |retabulate| can be constructed from its type. Some changes were made: 1. |_∷ᴮᵀ_| is introduced earlier and slightly more detailed because I will use it later. 2. definition of |mapBT| is omitted because I think it is probably not needed and now we might be running out of space. BTW, I don't know how to say ``everything related to |k < n| is omitted'' in an early stage, therefore all my calls to |retabulate| still have the |k < n| argument in underline. It is preferable to find a reason to omit it. Josh: I think it's fine to assume that they're only managed mentally (and not formally in Agda) in the `first pass' presented in the paper, like what we did when transcribing \lstinline{cd}.}
 
-Letting |retabulate| return a tree of trees rather than a tree of lists may look like a drastic change, but I don't need another type for lists --- the shape of |BT_ sk k| is always a list! In fact, I can define a cons-like operation for |BT_ sk k|:
+The type of |retabulate| looks like a reasonable update of the type of \lstinline{cd}, except that I'm letting |retabulate| return a tree of trees, rather than a tree of lists.
+Could that change be too drastic?
+Hm\ldots actually, no --- the shape of |BT_ sk k| is always a (non-empty) list!
+When |k|~is |zero|, a |BT_ 1 0|-tree has to be a |tipZ|.
+Otherwise, a |BT_ ssk sk|-tree has to take the form |bin (tipS y) t|, which is a cons-like operation:
 \begin{code}
 _∷ᴮᵀ_ : p xs → BT(C sk k) (p ∘ (x ∷_)) xs → BT(C ssk sk) p (x ∷ xs)
 y ∷ᴮᵀ t = bin (tipS y) t
 \end{code}
-The type says that, to show that all immediate sublists of |x ∷ xs| satisfy a predicate |p|, one only needs to show that |xs| satisfies |p| and that, for all immediate sublist |ws| of |xs|, |x ∷ ws| satisfies |p|. The definition of |_∷ᴮᵀ_| is forced by its type.
+To construct a table indexed by all the immediate sublists |ys| of |x ∷ xs|, I need an entry for |xs|, the immediate sublist without~|x|, and a table of entries for the other immediate sublists, which are |x ∷ ws| for all the immediate sublists |ws| of |xs|.
 
 I should go on to define |retabulate|.
-Now that its type is much more informative than that of \lstinline{cd}, rather than transcribing \lstinline{cd}, can its type guide me through the implementation?
-I typed the left hand side of |retabulate| into the editor, left the right hand side as a hole, and performed some case-splitting on the input tree, resulting in:
+Its type is much more informative than that of \lstinline{cd}.
+Rather than transcribing \lstinline{cd}, can its type guide me through the implementation?
+I type the left-hand side of |retabulate| into the editor, left the right-hand side as a hole, and perform some case splitting on the input tree, resulting in
 \begin{spec}
-retabulate _ (tipZ _)                           = (GOAL(BLANK)(G0))
-retabulate _ (tipS _)                           = (GOAL(BLANK)(G1))
-retabulate _ (bin     (tipS _) u)               = (GOAL(BLANK)(G2))
-retabulate _ (bin     (bin _ _)     (tipZ _))   = (GOAL(BLANK)(G3))
-retabulate _ (bin     (bin _ _)     (tipS _))   = (GOAL(BLANK)(G4))
-retabulate _ (bin t@  (bin _ _) u@  (bin _ _))  = (GOAL(BLANK)(G5))
+retabulate (tipZ _)                                  = (GOAL(BLANK)(G0))
+retabulate (tipS _)                                  = (GOAL(BLANK)(G1))
+retabulate (bin      (tipS _)     _               )  = (GOAL(BLANK)(G2))
+retabulate (bin      (bin _ _  )       (tipZ _)   )  = (GOAL(BLANK)(G3))
+retabulate (bin      (bin _ _  )       (tipS _)   )  = (GOAL(BLANK)(G4))
+retabulate (bin t @  (bin _ _  )  u @  (bin _ _)  )  = (GOAL(BT_ ssn sssk ((BT_ sssk ssk p) (x ∷ x₁ ∷ xs)))(G5))
 \end{spec}
-The cases for |tipS _| and |bin _ (tipS _)| can be eliminated immediately since the side condition |k < n| is voilated.
+The cases for |tipS _| and |bin _ (tipS _)| can be eliminated immediately since the side condition |k < n| is violated.
 I go straight to the last and the most difficult case, |bin t u|, where |t| and |u| are both constructed by |bin|.
-In |(GOAL(BLANK)(G5))| I should construct a result of type |BT_ (2+n) (3+k) ((BT_ (3+k) (2+k) p) (x ∷ x₁ ∷ xs))|, while |t| and |u| have types:
+In |(GOAL(BLANK)(G5))|, the types of |t|~and~|u| are
 \begin{spec}
-t  : BT(C (1+n) (2+k)) p (x₁ ∷ xs)
-u  : BT(C (1+n) (1+k)) (p ∘ (x ∷)) (x₁ ∷ xs)
+t  : BT(C sn ssk) p (x₁ ∷ xs)
+u  : BT(C sn sk) (p ∘ (x ∷_)) (x₁ ∷ xs)
 \end{spec}
-Neither of them have the right shape to be used immediately, so in |(GOAL(BLANK)(G5))| I try starting with a |bin|, resulting in |bin (GOAL(BLANK)(G6)) (GOAL(BLANK)(G7))|. Now |(GOAL(BLANK)(G6))| demands a value having type |BT(C (1+n) (3+k)) (BT(C (3+k) (2+k)) p) (x₁ ∷ xs)|, which is exactly what |retabulate _ t| delivers!
-That is a good sign.
+Neither of them have the right shape to be used immediately, so in |(GOAL(BLANK)(G5))| I try starting with a |bin|:
+\begin{spec}
+retabulate (bin t @ (bin _ _) u @ (bin _ _)) = bin  (GOAL(BT(C sn sssk) (BT(C sssk ssk) p) (x₁ ∷ xs))(G6))
+                                                    (GOAL(BT(C sn ssk) (BT(C sssk ssk) p ∘ (x ∷_)) (x₁ ∷ xs))(G7))
+\end{spec}
+The goal type of |(GOAL(BLANK)(G6))| is exactly what |retabulate t| delivers!
+That's a good sign.
 
-The type of |(GOAL(BLANK)(G7))|, meanwhile, is
+What can I put in |(GOAL(BLANK)(G7))|?
+The induction hypothesis for~|u| has type
 \begin{spec}
- (GOAL(BLANK)(G7)) : BT(C (1+n) (2+k)) (BT(C (3+k) (2+k)) p ∘ (x ∷_)) (x₁ ∷ xs)
+retabulate u : BT(C sn ssk) (BT (C ssk sk) (p ∘ (x ∷_))) (x₁ ∷ xs)
 \end{spec}
-What can I put in there?
-Applying |retabulate| to |u| gives me a value of this type:
-\begin{spec}
-retabulate u : BT(C(1+n) (2+k)) (BT (C (2+k) (1+k)) (p ∘ (x ∷_))) (x₁ ∷ xs)
-\end{spec}
-Both |t| and |retabulate _ u| have the outer shape |BT(C (1+n) (2+k)) _ (x₁ ∷ xs)| that I want, but the element types do not match.
+Both |t|~and |retabulate u| have the outer shape |BT(C sn ssk) _ (x₁ ∷ xs)| that I want, but the element types do not match.
 
 To complete the program I really have to pay more attention to what the types say.
-All the types have the form |BT(C(1+n) (2+k)) _ (x₁ ∷ xs)|, a predicate on |(2+k)|-sublists of |x₁ ∷ xs|.
-Denote such a list by |zs|.
-The predicate |BT(C (3+k) (2+k)) p ∘ (x ∷_)|, the element type of |(GOAL(BLANK)(G7))|, demands that all immediate sublists of |x ∷ zs| satisfy |p|.
-Meanwhile, |t| guarantees |p zs|, and the element type of |retabulate _ u|, |BT (C (2+k) (1+k)) (p ∘ (x ∷_))|, guarantees |p (x ∷ ws)| for each immediate sublist |ws| of |zs|.
-Surely from |p zs| and |p (x ∷ ws)| we can establish that |p| holds for all immediate sublists of |x ∷ zs| --- isn't that exactly what |_∷ᴮᵀ_| does?
-Indeed, |(GOAL(BLANK)(G7))| can be fulfilled by combining |t| and |retabulate _ u| pairwise using |_∷ᴮᵀ_|, that is, |zipBTWith _∷ᴮᵀ_ t (retabulate _ u)|!
+All the types have the form |BT(C sn ssk) _ (x₁ ∷ xs)|, which describes tables indexed by the |(2 + k)|-sublists |zs| of |x₁ ∷ xs|.
+For each |zs|, I need to gather |p|-typed entries for all the immediate sublists of |x ∷ zs|, because that's what the element types |BT(C sssk ssk) p ∘ (x ∷_)| in the goal type of |(GOAL(BLANK)(G7))| mean.
+What entries do I have in the context?
+\begin{itemize}
+\item I have~|t|, which contains an entry for (each) |zs|.
+\item I have |retabulate u|, which contains entries for |x ∷ ws| for all the immediate sublists |ws| of |zs| (described by the elements types |BT (C ssk sk) (p ∘ (x ∷_))|).
+\end{itemize}
+Do I have entries for all the immediate sublists of |x ∷ zs|?
+Yes!
+Because |zs| is the immediate sublist of |x ∷ zs| without~|x|, and the sublists |x ∷ ws| are all the others with~|x|.
+An entry and a tree of entries --- aren't they exactly the arguments of |_∷ᴮᵀ_|\,?
+Indeed, I can fulfil |(GOAL(BLANK)(G7))| by combining~|t| and |retabulate u| entry-wise (for each |zs|) using |_∷ᴮᵀ_|\,, that is, |zipBTWith _∷ᴮᵀ_ t (retabulate u)|!
 
-The rest of the cases are much easier, and I come up with a definition of |retabulate|:
+The rest of the cases are much easier, and I come up with a definition of |retabulate|,
 \begin{code}
 retabulate : (SUPPRESSED(k < n)) → BT(C n k) p xs → BT(C n sk) (BT(C sk k) p) xs
 retabulate {xs =' _ ∷ []     } (tipZ y) = tipS  (tipZ y)
@@ -830,11 +853,13 @@ retabulate (bin  t @  (bin _ _)       (tipZ z)   ) = bin   (retabulate t) (mapBT
 retabulate (bin  t @  (bin _ _)  u @  (bin _ _)  ) = bin   (retabulate t)
                                                            (zipBTWith _∷ᴮᵀ_ t (retabulate u))
 \end{code}
-where the map function is the expected one, having type
+where the map and zip functions are the expected ones:
 \begin{spec}
-mapBT : (∀ {ys} → p ys → q ys) → ∀ {xs} → (BT_ n k) p xs → (BT_ n k) q xs
+mapBT      : (  ∀ {ys} → p ys → q ys) → ∀ {xs} → (BT_ n k) p xs → (BT_ n k) q xs
+zipBTWith  : (  ∀ {ys} → p ys → q ys → r ys)
+           →'   ∀ {xs} → (BT_ n k) p xs → (BT_ n k) q xs → (BT_ n k) r xs
 \end{spec}
-The impossible cases are omitted, so is everything related to the side condition |k < n|, to make it easier to compare with \lstinline{cd}.
+%The impossible cases are omitted, so is everything related to the side condition |k < n|, to make it easier to compare with \lstinline{cd}.
 
 %I go on and transcribe \lstinline{cd} into |retabulate|,
 %\begin{code}
@@ -869,10 +894,9 @@ The first two cases of \lstinline{cd} are subsumed by the third case, |bin (tipS
 The second case of \lstinline{cd} recursively traverses the given tree to convert it to a list, which is not needed in |retabulate|, because it yields a tree of trees.
 Therefore the first two cases of \lstinline{cd} can be unified into one.
 Meanwhile, the first two cases of |retabulate| concerning |tipZ| are new.
-While \lstinline{cd} has to start from level-1, this pair of cases of |retabulate| is capable
-of producing a level-1 table (with as many elements as |xs|) from a level-0 table, which is a |tipZ|.
+While \lstinline{cd} has to start from level~$1$~(\cref{fig:sublists-lattice}), this pair of cases of |retabulate| is capable of producing a level-1 table (with as many elements as |xs|) from a level-$0$ table, which is a |tipZ|.
 This is due to |xs| now being available as an index, providing the missing context for |retabulate|.
-The definition has been verified simply by finding the (or rather, a) right type for it!
+%The definition has been verified simply by finding a right type for it!
 %There's actually no need to understand the definition of \lstinline{cd}/|retabulate| now, but I can still go through a case or two to see how well type-directed programming works.
 
 %\todo[inline]{Compare \lstinline{cd} and |retabulate|.
@@ -1008,6 +1032,7 @@ incr (  suc d)  = suc (incr d)
 
 \pause
 
+\Josh{Too much space before the pause}
 I step back and take another look at |choose|.
 One thing starts to bother me: |Exactly x| is a type that has a unique inhabitant, so I could've used the unit type~|⊤| as the element type instead, and I'd still give the same amount of information, which is none!
 That doesn't make a lot of sense --- I thought I was computing all the |k|-sublists and returning them in a table, but somehow those sublists didn't really matter, and I could just return a blank table of type |BT(C n k) (const ⊤) xs|\ldots?
@@ -1106,7 +1131,7 @@ data _↓≤_ : ℕ → ℕ → Set where
   suc   : suc m ↓≤ n →  m  ↓≤' n
 \end{code}
 The |loop| function performs induction on the distance |k ↓≤ n|; the counter~|k| goes up as the distance decreases in inductive calls, and eventually reaches~|n| when the distance becomes |zero|.
-The remaining goal |0 ↓≤ n| in |bu| is actually non-trivial, but the Agda standard library covers that.
+The remaining |(GOAL(0 ↓≤ n)(G0))| is actually non-trivial, but the Agda standard library covers that.
 
 \begin{aha}
 Another nice-looking implementation of |ImmediateSublistInduction|!
@@ -1234,7 +1259,7 @@ With the definition of |Fam'|, now I can rewrite the parametric function types o
 retabulate  :  BT(C n k) p   ⇉' BT(C n sk) (BT(C sk k) p)
 unTip       :  BT(C n n) p   ⇉' p
 \end{code}
-I can fit |blank(C n k)| into |Fam' (Vec a n)| by lifting its |⊤|~argument to a type family |const ⊤| (that is, an object of the category):
+I can fit |blank(C n k)| into |Fam' (Vec n a)| by lifting its |⊤|~argument to a type family |const ⊤| (that is, an object of the category):
 \begin{code}
 blank(C n k) : const ⊤ ⇉ BT(C n k) (const ⊤)
 \end{code}
@@ -1283,7 +1308,7 @@ For example, |retabulate| transforms the functor layer |BT_ n k| to a \emph{comp
 (Indeed, |retabulate| transforms only the tree constructors and doesn't change the elements to something else.)
 Moreover, this transformation of the functor layer is not interfered by whatever is happening at the inner layer.
 Again `whatever is happening' amounts to a quantification over all morphisms: for any |f : p ⇉ q| happening at the inner layer, if |retabulate| is happening at the functor layer too, it doesn't make a difference whether |f|~or |retabulate| happens first, because they happen at independent layers.
-Formally, this is stated as a \emph{naturality} equation, where |f|~needs to be lifted appropriately:
+Formally, this is stated as a \emph{naturality} equation (where |f|~needs to be lifted appropriately):
 \begin{code}
 retabulate · mapBT f = mapBT (mapBT f) · retabulate
 \end{code}
@@ -1304,7 +1329,7 @@ The natural transformations I've got are |retabulate| and |unTip|, and I can dra
 String diagrams focus on the functor layers and represent them explicitly as a bunch of wires --- functor composition is represented as juxtaposition of wires, and the identity functor is omitted (since it's the composition of no functors).
 Drawn as a string diagram, |retabulate| has one input wire labelled |BT_ n k| and two output wires |BT_ n sk| and |BT_ sk k|, since it transforms a |BT_ n k| layer to two layers |BT_ n sk · (BT_ sk k)|.
 The diagram of |unTip| goes from one wire to none, since |unTip| transforms |BT_ n n| to the identity functor.
-(Indeed, what |unTip| does is get rid of the |tipZ| or |tipS| constructor of a |BT_ n n|-tree and reveal the element inside.)
+(Indeed, what |unTip| does is get rid of the |tipZ| or |tipS| constructor.)
 
 Whereas functor composition spreads horizontally, sequential composition of natural transformations goes vertically.
 Given transformations |α : ∀ {p} → F p ⇉ G p| and |β : ∀ {p} → G p ⇉ H p|, their sequential composition |β ∘ α : ∀ {p} → F p ⇉ H p| is drawn in a string diagram as |α|~and~|β| juxtaposed vertically and sharing the middle wire with label~|G| (obscuring a section of the wire):
@@ -1325,7 +1350,7 @@ This is abstracted as a diagrammatic reasoning principle: dots in a diagram can 
 I want to draw the two algorithms as string diagrams.
 However, some of their components, namely |blank|, |e|, and~|g|, are not natural transformations.
 Technically, only natural transformations can go into string diagrams.
-But I'm still tempted to draw those components as
+But I'm still tempted to draw those components intuitively as
 \[ \tikzfig{pics/blank-g-e} \]
 After a bit of thought, I come up with some technical justification.
 Any morphism |f : p ⇉ q| can be lifted to have the type |∀ {r} → (const p) r ⇉ (const q) r|, and become a natural transformation from |const p| to |const q|.
@@ -1347,6 +1372,10 @@ It's kind of technical, but in the end these diagrams are okay.
 All the abstract nonsense took me some time.
 But I still don't know whether string diagrams will actually help me to understand the two algorithms~(\cref{sec:equality-from-types}).
 It's time to find out.
+
+I'm not confident enough to work with the recursive definitions straight away, so I take the special case |td s e g 3| of the top-down algorithm and unfold it into a deeply nested expression.
+Transcribing that into a string diagram is basically writing down all the intermediate type information and laying out the layered type structures horizontally~(\cref{fig:td-diagram}).
+\Jeremy{``Recall that |s| here is a type family, an object in this category, so is drawn as a wire label, whereas |e| and |g| are natural transformations, so drawn as dots.'' Worth saying? Josh: I didn't see this comment was about the |td| diagram. We've just seen the string-diagrammatic definitions of |blank|, |g|, and~|e|, so maybe the info needed here is how to get from those definitions to this diagram?}
 
 \begin{figure}
 \begin{center}
@@ -1371,12 +1400,12 @@ td s e g 3 =  g ∘
 \label{fig:td-diagram}
 \end{figure}
 
-I'm not confident enough to work with the recursive definitions straight away, so I take the special case |td s e g 3| of the top-down algorithm and unfold it into a deeply nested expression.
-Transcribing that into a string diagram is basically writing down all the intermediate type information and laying out the layered type structures horizontally~(\cref{fig:td-diagram}).
-\Jeremy{``Recall that |s| here is a type family, an object in this category, so is drawn as a wire label, whereas |e| and |g| are natural transformations, so drawn as dots.'' Worth saying? Josh: I didn't see this comment was about the |td| diagram. We've just seen the string-diagrammatic definitions of |blank|, |g|, and~|e|, so maybe the info needed here is how to get from those definitions to this diagram?}
-
 All the |mapBT|s are gone in the diagram, because I can directly apply a transformation to the intended layers/wires, rather than count awkwardly how many outer layers I have to skip using |mapBT|, one layer at a time.
 Functoriality is also transparent in the diagram, so it's slightly easier to see that |td| has two phases (between which I draw a dashed line): the first phase constructs deeply nested blank tables, and the second phase fills and demolishes the tables inside out.
+
+Functoriality is already somewhat transparent in the traditional expression though, thanks to the infix notation of function composition.
+So I suppose I don't absolutely need the string diagram to see that |td| has two phases, although the required rewriting~(\cref{fig:functoriality-rewriting}) is not as trivial as just seeing the two phases in the diagram.
+Moreover, there's nothing I can meaningfully move in the diagram --- all the transformations here are lifted after all.
 
 \begin{figure}
 \begin{center}
@@ -1395,9 +1424,15 @@ Functoriality is also transparent in the diagram, so it's slightly easier to see
 \label{fig:functoriality-rewriting}
 \end{figure}
 
-Functoriality is already somewhat transparent in the traditional expression though, thanks to the infix notation of function composition.
-So I suppose I don't absolutely need the string diagram to see that |td| has two phases, although the required rewriting~(\cref{fig:functoriality-rewriting}) is not as trivial as just seeing the two phases in the diagram.
-Moreover, there's nothing I can meaningfully move in the diagram --- all the transformations here are lifted after all.
+Hm. Maybe I'll have more luck with the bottom-up algorithm, which has `real' natural transformations?
+I go on to expand |bu s e g 3|.
+The loop in the expression unfolds into a sequence of functions, alternating between |retabulate| and |mapBT g|.
+
+`A sequence\ldots'
+I mutter.
+I didn't expect anything else from unfolding a loop. But the sequential structure is so different from the deeply nested structure of |td|.
+
+And then, something unexpected yet familiar appears in the transcribed diagram~(\cref{fig:bu-diagram}).
 
 \begin{figure}
 \begin{center}
@@ -1428,19 +1463,14 @@ bu s e g 3 =  unTip ∘
 \label{fig:bu-diagram}
 \end{figure}
 
-Hm. Maybe I'll have more luck with the bottom-up algorithm, which has `real' natural transformations?
-I go on to expand |bu s e g 3|.
-The loop in the expression unfolds into a sequence of functions, alternating between |retabulate| and |mapBT g|.
-
-`A sequence\ldots'
-I mutter.
-I didn't expect anything else from unfolding a loop. But the sequential structure is so different from the deeply nested structure of |td|.
-
-And then, something unexpected yet familiar appears in the transcribed diagram~(\cref{fig:bu-diagram}).
-
 \begin{aha}
 There are also two phases for table construction and demolition, and the |g|s and |e| in the demolition phase are \emph{exactly the same} as in |td|!
 \end{aha}
+
+The string diagram is truly helpful this time.
+Now I see, as Richard hinted, that I could rewrite the traditional expression using the naturality of |unTip| and |retabulate| to push |g|~and~|e| to the left of the sequence and separate the two phases~(\cref{fig:naturality-rewriting}).
+But in the string diagram, all those rewritings amount to nothing more than gently pulling the two phases apart, eventually making the dashed line horizontal.
+In fact I don't even bother to pull, because on this diagram I can already see simultaneously both the sequence (the dots appearing one by one vertically) and the result of rewriting the sequence using naturality.
 
 \begin{figure}
 \begin{center}
@@ -1470,11 +1500,6 @@ There are also two phases for table construction and demolition, and the |g|s an
 \label{fig:naturality-rewriting}
 \end{figure}
 
-The string diagram is truly helpful this time.
-Now I see, as Richard hinted, that I could rewrite the traditional expression using the naturality of |unTip| and |retabulate| to push |g|~and~|e| to the left of the sequence and separate the two phases~(\cref{fig:naturality-rewriting}).
-But in the string diagram, all those rewritings amount to nothing more than gently pulling the two phases apart, eventually making the dashed line horizontal.
-In fact I don't even bother to pull, because on this diagram I can already see simultaneously both the sequence (the dots appearing one by one vertically) and the result of rewriting the sequence using naturality.
-
 %\todo[inline]{Specialised cases (with a concrete size) only; production and consumption parts, which can be separated by naturality.}
 
 \pause
@@ -1485,12 +1510,6 @@ For |td|, the construction phase is a right-leaning tree on the diagram, whereas
 Maybe what I need is an equation about |blank| and |retabulate| that can help me rotate a tree\ldots?
 %
 \[ \text{\lstinline{cd (choose k xs)}} \equals \text{\lstinline{mapB (flatten . choose k) (choose (k+1) xs)}} \]
-
-\begin{figure}
-\ctikzfig{pics/rotations}
-\caption{Rewriting the table construction phase of |td s e g 3| to that of |bu s e g 3| using the |rotation| equation~\cref{eq:rotation}.}
-\label{fig:rotations}
-\end{figure}
 
 The equation~\cref{eq:cd-spec} flashes through my mind.
 Of course it has to be this equation --- I used it as a specification for \lstinline{cd}, the Haskell predecessor of |retabulate|.
@@ -1506,6 +1525,12 @@ That's a tree rotation all right!
 So I should do an induction that uses this equation to rotate the right-leaning tree in |td| and obtain the left-leaning tree in |bu|~(\cref{fig:rotations}).
 And then I'll need to prove the equation, meaning that I'll need to go through the definitions of |retabulate| and |blank|\ldots
 Oh hell, that's a lot of work.
+
+\begin{figure}
+\ctikzfig{pics/rotations}
+\caption{Rewriting the table construction phase of |td s e g 3| to that of |bu s e g 3| using the |rotation| equation~\cref{eq:rotation}.}
+\label{fig:rotations}
+\end{figure}
 
 %\todo[inline]{To prove the equality between |td| and |bu| along this direction:
 %The consumption parts of the two algorithms are the same.
@@ -1546,6 +1571,7 @@ As long as the type is blank nested tables, the two sides of an equation can be 
 Wait, blank nested tables --- aren't those what the construction phases of both algorithms produce?
 \end{aha}
 
+\Josh{Bad spacing after aha}
 I face-palm.
 It was a waste of time proving the |rotation| equation.
 The construction phases of both algorithms produce blank nested tables of the same type --- |BT(C 3 2) (BT(C 2 1) (BT(C 1 0) (const ⊤))) xs| in the concrete examples I tried (\cref{fig:td-diagram,fig:bu-diagram}).
