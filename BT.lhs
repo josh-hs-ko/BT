@@ -784,21 +784,22 @@ I think it's time to rename \lstinline{cd} to something more meaningful, and dec
 And a side condition |k < n| is needed to guarantee that the output shape |BT_ n sk| is valid.
 \Shin{In the following paragraphs I try to describe how |retabulate| can be constructed from its type. Some changes were made: 1. |_∷ᴮᵀ_| is introduced earlier and slightly more detailed because I will use it later. 2. definition of |mapBT| is omitted because I think it is probably not needed and now we might be running out of space. BTW, I don't know how to say ``everything related to |k < n| is omitted'' in an early stage, therefore all my calls to |retabulate| still have the |k < n| argument in underline. It is preferable to find a reason to omit it. Josh: I think it's fine to assume that they're only managed mentally (and not formally in Agda) in the `first pass' presented in the paper, like what we did when transcribing \lstinline{cd}.}
 
-The type of |retabulate| looks like a reasonable update of the type of \lstinline{cd}, except that I'm letting |retabulate| return a tree of trees, rather than a tree of lists.
+The type of |retabulate| looks like a sensible update of the type of \lstinline{cd}, except that I'm letting |retabulate| return a tree of trees, rather than a tree of lists.
 Could that change be too drastic?
 Hm\ldots actually, no --- the shape of |BT_ sk k| is always a (non-empty) list!
 When |k|~is |zero|, a |BT_ 1 0|-tree has to be a |tipZ|.
-Otherwise, a |BT_ ssk sk|-tree has to take the form |bin (tipS y) t|, which is a cons-like operation:
+Otherwise, a |BT_ ssk sk|-tree has to take the form |bin (tipS y) t|.
+This is in fact a cons-like operation:
 \begin{code}
 _∷ᴮᵀ_ : p xs → BT(C sk k) (p ∘ (x ∷_)) xs → BT(C ssk sk) p (x ∷ xs)
 y ∷ᴮᵀ t = bin (tipS y) t
 \end{code}
-To construct a table indexed by all the immediate sublists |ys| of |x ∷ xs|, I need an entry for |xs|, the immediate sublist without~|x|, and a table of entries for the other immediate sublists, which are |x ∷ ws| for all the immediate sublists |ws| of |xs|.
+To construct a table indexed by all the immediate sublists of |x ∷ xs|, I need an entry for |xs|, the immediate sublist without~|x|, and a table of entries for the other immediate sublists, which are |x ∷ ws| for all the immediate sublists |ws| of |xs|.
 
-I should go on to define |retabulate|.
+I go on to define |retabulate|.
 Its type is much more informative than that of \lstinline{cd}.
-Rather than transcribing \lstinline{cd}, can its type guide me through the implementation?
-I type the left-hand side of |retabulate| into the editor, left the right-hand side as a hole, and perform some case splitting on the input tree, resulting in
+Rather than transcribing \lstinline{cd}, can its type help me through the implementation?
+I type the left-hand side of |retabulate| into the editor, left the right-hand side as a hole, and perform some case splitting on the input tree:
 \begin{spec}
 retabulate (tipZ _)                                  = (GOAL(BLANK)(G0))
 retabulate (tipS _)                                  = (GOAL(BLANK)(G1))
@@ -808,8 +809,8 @@ retabulate (bin      (bin _ _  )       (tipS _)   )  = (GOAL(BLANK)(G4))
 retabulate (bin t @  (bin _ _  )  u @  (bin _ _)  )  = (GOAL(BT_ ssn sssk ((BT_ sssk ssk p) (x ∷ x₁ ∷ xs)))(G5))
 \end{spec}
 The cases for |tipS _| and |bin _ (tipS _)| can be eliminated immediately since the side condition |k < n| is violated.
-I go straight to the last and the most difficult case, |bin t u|, where |t| and |u| are both constructed by |bin|.
-In |(GOAL(BLANK)(G5))|, the types of |t|~and~|u| are
+I go straight to the last and the most difficult case, |bin t u|, where |t|~and~|u| are both constructed by |bin|.
+Their types are
 \begin{spec}
 t  : BT(C sn ssk) p (x₁ ∷ xs)
 u  : BT(C sn sk) (p ∘ (x ∷_)) (x₁ ∷ xs)
@@ -827,21 +828,21 @@ The induction hypothesis for~|u| has type
 \begin{spec}
 retabulate u : BT(C sn ssk) (BT (C ssk sk) (p ∘ (x ∷_))) (x₁ ∷ xs)
 \end{spec}
-Both |t|~and |retabulate u| have the outer shape |BT(C sn ssk) _ (x₁ ∷ xs)| that I want, but the element types do not match.
+The types of both |t|~and |retabulate u| have the same outer shape |BT(C sn ssk) _ (x₁ ∷ xs)| that I want in the goal type, but the element types don't match.
 
 To complete the program I really have to pay more attention to what the types say.
-All the types have the form |BT(C sn ssk) _ (x₁ ∷ xs)|, which describes tables indexed by the |(2 + k)|-sublists |zs| of |x₁ ∷ xs|.
-For each |zs|, I need to gather |p|-typed entries for all the immediate sublists of |x ∷ zs|, because that's what the element types |BT(C sssk ssk) p ∘ (x ∷_)| in the goal type of |(GOAL(BLANK)(G7))| mean.
-What entries do I have in the context?
+The outer shape |BT(C sn ssk) _ (x₁ ∷ xs)| tells me that I'm dealing with tables indexed by the |(2 + k)|-sublists |zs| of |x₁ ∷ xs|.
+For each |zs|, I need to construct a table of |p|-typed entries indexed by all the immediate sublists of |x ∷ zs|, because that's what the element types |BT(C sssk ssk) p ∘ (x ∷_)| in the goal type of |(GOAL(BLANK)(G7))| mean.
+What entries do I have in |t|~and |retabulate u|?
 \begin{itemize}
-\item I have~|t|, which contains an entry for (each) |zs|.
-\item I have |retabulate u|, which contains entries for |x ∷ ws| for all the immediate sublists |ws| of |zs| (described by the elements types |BT (C ssk sk) (p ∘ (x ∷_))|).
+\item I have an entry for (each) |zs| in~|t|.
+\item I have a table of entries indexed by |x ∷ ws| for all the immediate sublists |ws| of |zs| in |retabulate u| --- that's what the element types |BT (C ssk sk) (p ∘ (x ∷_))| mean.
 \end{itemize}
-Do I have entries for all the immediate sublists of |x ∷ zs|?
+Are these entries for all the immediate sublists of |x ∷ zs|?
 Yes!
 Because |zs| is the immediate sublist of |x ∷ zs| without~|x|, and the sublists |x ∷ ws| are all the others with~|x|.
-An entry and a tree of entries --- aren't they exactly the arguments of |_∷ᴮᵀ_|\,?
-Indeed, I can fulfil |(GOAL(BLANK)(G7))| by combining~|t| and |retabulate u| entry-wise (for each |zs|) using |_∷ᴮᵀ_|\,, that is, |zipBTWith _∷ᴮᵀ_ t (retabulate u)|!
+An entry and a table of entries --- aren't they exactly the arguments of |_∷ᴮᵀ_|\,?
+Indeed, I can fulfil |(GOAL(BLANK)(G7))| by combining corresponding entries in~|t| and |retabulate u| (with the same index |zs|) using |_∷ᴮᵀ_|\,, that is, |zipBTWith _∷ᴮᵀ_ t (retabulate u)|!
 
 The rest of the cases are much easier, and I come up with a definition of |retabulate|,
 \begin{code}
