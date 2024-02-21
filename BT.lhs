@@ -1637,21 +1637,18 @@ He would've liked the new languages and the new ways of reasoning.
 
 \section*{Afterword}
 
-\todo[inline]{Largely follows the actual development, which we realise makes a nice story, going from the concrete to the abstract (`based on a true story')}
+We have presented this work as a kind of `Socratic monologue', recording in an intuitive and colloquial style the thought processes of a dependently typed programmer as they solve a programming mystery. We were inspired by the opening chapters of the science fiction novel \textit{Project Hail Mary} by Andy Weir. 
 
-\todo[inline]{`Socratic monologue' of a dependently typed programmer, going through what they think about (in an intuitive and colloquial style) when solving the problem/mystery (cf~the beginning of the science fiction novel \textit{Project Hail Mary}) rather than reporting a piece of already finished work; the format is more effective for presenting thought processes and focusing on ideas (people don't usually hurry to work out all the technical detail when first solving a problem)}
+We have chosen this style over the traditional rational reconstruction of a finished piece of work. We hope that the reader finds the format effective for focusing on the main ideas while going through a development; after all, we don't usually hurry to work out all the technical details when first solving a problem. Our telling largely follows our actual development, going from the concrete to the abstract: ``based on a true story''. 
 
-%\Jeremy{Julie recommended making this nod to \textit{Project Hail Mary} the first point in the Afterword. But I guess it could instead be the last point.}
-
-\todo[inline]{Resist the temptation to generalise (for example, to dynamic programming in general as \citet{Bird-zippy-tabulations} attempted to do), and keep the material simple (no graded comonads, for example) and self-contained (but not a detailed tutorial; no explanation of Agda from scratch or formal categorical definitions, for example); loose ends here and there to point out generality and future work (exercises and papers)}
+We have resisted the temptation to generalise ---~for example, to dynamic programming more broadly, as \citet{Bird-zippy-tabulations} attempted to do. We have kept the material as simple as possible, avoiding a digression into graded comonads. We have also kept it fairly self-contained; but we have not written a detailed tutorial, nor explained Agda from scratch or given formal categorical definitions. We have left a few loose ends here and there to point out possible extensions and future exercises and papers.
 
 \todo[inline]{Compare with \varcitet{Mu-sublists}{'s} treatment of the problem using simple types and equational reasoning}
 
-\todo[inline]{Why should dependent types, category theory, and string diagrams be in the (mathematically inclined) functional programmer's toolbox?
-Explaining, discovering, and proving by writing things down in the right languages.
-Specifically:
-Fancy types can replace traditional specs and proofs (for example, equality between programs can be proved simply by showing that they have the same, uniquely inhabited type), and are a still under-explored methodology (going beyond length/shape indexing).
-Category theory offers useful abstraction (for sometimes comprehending indexed definitions as if they were simply typed); in particular, the categorical abstraction enables the use of string diagrams to make reasoning with naturality transparent (and in this case the main proof is entirely about naturality and rendered trivial).}
+We believe that dependent types, category theory, and string diagrams should be in the (mathematically inclined) functional programmer's toolbox. 
+We can discover, explain, and prove things by writing them down in the appropriate language.
+Fancy types can replace traditional specifications and proofs (for example, equality between programs can be proved simply by showing that they have the same, uniquely inhabited type), and going beyond length/shape indexing is still an under-explored methodology.
+Likewise, category theory offers useful abstractions, such as for comprehending indexed definitions as if they were simply typed; in particular, the categorical abstraction enables the use of string diagrams to make reasoning with naturality transparent (and in this case the main proof is entirely about naturality, and is rendered trivial).
 
 \begin{acks}
 % omitted automatically in anonymous mode
