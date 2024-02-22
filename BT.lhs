@@ -782,7 +782,7 @@ which is parametric in~|p| (so, like the Haskell version of \lstinline{cd}, the 
 I think it's time to rename \lstinline{cd} to something more meaningful, and decide to use `|retabulate|' because I'm moving values in a table into appropriate positions in a new (nested) table with a new tabulation scheme.
 % \Jeremy{I'd like to think of a better name. } % Happy now!
 And a side condition |k < n| is needed to guarantee that the output shape |BT_ n sk| is valid.
-\Shin{In the following paragraphs I try to describe how |retabulate| can be constructed from its type. Some changes were made: 1. |_∷ᴮᵀ_| is introduced earlier and slightly more detailed because I will use it later. 2. definition of |mapBT| is omitted because I think it is probably not needed and now we might be running out of space. BTW, I don't know how to say ``everything related to |k < n| is omitted'' in an early stage, therefore all my calls to |retabulate| still have the |k < n| argument in underline. It is preferable to find a reason to omit it. Josh: I think it's fine to assume that they're only managed mentally (and not formally in Agda) in the `first pass' presented in the paper, like what we did when transcribing \lstinline{cd}.}
+%\Shin{In the following paragraphs I try to describe how |retabulate| can be constructed from its type. Some changes were made: 1. |_∷ᴮᵀ_| is introduced earlier and slightly more detailed because I will use it later. 2. definition of |mapBT| is omitted because I think it is probably not needed and now we might be running out of space. BTW, I don't know how to say ``everything related to |k < n| is omitted'' in an early stage, therefore all my calls to |retabulate| still have the |k < n| argument in underline. It is preferable to find a reason to omit it. Josh: I think it's fine to assume that they're only managed mentally (and not formally in Agda) in the `first pass' presented in the paper, like what we did when transcribing \lstinline{cd}.}
 
 The type of |retabulate| looks like a sensible refinement of the type of \lstinline{cd}, except that I'm letting |retabulate| return a tree of trees, rather than a tree of lists.
 Could that change be too drastic?
@@ -799,7 +799,7 @@ To construct a table indexed by all the immediate sublists of |x ∷ xs|, I need
 I go on to define |retabulate|.
 Its type is much more informative than that of \lstinline{cd}.
 Rather than transcribing \lstinline{cd}, can its type guide me through the implementation?
-I type the left-hand side of |retabulate| into the editor, left the right-hand side as a hole, and perform some case splitting on the input tree:
+I type the left-hand side of |retabulate| into the editor, leave the right-hand side as a hole, and perform some case splitting on the input tree:
 \begin{spec}
 retabulate (tipZ _)                                  = (GOAL(BLANK)(G0))
 retabulate (tipS _)                                  = (GOAL(BLANK)(G1))
