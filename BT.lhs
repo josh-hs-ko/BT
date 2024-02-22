@@ -602,7 +602,7 @@ What's nice is that I didn't need to do much.
 The type checker took care of most of the proof, using the indices to keep track of the tree shapes throughout the transcription.
 
 I've still got a bit of extra proof burden about the two (greyed out) `side conditions' |1 ≤ k| and |k < n|.
-Whenever I called |cd|, I checked these conditions mentally and then ignored them.
+Whenever I called |cd|, I checked these conditions mentally and then temporarily ignored them.
 (I~wrote `|cd u|' as if |cd| were a function with only one explicit argument.)
 Everything related to these conditions was also ignored, including cases that can be proved to be impossible.
 Agda ensures that I don't forget about all the ignored stuff in the final code though.
@@ -771,7 +771,7 @@ What's special about |BT| is that the element types are indexed by sublists, so 
 That is, I can now directly say `values associated with sublists' and how they should be rearranged, rather than indirectly specify the rearrangement in terms of sublists and then extend to other types of values through parametricity.
 |BT_ n k p xs| is the type of a tree of |p|-typed values associated with the |k|-sublists of |xs|, and that's precisely the intended meaning of \lstinline{cd}'s input.
 What about the output?
-It should tabulate the |(1 + k)|-sublists of |xs|, so the type should be |BT_ n sk q xs| for some |q : Vec (1 + k) a → Set|,
+It should tabulate the |(1 + k)|-sublists of |xs|, so the type should be |BT_ n sk q xs| for some |q : Vec (1 + k) a → Set|.
 For each sublist |ys : Vec (1 + k) a|, I~want a list of |p|-typed values associated with the immediate sublists of |ys|, which are |k|-sublists.
 Or, instead of a list, I can just use a tree of type |BT_ sk k p ys|.
 Therefore the whole type is
@@ -789,7 +789,7 @@ Could that change be too drastic?
 Hm\ldots actually, no --- the shape of |BT_ sk k| is always a (non-empty) list!
 If |k|~is |zero|, a |BT_ 1 0|-tree has to be a |tipZ|.
 Otherwise, a |BT_ ssk sk|-tree has to take the form |bin (tipS y) t|.
-This is in fact a cons-like operation:
+This expression is in fact a cons-like operation:
 \begin{code}
 _∷ᴮᵀ_ : p xs → BT(C sk k) (p ∘ (x ∷_)) xs → BT(C ssk sk) p (x ∷ xs)
 y ∷ᴮᵀ t = bin (tipS y) t
@@ -820,27 +820,36 @@ Neither of them have the right shape to be used immediately, so in |(GOAL(BLANK)
 retabulate (bin t @ (bin _ _) u @ (bin _ _)) = bin  (GOAL(BT(C sn sssk) (BT(C sssk ssk) p) (x₁ ∷ xs))(G6))
                                                     (GOAL(BT(C sn ssk) (BT(C sssk ssk) p ∘ (x ∷_)) (x₁ ∷ xs))(G7))
 \end{spec}
-The goal type of |(GOAL(BLANK)(G6))| is exactly what |retabulate t| delivers!
+|(GOAL(BLANK)(G6))| is directly fulfilled by the induction hypothesis |retabulate t|!
 That's a good sign.
 
 What can I put in |(GOAL(BLANK)(G7))|?
-The induction hypothesis for~|u| has type
+Prompted by the success with |(GOAL(BLANK)(G6))|, I try the induction hypothesis for~|u|:
 \begin{spec}
 retabulate u : BT(C sn ssk) (BT (C ssk sk) (p ∘ (x ∷_))) (x₁ ∷ xs)
 \end{spec}
-The types of both |t|~and |retabulate u| have the same outer shape |BT(C sn ssk) _ (x₁ ∷ xs)| that I want in the goal type, but the element types don't match\ldots
+Hm.
+Its type has the same outer shape |BT(C sn ssk) _ (x₁ ∷ xs)| that I want in the goal type, but the element types don't match\ldots
 
 To fill out |(GOAL(BLANK)(G7))| I really have to pay more attention to what the types say.
-The outer shape |BT(C sn ssk) _ (x₁ ∷ xs)| tells me that I'm dealing with tables indexed by the |(2 + k)|-sublists |zs| of |x₁ ∷ xs|.
-For each |zs|, I need to construct a table of |p|-typed entries indexed by all the immediate sublists of |x ∷ zs|, because that's what the element types |BT(C sssk ssk) p ∘ (x ∷_)| in the goal type mean.
-What entries do I have in |t|~and |retabulate u|?
-\begin{itemize}
-\item I have an entry for (each) |zs| in~|t|.
-\item I have a table of entries indexed by |x ∷ ws| for all the immediate sublists |ws| of |zs| in |retabulate u| --- that's what the element types |BT (C ssk sk) (p ∘ (x ∷_))| mean.
+I stare at the types, and, slowly, they start to make sense.
+\begin{itemize}[leftmargin=*]
+\item The outer shape |BT(C sn ssk) _ (x₁ ∷ xs)| tells me that I'm dealing with tables indexed by the |(2 + k)|-sublists |zs| of |x₁ ∷ xs|.
+\item For each |zs|, I need to construct a table of |p|-typed entries indexed by all the immediate sublists of |x ∷ zs|, because that's what the element types |BT(C sssk ssk) p ∘ (x ∷_)| in the goal type mean.
+\item What do I have in |retabulate u|?
+I have a table of entries indexed by |x ∷ ws| for all the immediate sublists |ws| of |zs| in |retabulate u| --- that's what the element types |BT (C ssk sk) (p ∘ (x ∷_))| mean.
+\item What's the relationship between these sublists |x ∷ ws| and the table I need to construct, which is indexed by the immediate sublists of |x ∷ zs|?
+Oh right, the sublists |x ∷ ws| are all the immediate sublists of |x ∷ zs| with the first element~|x|!
+So I've already got most of the entries I need.
+\item I'm still missing an entry for the immediate sublist of |x ∷ zs| without~|x|, which is |zs|.
+Do I have that?
+I search through the context.
+The type of~|t| catches my attention: it has the familiar outer shape |BT(C sn ssk) _ (x₁ ∷ xs)|.
+What entries are in~|t|?
+Its type tells me that there's an entry for each |(2 + k)|-sublist |zs| of |x₁ ∷ xs|.
+That's precisely what I'm missing!
 \end{itemize}
-Are these entries for all the immediate sublists of |x ∷ zs|?
-Yes!
-Because |zs| is the immediate sublist of |x ∷ zs| without~|x|, and the sublists |x ∷ ws| are all the others with~|x|.
+So, for each |zs|, I can construct a table indexed by the immediate sublists of |x ∷ zs| by combining an entry for |zs| (the immediate sublist without~|x|) from~|t| with a table of entries for all the other immediate sublists (with~|x|) from |retabulate u|.
 An entry and a table of entries --- aren't they exactly the arguments of |_∷ᴮᵀ_|\,?
 Indeed, I can fulfil |(GOAL(BLANK)(G7))| by combining all the corresponding entries in~|t| and |retabulate u| (that share the same index |zs|) using |_∷ᴮᵀ_|\,, that is, |zipBTWith _∷ᴮᵀ_ t (retabulate u)|!
 
@@ -972,7 +981,8 @@ at level~0, and work upwards using~|g|.
 There's no problem going from level~0 to level~1, because there's now additional context in the indices so that |g|~knows for which singleton list a solution should be computed.
 Making types precise has helped me to find a more natural and general form of recursive computation over immediate sublists!
 
-And it's not just any recursive computation --- it's now an alternative \emph{induction principle} for lists where the inductive case assumes that the induction hypothesis holds for all the immediate sublists.
+And it's not just any recursive computation --- it's now an alternative \emph{induction principle} for lists!
+The base case~|e| is still about the empty list, and the inductive case~|g| assumes that the induction hypothesis holds for all the immediate sublists.
 (I~guess I've been instinctively drawn towards induction principles, in common with most dependently typed programmers.)
 \begin{temp}
 \begin{code}
@@ -1124,7 +1134,7 @@ unTip : BT(C n n) p xs → p xs
 unTip             (tipS  p) = p
 unTip {xs =' []}  (tipZ  p) = p
 \end{code}
-The counter/argument~|k| of |loop| should satisfy the invariant |k ↓≤ n|.
+The argument/counter~|k| of |loop| should satisfy the invariant |k ↓≤ n|.
 The data type |m ↓≤ n| is another version of natural number inequality, which is dual to |_≤↑_| in the sense that |n|~is fixed throughout the new definition, and |m|~moves away from~|n|:
 \begin{code}
 data _↓≤_ : ℕ → ℕ → Set where
@@ -1509,7 +1519,7 @@ In fact I don't even bother to pull, because on this diagram I can already see s
 So, modulo naturality, the two algorithms have the same table demolition phase but different table construction phases.
 If I can prove that their table construction phases are equal, then I'll have another proof that the two algorithms are equal, in addition to the parametricity-based proof~(\cref{sec:equality-from-types}).
 For |td|, the construction phase is a right-leaning tree on the diagram, whereas for |bu| it's a left-leaning tree.
-Maybe what I need is an equation about |blank| and |retabulate| that can help me rotate a tree\ldots?
+Maybe what I need is an equation about |blank| and |retabulate| that can help me to rotate a tree\ldots?
 %
 \[ \text{\lstinline{cd (choose k xs)}} \equals \text{\lstinline{mapB (flatten . choose k) (choose (k+1) xs)}} \]
 

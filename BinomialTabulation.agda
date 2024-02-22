@@ -141,7 +141,7 @@ retabulate {xs = _ ∷ _ ∷ _} _ (tipZ y) = bin (retabulate (s≤s z≤n) (tipZ
 retabulate _             (bin   (tipS y  ) u          ) = tipS (y ∷ᴮᵀ u)
 retabulate _             (bin t@(bin t' _)   (tipZ z )) = bin (retabulate (s≤s (bounded t')) t) (mapBT (_∷ᴮᵀ (tipZ z)) t)
 retabulate 2+n<2+n       (bin   (bin _  _)   (tipS _ )) = ⊥-elim (<-irrefl refl 2+n<2+n)
-retabulate (s≤s 1+k<1+n) (bin t@(bin t' _) u@(bin _ _)) = bin {!   !} {!   !} -- bin (retabulate (s≤s (bounded t')) t) (zipBTWith _∷ᴮᵀ_ t (retabulate 1+k<1+n u))
+retabulate (s≤s 1+k<1+n) (bin t@(bin t' _) u@(bin _ _)) = bin (retabulate (s≤s (bounded t')) t) (zipBTWith _∷ᴮᵀ_ t (retabulate 1+k<1+n u))
 
 --------
 -- Section 2.4
