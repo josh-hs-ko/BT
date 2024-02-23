@@ -1649,15 +1649,16 @@ He would've liked the new languages and the new ways of reasoning.
 
 \section*{Afterword}
 
-We have presented this work as a kind of `Socratic monologue', recording in an intuitive and colloquial style the thought processes of a dependently typed programmer as they solve a programming mystery. We were inspired by the opening chapters of the science fiction novel \textit{Project Hail Mary} by Andy Weir. 
+We have presented this work as a kind of `Socratic monologue', recording in an intuitive and colloquial style the thought processes of a dependently typed programmer as they solve a programming mystery. We were inspired by the opening chapters of the science fiction novel \textit{Project Hail Mary} by Andy Weir.
 
-We have chosen this style over the traditional rational reconstruction of a finished piece of work. We hope that the reader finds the format effective for focusing on the main ideas while going through a development; after all, we don't usually hurry to work out all the technical details when first solving a problem. Our telling largely follows our actual development, going from the concrete to the abstract: ``based on a true story''. 
+We have chosen this style over the traditional rational reconstruction of a finished piece of work. We hope that the reader finds the format effective for focusing on the main ideas while going through a development; after all, we don't usually hurry to work out all the technical details when first solving a problem. Our telling largely follows our actual development, going from the concrete to the abstract: ``based on a true story''.
 
 We have resisted the temptation to generalise ---~for example, to dynamic programming more broadly, as \citet{Bird-zippy-tabulations} attempted to do. We have kept the material as simple as possible, avoiding a digression into graded comonads. We have also kept it fairly self-contained; but we have not written a detailed tutorial, nor explained Agda from scratch or given formal categorical definitions. We have left a few loose ends here and there to point out possible extensions and future exercises and papers.
+It is instructive comparing our work with that of \varcitet{Mu-sublists}{'s}, where \lstinline{cd} is derived from the specification and that \lstinline{td = bu} is proved by traditional equational reasoning of simple-typed terms, which we did away with by designing types carrying more information for our terms.
+\Shin{Feeling a bit awkward mentioning it here... feel free to edit it!}
+%\todo[inline]{Compare with \varcitet{Mu-sublists}{'s} treatment of the problem using simple types and equational reasoning}
 
-\todo[inline]{Compare with \varcitet{Mu-sublists}{'s} treatment of the problem using simple types and equational reasoning}
-
-We believe that dependent types, category theory, and string diagrams should be in the (mathematically inclined) functional programmer's toolbox. 
+We believe that dependent types, category theory, and string diagrams should be in the (mathematically inclined) functional programmer's toolbox.
 We can discover, explain, and prove things by writing them down in the appropriate language.
 Fancy types can replace traditional specifications and proofs (for example, equality between programs can be proved simply by showing that they have the same, uniquely inhabited type), and going beyond length/shape indexing is still an under-explored methodology.
 Likewise, category theory offers useful abstractions, such as for comprehending indexed definitions as if they were simply typed; in particular, the categorical abstraction enables the use of string diagrams to make reasoning with naturality transparent (and in this case the main proof is entirely about naturality, and is rendered trivial).
