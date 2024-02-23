@@ -740,6 +740,7 @@ This |BT| definition is really intriguing\ldots
 My mind starts to wander.
 The ad hoc feeling I had with~|B'| is completely gone.
 This is probably because there's no arbitrary information in |BT| with respect to \lstinline{choose}.
+\Shin{Does it mean there is no unnecessary information apart from those relevant to \lstinline{choose}, or there is no information about \lstinline{choose}?}
 Most likely, there is a way to derive |BT| from \lstinline{choose}, and that'll work for a whole class of functions.
 I mean, the type of |BT_ n k : (p : Vec k a → Set) → Vec n a → Set| is a continuation-passing version of some |Vec n a ↝ Vec k a|, which would be the (shape-indexed) type of a version of \lstinline{choose} that non-deterministically returns a sublist.
 And the index~|p| works like a continuation too.
@@ -768,6 +769,7 @@ That paper will have to wait though.
 I've still got a problem to solve: how do I use |BT| to specify \lstinline{cd}?
 
 What's special about |BT| is that the element types are indexed by sublists, so I know from the type of an element with which sublist it is associated.
+\Shin{"I know from the type of an element which sublist it is associated."? Should there be a "with"?}
 That is, I can now directly say `values associated with sublists' and how they should be rearranged, rather than indirectly specify the rearrangement in terms of sublists and then extend to other types of values through parametricity.
 |BT_ n k p xs| is the type of a tree of |p|-typed values associated with the |k|-sublists of |xs|, and that's precisely the intended meaning of \lstinline{cd}'s input.
 What about the output?
