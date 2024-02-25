@@ -40,6 +40,8 @@ acmsmall,fleqn,screen,review]{acmart}
 %\definecolor{SkyBlue}{HTML}{D9F6FF}
 %\newenvironment{final}{\begin{mdframed}[backgroundcolor=SkyBlue, linewidth=0, skipabove=1ex, leftmargin=1ex, rightmargin=0, innerleftmargin=0, innerrightmargin=0, innertopmargin=0, innerbottommargin=0]}{\end{mdframed}}
 
+\usepackage{wrapfig}
+
 \usepackage{xifthen}
 \newcommand{\varcitet}[3][]{\citeauthor{#2}#3~[\ifthenelse{\isempty{#1}}{\citeyear{#2}}{\citeyear[#1]{#2}}]}
 
@@ -137,6 +139,9 @@ acmsmall,fleqn,screen,review]{acmart}
 %format ↓≤' = "{_\downarrow\kern-.8pt{\le}}"
 %format CDOTS = "\cdots"
 
+%format mapB = map "_{" B "}"
+%format unTipB = unTip "_{" B "}"
+%format zipBWith = zip "_{" B "}\kern-1.75pt" With
 %format B' = B "^\prime"
 %format (B'_(n)(k)) = B' "{}^{" n "}_{" k "}"
 %format testB' = test B'
@@ -321,7 +326,7 @@ I know \lstinline{B} is this Haskell data type of binary trees:
 \begin{lstlisting}
 data B a = Tip a || Bin (B a) (B a)
 \end{lstlisting}
-And presumably \lstinline{mapB} and \lstinline{zipBWith} are the usual \lstinline{map} and \lstinline{zipWith} functions for these trees, and \lstinline{L} is the standard data type of lists.
+And presumably \lstinline{mapB} and \lstinline{zipBWith} are the usual map and zip functions for these trees, and \lstinline{L}~is the standard data type of lists.
 But how did Richard come up with such an incomprehensible function definition?
 %\Jeremy{We should be more consistent about whether to call him Richard or Bird. Shin: does it work if we say "Richard" when we refer to the person and say Bird (2008) when we refer to the paper?}
 He didn't bother to explain it in the paper.
@@ -330,8 +335,8 @@ He didn't bother to explain it in the paper.
 \subsection{Top-Down and Bottom-Up Algorithms}
 \label{sec:algorithms}
 
-From the explanations that \emph{are} in the paper, I can make a pretty good guess at roughly what \lstinline{cd} should do.
-Richard was studying the relationship between top-down and bottom-up algorithms that solve problems specified recursively on some input data structure.
+From the explanations that \emph{are} in the paper, I suppose I can guess roughly what \lstinline{cd} should do.
+Richard was studying the relationship between top-down and bottom-up algorithms that solve problems specified recursively on some input data structure.\todo{A concrete example?}
 When the input is a non-empty list, a generic top-down algorithm is defined by
 %\todo{Make the function polymorphic}
 %\Josh{Include |f| and |g| as arguments (like |foldr| etc). Shin: Done.}
@@ -341,7 +346,7 @@ td :: (a -> s) -> (L s -> s) -> L a -> s
 td f g [x] = f x
 td f g xs  = g (map (td f g) (dc xs))
 \end{lstlisting}
-The input of \lstinline{td} is a non-empty list of \lstinline{a}'s, and the output is a solution of type \lstinline{s} for the list.
+The input of \lstinline{td} is a non-empty list of \lstinline{a}'s, and the output is a solution of type \lstinline{s} for the input list.
 Singleton lists form the base cases, for which a solution is directly computed by a given function~\lstinline{f}.
 If a non-empty list \lstinline{xs} is non-singleton, it is decomposed into shorter lists by some\csp\lstinline{dc :: L a -> L (L a)}.
 Then a subsolution is computed for each shorter list recursively by \lstinline{td}.
@@ -360,7 +365,7 @@ But I'm working with this simplified version as an easier starting point.
 \label{fig:td-call-tree}
 \end{figure}
 
-In the last (and the most difficult) example in the paper, \lstinline{dc} computes all the \emph{immediate sublists} of the given list --- all the lists with exactly one element missing:
+In the last (and the most difficult) example in the paper, \lstinline{dc} computes all the \emph{immediate sublists} of a given list --- all the lists with exactly one element missing:
 %\Josh{Inline monospace code with spaces will need space corrections before and after.}
 \begin{lstlisting}
 dc :: L a -> L (L a)
@@ -404,9 +409,8 @@ If such a function \lstinline{cd'} could be constructed, a bottom-up algorithm c
 \begin{lstlisting}
 bu' :: (a -> s) -> (L s -> s) -> L a -> s
 bu' f g = head . loop . map f
-  where
-    loop [y] = [y]
-    loop ys  = loop (map g (cd ys))
+  where loop [y] = [y]
+        loop ys  = loop (map g (cd ys))
 \end{lstlisting}
 Level~$1$ is obtained by applying \lstinline{f} to each element of the input list.
 Then the \lstinline{loop} function keeps applying\csp\lstinline{map g . cd'}\csp to get the next level.
@@ -424,16 +428,15 @@ So\csp\lstinline{cd :: B a -> B (L a)}, and the (real) bottom-up algorithm \lsti
 \begin{lstlisting}
 bu :: (a -> s) -> (L s -> s) -> L a -> s
 bu f g = unTip . loop . cvt . map f
-  where
-    loop (Tip x) = Tip x
-    loop xs      = loop (mapB g (cd xs))
+  where loop (Tip x) = Tip x
+        loop xs      = loop (mapB g (cd xs))
 \end{lstlisting}
-where \lstinline{unTip} extracts the element of a \lstinline{Tip} tree,
+where \lstinline{unTip} extracts the element of a \lstinline{Tip} tree, and \lstinline{cvt} converts a list to a tree:
 \begin{lstlisting}
 unTip :: B a -> a
 unTip (Tip x) = x
 \end{lstlisting}
-and \lstinline{cvt} converts a list to a tree:
+\vspace{-1ex}
 \begin{lstlisting}
 cvt :: L a -> B a
 cvt [x]         = Tip x
@@ -500,7 +503,7 @@ Presumably, \lstinline{cd} does something useful only for the trees built by\csp
 What are the constraints on these trees, and how does \lstinline{cd} exploit them?
 %\Josh{To be explicitly responded at the end of S3}
 
-Richard did give a hint: the sizes of subtrees along their left spines (the red numbers in Figure~\ref{fig:map_g_cd}) $[1,2,3,4]$, $[1,3,6]$, and $[1,4]$ are the first three diagonals of Pascal's triangle --- the trees are related to binomial coefficients!
+Richard did give a hint: the sizes of subtrees along their left spines (the red numbers in Figure~\ref{fig:map_g_cd}) $[1,2,3,4]$, $[1,3,6]$, and $[1,4]$ are the diagonals of Pascal's triangle --- the trees are related to \emph{binomial coefficients}!
 %So the name \lstinline{B} refers to `binomial' in addition to `binary'.
 The binomial coefficient~|CHOOSE n k| is the number of ways of choosing $k$~elements from an $n$-list.
 Indeed, each level~$k$ in the lattice~(\cref{fig:sublists-lattice}) contains values about $k$-sublists.
@@ -535,7 +538,7 @@ I'm worried that there will be many complex proofs waiting ahead for me.
 
 The binomial shape constraint seems to be the easiest next target, because there's a standard solution: capturing the tree shape in its type.
 Shape-indexed data types are so common now that I'm tempted to say they should count as simple types.
-They are common even in Haskell.
+They're common even in Haskell.
 I prefer a proper dependently typed language though, so I open my favourite editor, and switch to Agda.
 
 The classic example of shape-indexing is, of course, length-indexed lists (or `vectors'):
@@ -544,7 +547,7 @@ data Vec : ℕ → Set → Set where
   []   :                Vec    zero    a
   _∷_  : a → Vec n a →  Vec (  suc n)  a
 \end{code}
-(I enjoy writing Agda types these days because I no longer have to quantify over each and every variable, such as |a|~and~|n| in the type of cons --- Agda can do that for me if I give suitable declarations.)
+(I enjoy writing Agda types these days because I no longer have to quantify over each and every variable, such as |a|~and~|n| in the type of cons --- Agda can do that for me if I give suitable variable declarations.)
 The constructors used in a list of type |Vec n a| are completely determined by the length index~|n|.
 The data type definition could even be understood as if it were performing pattern matching on the index: if the index is |zero|, then the list has to be nil; otherwise the index is a |suc|, and the list has to start with a cons.
 (About a decade ago a gang of people~\citep{Chapman-levitation, Ko-pcOrn, Dagand-functional-ornaments} did develop theories for defining data types by pattern matching on indices in this way.)
@@ -553,10 +556,9 @@ In the same vein, I write down a shape-indexed version of Richard's \lstinline{B
 %\Jeremy{For consistency here, we should talk earlier about ``level $k$'' rather than ``level $n$''}
 \begin{code}
 data B : ℕ → ℕ → Set → Set where
-  tipZ  :   a                → B n           zero    a
-  tipS  :   a                → B (suc  k) (  suc k)  a
-  bin   :   B n (suc  k)  a
-        →'  B n       k   a  → B (suc  n) (  suc k)  a
+  tipZ  :   a                        → B n           zero    a
+  tipS  :   a                        → B (suc  k) (  suc k)  a
+  bin   :   B n (suc k) a → B n k a  → B (suc  n) (  suc k)  a
 \end{code}
 The size of a tree of type |B n k a| with $k \le n$ is precisely the binomial coefficient~|CHOOSE n k|. Naturally, there are no inhabitants when $k > n$.
 Like |Vec|, the indices $n, k$ determine the constructors.
@@ -570,8 +572,8 @@ And now I can give a more precise type to \lstinline{cd}~(\cref{sec:functions}):
 \begin{code}
 cd : (SUPPRESSED(1 ≤ k)) → (SUPPRESSED(k < n)) → B(C n k) a → B(C n sk) (Vec (1 + k) a)
 \end{code}
-It takes as input the data for level~$k$ out of $n$~levels in the sublist lattice~(\cref{fig:sublists-lattice}), with $1 \le k < n$; these are the results for each of the |CHOOSE n k| $k$-sublists of the original $n$-list.
-And it returns as output the components for level~|1 + k|; there are |CHOOSE n (sk)| of these, each a |(1 + k)|-list to be fed into \lstinline{g}.
+It takes as input the data for level~$k$ out of $n$~levels in the sublist lattice~(\cref{fig:sublists-lattice}), with $1 \le k < n$; these are the solutions for each of the |CHOOSE n k| $k$-sublists of the original $n$-list.
+And it returns as output the components for level |1 + k|; there are |CHOOSE n (sk)| of these, each a |(1 + k)|-list to be fed into \lstinline{g}.
 %The input data can conveniently be stored in a tree indexed by $n,k$, and the output indexed by $n,1+k$.
 
 I continue to transcribe the definition of \lstinline{cd} interactively in Agda.
@@ -601,7 +603,7 @@ So, as I guessed, the binomial shape constraint holds throughout |cd|.
 What's nice is that I didn't need to do much.
 The type checker took care of most of the proof, using the indices to keep track of the tree shapes throughout the transcription.
 
-I've still got a bit of extra proof burden about the two (greyed out) `side conditions' |1 ≤ k| and |k < n|.
+I've still got a bit of extra proof burden about the two (greyed out) `side conditions' |1 ≤ k| and |k < n|.\todo{bring forward}
 Whenever I called |cd|, I checked these conditions mentally and then temporarily ignored them.
 (I~wrote `|cd u|' as if |cd| were a function with only one explicit argument.)
 Everything related to these conditions was also ignored, including cases that can be proved to be impossible.
@@ -613,7 +615,7 @@ So much for the shape.
 But how do I know that the contents are correct~--- that \lstinline{cd} is correctly rearranging the values?
 %\Jeremy{I don't really understand the TODO: ``What to say? Need a spec: the equational one using \lstinline{choose} (marking the element positions with sublists and specifying where the elements should go); but requires a lot of proving''. Update 20240124: A lot of equational reasoning. Do we mention Shin's paper? Josh: This has to be in the Afterword.}
 
-Most likely, the key is parametricity.
+Most likely, the key is parametricity.\todo{explain general intuition}
 The input to \lstinline{cd} is a tree of values associated with $k$-sublists (for some $1 \le k < n$), and these values are rearranged in relation to |(1 + k)|-sublists.
 Since \lstinline{cd} is parametric in the type of these values, I can just take |k|-sublists themselves and specify how \lstinline{cd} should rearrange them, and then \lstinline{cd} will have to do the same rearrangement for any type of values.
 
@@ -623,12 +625,12 @@ In Haskell, I suppose Richard might have defined the choice of \lstinline{k}~ele
 %Josh: Coincidentally, using a snoc pattern is more consistent with k+1.}
 \begin{lstlisting}
 choose :: Int -> L a -> B (L a)
-choose    0  _                      =  Tip []
-choose (k+1) xs || length xs == k+1  =  Tip xs
-choose (k+1) (xs ++ [x])            =  Bin (choose (k+1) xs)
-                                           (mapB (++[x]) (choose k xs))
+choose    0  _                     = Tip []
+choose (k+1) xs || length xs == k+1 = Tip xs
+choose (k+1) (xs ++ [x])           = Bin (choose (k+1) xs)
+                                         (mapB (++[x]) (choose k xs))
 \end{lstlisting}
-The pattern-matching structure of \lstinline{choose} is the same as how |B(C n k)| analyses its indices~(\cref{sec:shape}), except that here I need to deal with a list \lstinline{xs} rather than just its length.
+The pattern-matching structure of \lstinline{choose} is the same as how |B(C n k)|analyses its indices~(\cref{sec:shape}), except that here I need to deal with a list rather than just its length.
 The function formalises the pattern I saw in Richard's trees~(\cref{sec:binomial}).
 It also generalises Richard's \lstinline{dc} that computes the immediate sublists~(\cref{sec:algorithms}):\csp\lstinline{dc xs}\csp can be redefined as\csp\lstinline{flatten (choose (length xs - 1) xs)}, where
 \begin{lstlisting}
@@ -636,7 +638,7 @@ flatten :: B a -> L a
 flatten (Tip x)   = [x]
 flatten (Bin t u) = flatten t ++ flatten u
 \end{lstlisting}
-Then Richard could have specified \lstinline{cd} by
+Then Richard could have specified \lstinline{cd} by\todo{refer to the parametricity argument and \cref{fig:map_g_cd}}
 \begin{equation}
 \text{\lstinline{cd (choose k xs)}} \equals \text{\lstinline{mapB (flatten . choose k) (choose (k+1) xs)}}
 \tag{$\ast$}
@@ -651,20 +653,19 @@ I'm not thrilled by the prospect.
 
 \pause
 
-\Josh{No indentation after a pause?}
+\todo{No indentation after a pause?}%
 My editor is still running Agda and showing the shape-indexed version of |cd|, with |B(C n k)| in its type~(\cref{sec:shape}).
 The whole point of programming with \emph{inductive families}~\citep{Dybjer-inductive-families} such as |B(C n k)| is to `say more and prove less': encode more properties in the indices, so that those properties are automatically taken care of as programs construct and deconstruct indexed data, requiring fewer manual proofs.
 %\Jeremy{Well: the same proofs, but relegating them to the typechecker.}
 Instead of just the shapes, maybe it's possible to extend |B(C n k)| and encode the \emph{entire} specification~\cref{eq:cd-spec} of \lstinline{cd} in its type?
 
 What the specification~\cref{eq:cd-spec} says is basically that \lstinline{cd} should transform a tree produced by \lstinline{choose} into another one also produced by \lstinline{choose} and then processed using a \lstinline{mapB}.
-I suppose I could force a tree to be the result of \lstinline{mapB h (choose k xs)} for some~\lstinline{h} (which is the common form of the input and output trees of \lstinline{cd}) by adding \lstinline{h} and \lstinline{xs} as indices to |B(C n k)|:
+I suppose I could force a tree to be the result of \lstinline{mapB h (choose k xs)} for some~\lstinline{h} (which is the common form of the input and output trees of \lstinline{cd}) by adding \lstinline{h} and \lstinline{xs} as indices to |B(C n k)|:\todo{refine~|B| by just adding equality constraints}
 \begin{code}
   data B' : (n k : ℕ) (b : Set) → (Vec k a → b) → Vec n a → Set where
-    tipZ  :   (y : b) (e : y ≡ h []  )             → B' n           zero    b h xs
-    tipS  :   (y : b) (e : y ≡ h xs  )             → B' (suc  k) (  suc k)  b h xs
-    bin   :   B' n (suc  k)  b    h            xs
-          →'  B' n       k   b (  h ∘ (x ∷_))  xs  → B' (suc  n) (  suc k)  b h (x ∷ xs)
+    tipZ  : (y : b) (e : y ≡ h []  )                        → B' n           zero    b h xs
+    tipS  : (y : b) (e : y ≡ h xs  )                        → B' (suc  k) (  suc k)  b h xs
+    bin   : B' n (suc k) b h xs → B' n k b (h ∘ (x ∷_)) xs  → B' (suc  n) (  suc k)  b h (x ∷ xs)
 \end{code}
 It's a rather complex extension to |B(C n k)|, but I think I'll be fine if I stick to the same programming methodology: perform `pattern matching' on the indices, and specify what should be in the tree in each case.
 In the first case, \lstinline{choose} returns~\lstinline{Tip []}, so the tree should be a |tipZ|, and its element~|y| should be accompanied by a proof~|e| that |y|~equals |h []|, so that |tipZ y e| `is' \lstinline{mapB h (Tip [])}.
@@ -680,11 +681,9 @@ Even though I sort of derived the data type from a specification and know it sho
 So I write a tree with `holes' (missing parts of a program) at the element positions, and let Agda tell me what types the holes should have:
 \begin{code}
 testB' : {b : Set} {h : Vec 2 Char → b} → (B'_ 4 2) b h "abcd"
-testB' = bin  (bin  (tipS  (GOAL(b)(G0)) (GOAL(?0 ≡ h "cd")(G1)))
-                    (bin  (tipS  (GOAL(b)(G2))  (GOAL(?2 ≡ h "bd")(G3))  )
-                          (tipZ  (GOAL(b)(G4))  (GOAL(?4 ≡ h "bc")(G5))  )))
-              (bin  (bin  (tipS  (GOAL(b)(G6))  (GOAL(?6 ≡ h "ad")(G7))  )
-                          (tipZ  (GOAL(b)(G8))  (GOAL(?8 ≡ h "ac")(G9))  ))
+testB' = bin  (bin  (tipS (GOAL(b)(G0)) (GOAL(?0 ≡ h "cd")(G1)))
+                    (bin (tipS (GOAL(b)(G2)) (GOAL(?2 ≡ h "bd")(G3))) (tipZ (GOAL(b)(G4)) (GOAL(?4 ≡ h "bc")(G5)))))
+              (bin  (bin (tipS (GOAL(b)(G6)) (GOAL(?6 ≡ h "ad")(G7))) (tipZ (GOAL(b)(G8)) (GOAL(?8 ≡ h "ac")(G9))))
                     (tipZ  (GOAL(b)(G10)) (GOAL(?10 ≡ h "ab")(G11))))
 \end{code}
 The goal types of the even-numbered holes are all~|b|, and the odd-numbered holes require proofs that the even-numbered holes are equal to |h zs| for all the |2|-sublists |zs| of |"abcd"|.
@@ -708,10 +707,9 @@ If only the elements aren't restricted to pairs of the form |y : b| and |e : y �
 A lightbulb lights up above my head.
 \begin{code}
 data BT : (n k : ℕ) → (Vec k a → Set) → Vec n a → Set where
-  tipZ  :   p []                             → BT n           zero    p xs
-  tipS  :   p xs                             → BT (suc  k) (  suc k)  p xs
-  bin   :   BT n (suc  k)   p            xs
-        →'  BT n       k (  p ∘ (x ∷_))  xs  → BT (suc  n) (  suc k)  p (x ∷ xs)
+  tipZ  : p []                                        → BT n           zero    p xs
+  tipS  : p xs                                        → BT (suc  k) (  suc k)  p xs
+  bin   : BT n (suc k) p xs → BT n k (p ∘ (x ∷_)) xs  → BT (suc  n) (  suc k)  p (x ∷ xs)
 \end{code}
 Just generalise the element type!
 More specifically, generalise that to a \emph{type family} |p : Vec k a → Set| indexed by |k|-sublists.
@@ -725,12 +723,8 @@ So, in general, all the elements in a tree of type |BT_ n k p xs| have \emph{dis
 To see an example:
 \begin{code}
 testBT : {p : Vec 2 Char → Set} → (BT_ 4 2) p "abcd"
-testBT = bin  (bin  (tipS  (GOAL(p "cd")(G0))  )
-                    (bin  (tipS  (GOAL(p "bd")(G1))  )
-                          (tipZ  (GOAL(p "bc")(G2))  )))
-              (bin  (bin  (tipS  (GOAL(p "ad")(G3))  )
-                          (tipZ  (GOAL(p "ac")(G4))  ))
-                    (tipZ  (GOAL(p "ab")(G5))  ))
+testBT = bin  (bin (tipS (GOAL(p "cd")(G0))) (bin (tipS (GOAL(p "bd")(G1))) (tipZ (GOAL(p "bc")(G2)))))
+              (bin (bin (tipS (GOAL(p "ad")(G3))) (tipZ (GOAL(p "ac")(G4)))) (tipZ (GOAL(p "ab")(G5))))
 \end{code}
 It's simpler to think of a tree of type |BT_ n k p xs| as a table with all the |k|-sublists of~|xs| as the keys. For each key~|ys|, there's an entry of type |p ys|.
 (So the `T' in |BT| stands for both `tree' and `table'.)
@@ -749,10 +743,10 @@ Take the (expanded) type of |bin| for example:
 bin  :   BT n (suc  k)  (λ ys  → p ys)        xs
      →'  BT n       k   (λ zs  → p (x ∷ zs))  xs  → BT (suc n) (suc k) p (x ∷ xs)
 \end{code}
-I can read it as `to compute a |(1 + k)|-sublist of |x ∷ xs| and pass it to continuation~|p|, either compute a |(1 + k)|-sublist |ys| of |xs| and pass |ys| to |p| directly, or compute a |k|-sublist |zs| of |xs| and pass |x ∷ zs| to~|p|'.
+I can read it as `to compute a |(1 + k)|-sublist of |x ∷ xs| and pass it to continuation~|p|, either compute a |(1 + k)|-sublist |ys| of |xs| and pass |ys| to |p| directly, or compute a |k|-sublist |zs| of |xs| and pass |x ∷ zs| to~|p|'.\todo{refer to code above}
 All the results from |p| are then collected in a tree as the indices of the element types.
 %\Shin{Changed some ``return'' to ``pass'' and added ``to |p|'', ``from |p|'' etc., to make it clearer --- if my understanding is correct.}
-Another similar and familiar example is
+Another similar and familiar example is\todo{in the standard library}
 \begin{code}
 data All : (a → Set) → Vec n a → Set where
   []   :                   All p []
@@ -769,14 +763,14 @@ That paper will have to wait though.
 I've still got a problem to solve: how do I use |BT| to specify \lstinline{cd}?
 
 What's special about |BT| is that the element types are indexed by sublists, so I know from the type of an element with which sublist it is associated.
-\Shin{"I know from the type of an element which sublist it is associated."? Should there be a "with"?}
-That is, I can now directly say `values associated with sublists' and how they should be rearranged, rather than indirectly specify the rearrangement in terms of sublists and then extend to other types of values through parametricity.
+\Shin{"I know from the type of an element which sublist it is associated."? Should there be a "with"? Josh: There is one before `which'.}
+That is, I can now directly say `values associated with sublists' and rearrange these values, rather than indirectly specify the rearrangement in terms of sublists and then extend to other types of values through parametricity.
 |BT_ n k p xs| is the type of a tree of |p|-typed values associated with the |k|-sublists of |xs|, and that's precisely the intended meaning of \lstinline{cd}'s input.
 What about the output?
 It should tabulate the |(1 + k)|-sublists of |xs|, so the type should be |BT_ n sk q xs| for some |q : Vec (1 + k) a → Set|.
 For each sublist |ys : Vec (1 + k) a|, I~want a list of |p|-typed values associated with the immediate sublists of |ys|, which are |k|-sublists.
 Or, instead of a list, I can just use a tree of type |BT_ sk k p ys|.
-Therefore the whole type is
+Therefore the whole type is\todo{missing |1 ≤ k| (compared to |cd|)}
 \begin{code}
 retabulate : (SUPPRESSED(k < n)) → (BT_ n k) p xs → (BT_ n sk) ((BT_ sk k) p) xs
 \end{code}
@@ -841,7 +835,7 @@ I stare at the types, and, slowly, they start to make sense.
 \item What do I have in |retabulate u|?
 I have a table of entries indexed by |x ∷ ws| for all the immediate sublists |ws| of |zs| in |retabulate u| --- that's what the element types |BT (C ssk sk) (p ∘ (x ∷_))| mean.
 \item What's the relationship between these sublists |x ∷ ws| and the table I need to construct, which is indexed by the immediate sublists of |x ∷ zs|?
-Oh right, the sublists |x ∷ ws| are all the immediate sublists of |x ∷ zs| with the first element~|x|!
+Oh right, the sublists |x ∷ ws| are the immediate sublists of |x ∷ zs| with the first element~|x|!
 So I've already got most of the entries I need.
 \item I'm still missing an entry for the immediate sublist of |x ∷ zs| without~|x|, which is |zs|.
 Do I have that?
@@ -851,7 +845,7 @@ What entries are in~|t|?
 Its type tells me that there's an entry for each |(2 + k)|-sublist |zs| of |x₁ ∷ xs|.
 That's precisely what I'm missing!
 \end{itemize}
-So, for each |zs|, I can construct a table indexed by the immediate sublists of |x ∷ zs| by combining an entry for |zs| (the immediate sublist without~|x|) from~|t| with a table of entries for all the other immediate sublists (with~|x|) from |retabulate u|.
+So, for each |zs|, I can construct a table indexed by all the immediate sublists of |x ∷ zs| by combining an entry for |zs| (the immediate sublist without~|x|) from~|t| with a table of entries for the other immediate sublists with~|x| from |retabulate u|.
 An entry and a table of entries --- aren't they exactly the arguments of |_∷ᴮᵀ_|\,?
 Indeed, I can fulfil |(GOAL(BLANK)(G7))| by combining all the corresponding entries in~|t| and |retabulate u| (that share the same index |zs|) using |_∷ᴮᵀ_|\,, that is, |zipBTWith _∷ᴮᵀ_ t (retabulate u)|!
 
@@ -926,7 +920,7 @@ That'll probably be a fun exercise\ldots but I'll leave that for another day.
 
 Right now I'm more eager to find out why the bottom-up algorithm \lstinline{bu} equals the top-down \lstinline{td}~(\cref{sec:algorithms,sec:bu}).
 Will dependent types continue to be helpful?
-I should try and find out by transcribing the two algorithms into Agda too.
+I should try and find out by transcribing the two algorithms into Agda too.\todo{Goal: upgrade the type of \lstinline{cd}}
 
 I go back to the type of the combining function~\lstinline{g}.
 This type \lstinline{L s -> s}
@@ -947,9 +941,8 @@ So
 g : ∀ {k} → {ys : Vec (2 + k) a} → BT(C ssk sk) s ys → s ys
 \end{code}
 \end{temp}
-I look at this with a satisfied smile --- now that's what I call
+Now that's what I call a nice and informative type!
 %\Jeremy{British pop-cultural reference}
-a nice and informative type!
 It says concisely and precisely what |g|~does: compute a solution for any |ys : Vec (2 + k) a| from a table of solutions for all the length-|(1 + k)| (that is, immediate) sublists of |ys|.
 
 The smile quickly turns into a frown though.
@@ -957,7 +950,6 @@ I still don't feel comfortable with |BT(C ssk sk)|.
 The indices are apparently not the most general ones --- why not |BT(C sk k)|?
 
 I delete~(\ding{56}) the type of~|g| and start pondering.
-\Jeremy{Saying this here is a bit awkward\ldots Josh: How about this?}
 I wrote |BT(C ssk sk)| in that type because that was what Richard wanted to say.
 Richard used singleton lists as the base cases instead of the empty list, so \lstinline{g}~was applied to solutions for sublists of length at least~|1|, hence the subscript |1 + k|.
 But the most general type
@@ -1028,13 +1020,13 @@ mapExactly f (exactly x) = exactly (f x)
 The definition of |choose| first performs an induction on~|k|, like the Haskell version.
 In contrast to Haskell, I need to make the Agda function total by saying explicitly that the length~|n| of the list |xs| is at least~|k|, so that there are enough elements to choose from.
 Somewhat notoriously, there are many versions of natural number inequality.
-The version needed here is a data type |m ≤↑ n| where |m|~remains fixed throughout the definition and serves as an `origin', and an inhabitant of |m ≤↑ n| is the distance (which is essentially a natural number) that |n|~is away from the origin~|m|:
+The version needed here\todo{Why?} is a data type |m ≤↑ n| where |m|~remains fixed throughout the definition and serves as an `origin', and an inhabitant of |m ≤↑ n| is the distance (which is essentially a natural number) that |n|~is away from the origin~|m|:
 \begin{code}
 data _≤↑_ : ℕ → ℕ → Set where
   zero  :           m ≤↑ m
   suc   : m ≤↑ n →  m ≤↑ suc n
 \end{code}
-The second and third cases of |choose| are an inner induction on the distance that |n|~is away from |suc k|.
+The second and third cases of |choose|\todo{interrupted by too many things} are an inner induction on the distance that |n|~is away from |suc k|.
 In the second case the distance is |zero|, meaning that |n|~is (at the origin) |suc k|, so |xs| has the right length and can be directly returned.
 Otherwise the distance is |suc d| in the third case, where the first inductive call is on~|d|, and the second inductive call is on~|k| while the distance is unchanged, but the type |suc k ≤↑ suc n| needs to be adjusted to |k ≤↑ n| by invoking this |incr| function on~|d|:
 \begin{code}
@@ -1045,9 +1037,9 @@ incr (  suc d)  = suc (incr d)
 
 \pause
 
-\Josh{Too much space before the pause}
+\todo{Too much space before the pause}%
 I step back and take another look at |choose|.
-One thing starts to bother me: |Exactly x| is a type that has a unique inhabitant, so I could've used the unit type~|⊤| as the element type instead, and I'd still give the same amount of information, which is none!
+There's one thing that bothers me: |Exactly x| is a type that has a unique inhabitant, so I could've used the unit type~|⊤| as the element types instead, and I'd still give the same amount of information, which is none!
 That doesn't make a lot of sense --- I thought I was computing all the |k|-sublists and returning them in a table, but somehow those sublists didn't really matter, and I could just return a blank table of type |BT(C n k) (const ⊤) xs|\ldots?
 
 \begin{aha}
@@ -1123,19 +1115,19 @@ I proceed to transcribe \lstinline{bu}~(\cref{sec:bu}):
 \begin{code}
 bu : ImmediateSublistInduction
 bu s e g n = unTip ∘ loop 0 (GOAL(0 ↓≤ n)(G0)) ∘ mapBT e ∘ blank(C n 0)
-  where
-    loop : (k : ℕ) → k ↓≤ n → BT(C n k) s xs → BT(C n n) s xs
-    loop n    zero    = id
-    loop k (  suc d)  = loop (1 + k) d ∘ mapBT g ∘ retabulate
+  where  loop : (k : ℕ) → k ↓≤ n → BT(C n k) s xs → BT(C n n) s xs
+         loop n    zero    = id
+         loop k (  suc d)  = loop (1 + k) d ∘ mapBT g ∘ retabulate
 \end{code}
 I construct the initial table by reusing |blank| to create a blank level-|0| table and using |mapBT e| to fill in the initial solution for the empty list.
-Then the |loop| function increases the level to~|n| by repeatedly retabulating a level-|k| table as a level-|(1 + k)| table and filling in solutions for all the length-|(1 + k)| sublists using~|g|.
+Then the |loop| function increases the level to~|n| by repeatedly retabulating a level-|k| table as a level-|(1 + k)| table and filling in solutions for all the length-|(1 + k)| sublists using |mapBT g|.
 Finally, a solution for the whole input list is extracted from the level-|n| table using
 \begin{code}
 unTip : BT(C n n) p xs → p xs
 unTip             (tipS  p) = p
 unTip {xs =' []}  (tipZ  p) = p
 \end{code}
+(The |bin| case is impossible and ignored.)
 The argument/counter~|k| of |loop| should satisfy the invariant |k ↓≤ n|.
 The data type |m ↓≤ n| is another version of natural number inequality, which is dual to |_≤↑_| in the sense that |n|~is fixed throughout the new definition, and |m|~moves away from~|n|:
 \begin{code}
@@ -1146,9 +1138,9 @@ data _↓≤_ : ℕ → ℕ → Set where
 The |loop| function performs induction on the distance |k ↓≤ n|; the counter~|k| goes up as the distance decreases in inductive calls, and eventually reaches~|n| when the distance becomes |zero|.
 The remaining |(GOAL(0 ↓≤ n)(G0))| is actually non-trivial, but the Agda standard library covers that.
 
-\begin{aha}
-Another nice-looking implementation of |ImmediateSublistInduction|!
-\end{aha}
+%\begin{aha}
+%Another nice-looking implementation of |ImmediateSublistInduction|!
+%\end{aha}
 
 \pause
 
@@ -1161,17 +1153,15 @@ The definitions still look rather different except for their type\ldots
 \end{aha}
 
 \begin{aha}
-Is it possible to have extensionally different implementations of an induction principle?
-\Josh{Don't know how to fix the spacing between two aha environments\ldots}
+Is it possible to have extensionally different implementations of an induction principle?%
+\todo{Don't know how to fix the spacing between two aha environments systematically\ldots}
 \end{aha}
 
 Let me think about the induction principle of natural numbers.
 \begin{code}
 ℕ-Induction : Set₁
-ℕ-Induction =  (p   : ℕ → Set)
-               (pz  : p zero)
-               (ps  : ∀ {m} → p m → p (suc m))
-               (n   : ℕ) → p n
+ℕ-Induction =  (p : ℕ → Set) (pz : p zero) (ps : ∀ {m} → p m → p (suc m))
+               (n : ℕ) → p n
 
 ind : ℕ-Induction
 ind p pz ps     zero    = pz
@@ -1199,13 +1189,14 @@ Now choose the invariant that any proof of |p m| is equal to the one produced by
   →  f p pz ps n ≡ ind p pz ps n
 ℕ-Induction-uniqueness-from-parametricity f param p pz ps n =
   param (λ {m} x → x ≡ ind p pz ps m) refl (cong ps)
-  -- |cong : (f : a → b) → x ≡ y → f x ≡ f y|
+  -- |refl : ∀ {x} → x ≡ x|;\hspace{.5em}|cong : (f : a → b) → x ≡ y → f x ≡ f y|
 \end{code}
 The same argument works for |ImmediateSublistInduction| --- any function of the type satisfying unary parametricity is pointwise equal to |td|.
 I finish the Agda proofs for both induction principles in a dreamlike state.
 
 \begin{aha}
-Yeah, I have a proof that |td| equals |bu|.\Jeremy{Julie thought these one-line paragraphs look a bit messy. She suggested adding some space above and below. How is this? Josh: I like the spacing locally, but globally it almost look like a displayed equation (or, indeed, a quote), so there's some unintended emphasis, which may be confusing.}
+Yeah, I have a proof that |td| equals |bu|.
+%\Jeremy{Julie thought these one-line paragraphs look a bit messy. She suggested adding some space above and below. How is this? Josh: I like the spacing locally, but globally it almost look like a displayed equation (or, indeed, a quote), so there's some unintended emphasis, which may be confusing.}
 \end{aha}
 
 Well, strictly speaking I don't have one yet.
@@ -1229,11 +1220,12 @@ Their dependent function types with all the indices are more advanced than Richa
 But one nice thing about category theory is its adaptability --- all I need to figure out is which category I'm in, and then I'll be able to work out what naturality means for my functions systematically within the world of category theory.
 
 And, if the key is naturality, now I have an additional tool that Richard didn't: string diagrams.
-I've seen how dramatically string diagrams simplify proofs using naturality (and also various other kinds of proof, for which the simplification can be even more dramatic), so it's probably worthwhile to take a look at the two algorithms from a string-diagrammatic perspective.
+I've seen how dramatically string diagrams simplify proofs using naturality, so it's probably worthwhile to take a look at the two algorithms from a string-diagrammatic perspective.
 
 But before I get to string diagrams, I need to work through some basic category theory\ldots
 
 \subsection{From Categories to String Diagrams}
+\label{sec:basic-category-theory}
 
 Functional programmers are familiar with types and functions, and know when functions can be composed sequentially --- when adjacent functions meet at the same type.
 And it's possible to compose an empty sequence of functions, in which case the result is an identify function.
@@ -1247,10 +1239,10 @@ is a blessing for the functional programmer: it means that the programmer can st
 More importantly, some notions that prove to be useful in functional programming (such as naturality) can be defined generically on categories and systematically transported to other settings.
 
 A clue about the kind of category I'm in is that I'm tempted to say `|retabulate| transforms a tree of |p|'s to a tree of trees of |p|'s'.
-When a simply typed functional programmer says `a tree of something', that `something' is a type, that is, an object in the category |Fun| of types and functions.
+When a simply typed functional programmer says `a tree of something', that `something' is a type, that is, an object in the familiar category of types and functions.
 But here |p|~is not a type.
 It's a type family.
-So I've left |Fun| and landed in a kind of category where the objects are type families.
+So I've landed in a different kind of category where the objects are type families.
 
 There are quite a few versions of `categories of families'.
 I go through the types of the components used in the algorithms~(\cref{sec:equality-from-types}) to find a common form, and it seems that the simplest version suffices: given an index type |a : Set|, a category of families |Fam' a| has objects of type
@@ -1335,8 +1327,7 @@ retabulate · mapBT f = mapBT (mapBT f) · retabulate
 With functor composition, in general there can be many functor layers in an object (like the target of |retabulate|), and all these layers can be transformed independently by natural transformations.
 The best way of managing this structure is to use \emph{string diagrams}.
 In string diagrams, functors are drawn as wires, and natural transformations are drawn as dots with input functors/wires attached below and output functors/wires above.
-(I learned string diagrams mainly from \citet{Coecke-PQP}, so my string diagrams have inputs below and outputs on top.
-I'm also thinking about giving \varcitet{Hinze-string-diagrams}{'s} new textbook a try.)
+(I learned string diagrams mainly from \citet{Coecke-PQP}, so my string diagrams have inputs below and outputs on top.)
 The natural transformations I've got are |retabulate| and |unTip|, and I can draw their types as
 \[ \tikzfig{pics/retabulate-unTip} \]
 String diagrams focus on the functor layers and represent them explicitly as a bunch of wires --- functor composition is represented as juxtaposition of wires, and the identity functor is omitted (since it's the composition of no functors).
@@ -1344,9 +1335,11 @@ Drawn as a string diagram, |retabulate| has one input wire labelled |BT_ n k| an
 The diagram of |unTip| goes from one wire to none, since |unTip| transforms |BT_ n n| to the identity functor.
 (Indeed, what |unTip| does is get rid of the |tipZ| or |tipS| constructor.)
 
+\begin{wrapfigure}{r}{.075\textwidth}
+\ctikzfig{pics/vertical-right}
+\end{wrapfigure}
 Whereas functor composition spreads horizontally, sequential composition of natural transformations goes vertically.
-Given transformations |α : ∀ {p} → F p ⇉ G p| and |β : ∀ {p} → G p ⇉ H p|, their sequential composition |β ∘ α : ∀ {p} → F p ⇉ H p| is drawn in a string diagram as |α|~and~|β| juxtaposed vertically and sharing the middle wire with label~|G| (obscuring a section of the wire):
-\[ \tikzfig{pics/vertical} \]
+Given transformations |α : ∀ {p} → F p ⇉ G p| and |β : ∀ {p} → G p ⇉ H p|, their sequential composition |β ∘ α : ∀ {p} → F p ⇉ H p| is drawn in a string diagram as |α|~and~|β| juxtaposed vertically and sharing the middle wire with label~|G| (obscuring a section of the wire).
 
 The power of string diagrams becomes evident when things happen in both the horizontal and vertical dimensions.
 For example, suppose there are two layers |F|~and~|F'|, where the outer layer~|F| should be transformed by~|α| and the inner layer~|F'| by |α' : ∀ {p} → F' p ⇉ G' p|.
@@ -1360,7 +1353,7 @@ This is abstracted as a diagrammatic reasoning principle: dots in a diagram can 
 
 \pause
 
-I want to draw the two algorithms as string diagrams.
+I want to draw |td| and |bu| as string diagrams.
 However, some of their components, namely |blank|, |e|, and~|g|, are not natural transformations.
 Technically, only natural transformations can go into string diagrams.
 But I'm still tempted to draw those components intuitively as
@@ -1387,9 +1380,10 @@ But I still don't know whether string diagrams will actually help me to understa
 It's time to find out.
 
 I'm not confident enough to work with the recursive definitions straight away, so I take the special case |td s e g 3| of the top-down algorithm and unfold it into a deeply nested expression involving |mapBT|s and |blank|s (as on the left of \cref{fig:td-diagram}).
-Transcribing that into a string diagram is basically writing down all the intermediate type information and laying out the layered type structures horizontally~(as on the right of \cref{fig:td-diagram}). For example, the rightmost component |blank(C 3 2)| in the expression has type |const ⊤ ⇉ BT(C n k) (const ⊤)|, which ---~after eliding the |const|s, as I've just decided to do~--- is drawn as the bottom Y-junction in the string diagram. \Jeremy{How's this? Do you think of it as a ``Y-junction''? A ``fork''?
-% ``Recall that |s| here is a type family, an object in this category, so is drawn as a wire label, whereas |e| and |g| are natural transformations, so drawn as dots.'' Worth saying? Josh: I didn't see this comment was about the |td| diagram. We've just seen the string-diagrammatic definitions of |blank|, |g|, and~|e|, so maybe the info needed here is how to get from those definitions to this diagram?
-}
+Transcribing that into a string diagram is basically writing down all the intermediate type information and laying out the layered type structures horizontally~(as on the right of \cref{fig:td-diagram}). For example, the rightmost component |blank(C 3 2)| in the expression has type |const ⊤ ⇉ BT(C n k) (const ⊤)|, which ---~after eliding the |const|s, as I've just decided to do~--- is drawn as the bottom Y-junction in the string diagram.%
+\todo{can be expanded more}
+%\Jeremy{How's this? Do you think of it as a ``Y-junction''? A ``fork''?
+% ``Recall that |s| here is a type family, an object in this category, so is drawn as a wire label, whereas |e| and |g| are natural transformations, so drawn as dots.'' Worth saying? Josh: I didn't see this comment was about the |td| diagram. We've just seen the string-diagrammatic definitions of |blank|, |g|, and~|e|, so maybe the info needed here is how to get from those definitions to this diagram?}
 
 \begin{figure}
 \begin{center}
@@ -1582,10 +1576,10 @@ Usually they make proofs more complex, but not in this case because the proof do
 As long as the type is blank nested tables, the two sides of an equation can be arbitrarily complicated, and I can still prove them equal just by using |BT-isProp|.
 
 \begin{aha}
-Wait, blank nested tables --- aren't those what the construction phases of both algorithms produce?
+Wait, blank nested tables --- aren't those what the construction phases of both algorithms produce?%
+\todo{bad spacing after aha}
 \end{aha}
 
-\Josh{Bad spacing after aha}
 I face-palm.
 It was a waste of time proving the |rotation| equation.
 The construction phases of both algorithms produce blank nested tables of the same type --- |BT(C 3 2) (BT(C 2 1) (BT(C 1 0) (const ⊤))) xs| in the concrete examples I tried (\cref{fig:td-diagram,fig:bu-diagram}).
@@ -1649,24 +1643,31 @@ He would've liked the new languages and the new ways of reasoning.
 
 \section*{Afterword}
 
-We have presented this work as a kind of `Socratic monologue', recording in an intuitive and colloquial style the thought processes of a dependently typed programmer as they solve a programming mystery. We were inspired by the opening chapters of the science fiction novel \textit{Project Hail Mary} by Andy Weir.
+This work is presented as a kind of `Socratic monologue', recording the thought processes of a dependently typed programmer as they solve a programming mystery.
+We were inspired by the science fiction novel \textit{Project Hail Mary} by Andy Weir (in particular the opening chapters), where the narrative masterfully weaves together intuitive presentations of scientific knowledge and applications of that knowledge to solve problems faced by the protagonist.
+We envisaged to do something similar with this paper, although it ends up being not as entertaining as Weir's novel, because we need to cover more technical detail, and there is very little action in our story apart from sitting in front of a computer and racking one's brains.
+However, compared to the traditional rational reconstruction of a finished piece of work, we believe that this format helps both the writer and the reader to focus on currently available clues and how to make progress based on those clues, and to pass on that experience.
+In fact, our telling largely follows our actual development (tracing what \lstinline{cd} does in \cref{fig:map_g_cd}, generalising |B|~and~|B'| to |BT|, realising that the |BT-isProp| argument works more generally after proving |rotation|, etc) --- that is, this paper is `based on a true story'.
 
-We have chosen this style over the traditional rational reconstruction of a finished piece of work. We hope that the reader finds the format effective for focusing on the main ideas while going through a development; after all, we don't usually hurry to work out all the technical details when first solving a problem. Our telling largely follows our actual development, going from the concrete to the abstract: ``based on a true story''.
+The format also works well with various decisions regarding what (not) to include in the paper.
+We put emphasis on intuitive explanations, and only give formal definitions, theorems, and proofs when necessary (because we usually rely on intuitive reasoning to tackle a problem at first, and do not hurry to write things down formally).
+We have strived to keep the paper fairly self-contained: the reader should be able to get a sense of the main ideas just from the intuitive explanations.
+But we do not intend this paper to be a tutorial of dependently typed programming (in Agda) or category theory --- this paper is best thought of as a companion to such tutorials or textbooks, giving a larger but not overly complicated example, and applying the abstract tools to this example.
+To make the paper more accessible, we have also resisted the temptation to generalise or to answer every question (because when we are solving a problem, we usually put aside ideas that are not directly relevant).
+For example, we do not generalise |ImmediateSublistInduction| for dynamic programming more broadly (as \citet{Bird-zippy-tabulations} attempted to do); we leave the question of whether the type of |retabulate| uniquely determines the extensional behaviour of its inhabitants as a conjecture; and we avoid digressions into topics such as how data types like |BT| can be derived systematically and whether |BT| is a graded comonad.\todo{Citation?}
 
-We have resisted the temptation to generalise ---~for example, to dynamic programming more broadly, as \citet{Bird-zippy-tabulations} attempted to do. We have kept the material as simple as possible, avoiding a digression into graded comonads. We have also kept it fairly self-contained; but we have not written a detailed tutorial, nor explained Agda from scratch or given formal categorical definitions. We have left a few loose ends here and there to point out possible extensions and future exercises and papers.
-It is instructive comparing our work with that of \varcitet{Mu-sublists}{'s}, where \lstinline{cd} is derived from the specification and that \lstinline{td = bu} is proved by traditional equational reasoning of simple-typed terms, which we did away with by designing types carrying more information for our terms.
-\Shin{Feeling a bit awkward mentioning it here... feel free to edit it!}
-%\todo[inline]{Compare with \varcitet{Mu-sublists}{'s} treatment of the problem using simple types and equational reasoning}
-
-We believe that dependent types, category theory, and string diagrams should be in the (mathematically inclined) functional programmer's toolbox.
-We can discover, explain, and prove things by writing them down in the appropriate language.
-Fancy types can replace traditional specifications and proofs (for example, equality between programs can be proved simply by showing that they have the same, uniquely inhabited type), and going beyond length/shape indexing is still an under-explored methodology.
-Likewise, category theory offers useful abstractions, such as for comprehending indexed definitions as if they were simply typed; in particular, the categorical abstraction enables the use of string diagrams to make reasoning with naturality transparent (and in this case the main proof is entirely about naturality, and is rendered trivial).
+The general message we want to deliver is that we can discover, explain, and prove things by writing them down in appropriate languages.
+More specifically, dependent types, category theory, and string diagrams are some of those languages, and they should be in the (mathematically inclined) functional programmer's toolbox.
+In the case of dependent types, they can be expressive enough to replace traditional (equational) specifications and proofs --- for example, the dependently typed |td| and |bu| can be proved equal simply by showing that they have the same, uniquely inhabited type~(\cref{sec:equality-from-types}).
+This approach to program equality is still under-explored, and has potential to reduce proof burdens drastically.
+For a comparison, \citet{Mu-sublists} derives \lstinline{cd} from the specification~\cref{eq:cd-spec} and proves the equality between \lstinline{td} and \lstinline{bu} using traditional equational reasoning on simply typed terms; we do away with these by designing types carrying more information for our terms.
+As for category theory, even though we use it only in a lightweight manner, it still offers a somewhat useful abstraction for managing more complex (in our case, indexed) definitions as if they were simply typed programs~(\cref{sec:basic-category-theory}).
+More importantly, the categorical abstraction enables the use of string diagrams to simplify proofs about functoriality and naturality.
+These properties are only the simplest ones that string diagrams can handle --- for other kinds of proof~\citep{Coecke-PQP,Hinze-string-diagrams} the simplification can be even more dramatic.
+Our comparison between diagrammatic and traditional equational reasoning (\cref{fig:bu-diagram,fig:naturality-rewriting}, for example) should be a good, albeit modest, demonstration of the power of string diagrams in a more practical scenario.
 
 \begin{acks}
-% omitted automatically in anonymous mode
-\todo[inline]{We'll eventually need acknowledgements. This is a placeholder to remember to thank Julie Summers, Royal Literary Fund Fellow at Kellogg College.}
-\todo[inline]{Liang-Ting offered some helpful suggestions too.}
+We would like to thank Liang-Ting Chen for offering helpful suggestions about the development; Julie Summers, Royal Literary Fund Fellow at Kellogg College, Oxford, for commenting on an early draft; and Gene Tsai\todo{check again how he wants to be named} for proofreading a draft.
 \end{acks}
 
 \bibliographystyle{ACM-Reference-Format}
