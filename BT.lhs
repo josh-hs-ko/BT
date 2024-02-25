@@ -1663,8 +1663,8 @@ This approach to program equality is still under-explored, and has potential to 
 For a comparison, \citet{Mu-sublists} derives \lstinline{cd} from the specification~\cref{eq:cd-spec} and proves the equality between \lstinline{td} and \lstinline{bu} using traditional equational reasoning on simply typed terms; we do away with these by designing types carrying more information for our terms.
 As for category theory, even though we use it only in a lightweight manner, it still offers a somewhat useful abstraction for managing more complex (in our case, indexed) definitions as if they were simply typed programs~(\cref{sec:basic-category-theory}).
 More importantly, the categorical abstraction enables the use of string diagrams to simplify proofs about functoriality and naturality.
-These properties are only the simplest ones that string diagrams can handle --- for other kinds of proof~\citep{Coecke-PQP,Hinze-string-diagrams} the simplification can be even more dramatic.
-Our comparison between diagrammatic and traditional equational reasoning (\cref{fig:bu-diagram,fig:naturality-rewriting}, for example) should be a good, albeit modest, demonstration of the power of string diagrams in a more practical scenario.
+These properties are only the simplest ones that string diagrams can handle --- for other kinds of proofs~\citep{Coecke-PQP,Hinze-string-diagrams} the simplification can be even more dramatic, although a lot of those proofs are purely mathematical.
+Our comparison between diagrammatic and traditional equational reasoning (\cref{fig:bu-diagram,fig:naturality-rewriting}, for example) should be a good, albeit modest, demonstration of the power of string diagrams in a more practical, algorithmic scenario.
 
 \begin{acks}
 We would like to thank Liang-Ting Chen for offering helpful suggestions about the development; Julie Summers, Royal Literary Fund Fellow at Kellogg College, Oxford, for commenting on an early draft; and Gene Tsai\todo{check again how he wants to be named} for proofreading a draft.
