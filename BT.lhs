@@ -610,6 +610,7 @@ Everything related to these conditions was also ignored, including cases that ca
 Agda ensures that I don't forget about all the ignored stuff in the final code though.
 
 \subsection{Properties in Types}
+\label{sec:BT}
 
 So much for the shape.
 But how do I know that the contents are correct~--- that \lstinline{cd} is correctly rearranging the values?
@@ -1374,6 +1375,7 @@ It's kind of technical, but in the end these diagrams are okay.
 %The two sides of a traditional naturality equation look rather different, whereas in a diagrammatic equation the two sides are `the same picture', allowing us to change perspectives effortlessly.}
 
 \subsection{Diagrammatic Reasoning}
+\label{sec:diagrammatic-reasoning}
 
 All the abstract nonsense took me some time.
 But I still don't know whether string diagrams will actually help me to understand the two algorithms from \cref{sec:equality-from-types}.
@@ -1645,16 +1647,16 @@ He would've liked the new languages and the new ways of reasoning.
 
 This work is presented as a kind of `Socratic monologue', recording the thought processes of a dependently typed programmer as they solve a programming mystery.
 We were inspired by the science fiction novel \textit{Project Hail Mary} by Andy Weir (in particular the opening chapters), where the narrative masterfully weaves together intuitive presentations of scientific knowledge and applications of that knowledge to solve problems faced by the protagonist.
-We envisaged to do something similar with this paper, although it ends up being not as entertaining as Weir's novel, because we need to cover more technical detail, and there is very little action in our story apart from sitting in front of a computer and racking one's brains.
+We envisaged to do something similar with this paper, although it ends up being not as leisurely and entertaining as Weir's novel, because we need to cover more technical detail, and there is very little action in our story apart from sitting in front of a computer and racking one's brains.
 However, compared to the traditional rational reconstruction of a finished piece of work, we believe that this format helps both the writer and the reader to focus on currently available clues and how to make progress based on those clues, and to pass on that experience.
-In fact, our telling largely follows our actual development (tracing what \lstinline{cd} does in \cref{fig:map_g_cd}, generalising |B|~and~|B'| to |BT|, realising that the |BT-isProp| argument works more generally after proving |rotation|, etc) --- that is, this paper is `based on a true story'.
+In fact, our telling largely follows our actual development (tracing what \lstinline{cd} does in \cref{fig:map_g_cd}, generalising |B|~and~|B'| to |BT| in \cref{sec:BT}, realising that the |BT-isProp| argument works more generally after proving |rotation| in \cref{sec:diagrammatic-reasoning}, etc) --- that is, this paper is `based on a true story'.
 
 The format also works well with various decisions regarding what (not) to include in the paper.
 We put emphasis on intuitive explanations, and only give formal definitions, theorems, and proofs when necessary (because we usually rely on intuitive reasoning to tackle a problem at first, and do not hurry to write things down formally).
 We have strived to keep the paper fairly self-contained: the reader should be able to get a sense of the main ideas just from the intuitive explanations.
-But we do not intend this paper to be a tutorial of dependently typed programming (in Agda) or category theory --- this paper is best thought of as a companion to such tutorials or textbooks, giving a larger but not overly complicated example, and applying the abstract tools to this example.
+But we do not intend this paper to be a tutorial of dependently typed programming (in Agda) or category theory --- this paper is best thought of as a companion to such tutorials or textbooks, giving a larger but not overly complicated example, and applying the abstract tools to the example.
 To make the paper more accessible, we have also resisted the temptation to generalise or to answer every question (because when we are solving a problem, we usually put aside ideas that are not directly relevant).
-For example, we do not generalise |ImmediateSublistInduction| for dynamic programming more broadly (as \citet{Bird-zippy-tabulations} attempted to do); we leave the question of whether the type of |retabulate| uniquely determines the extensional behaviour of its inhabitants as a conjecture; and we avoid digressions into topics such as how data types like |BT| can be derived systematically and whether |BT| is a graded comonad.\todo{Citation?}
+For example, we do not generalise |ImmediateSublistInduction| for dynamic programming more broadly (as \citet{Bird-zippy-tabulations} attempted to do); we leave the question of whether the type of |retabulate| uniquely determines the extensional behaviour of its inhabitants as a conjecture~(\cref{sec:spec}); and we avoid digressions into topics such as how data types like |BT| can be derived systematically~(\cref{sec:BT}) and whether |BT| is a graded comonad.\todo{Citation?}
 
 The general message we want to deliver is that we can discover, explain, and prove things by writing them down in appropriate languages.
 More specifically, dependent types, category theory, and string diagrams are some of those languages, and they should be in the (mathematically inclined) functional programmer's toolbox.
@@ -1663,7 +1665,7 @@ This approach to program equality is still under-explored, and has potential to 
 For a comparison, \citet{Mu-sublists} derives \lstinline{cd} from the specification~\cref{eq:cd-spec} and proves the equality between \lstinline{td} and \lstinline{bu} using traditional equational reasoning on simply typed terms; we do away with these by designing types carrying more information for our terms.
 As for category theory, even though we use it only in a lightweight manner, it still offers a somewhat useful abstraction for managing more complex (in our case, indexed) definitions as if they were simply typed programs~(\cref{sec:basic-category-theory}).
 More importantly, the categorical abstraction enables the use of string diagrams to simplify proofs about functoriality and naturality.
-These properties are only the simplest ones that string diagrams can handle --- for other kinds of proofs~\citep{Coecke-PQP,Hinze-string-diagrams} the simplification can be even more dramatic, although a lot of those proofs are purely mathematical.
+These properties are only the simplest ones that string diagrams can handle --- for other kinds of proofs~\citep{Coecke-PQP,Hinze-string-diagrams} the simplification can be even more dramatic, although a lot of those proofs are highly abstract.
 Our comparison between diagrammatic and traditional equational reasoning (\cref{fig:bu-diagram,fig:naturality-rewriting}, for example) should be a good, albeit modest, demonstration of the power of string diagrams in a more practical, algorithmic scenario.
 
 \begin{acks}
