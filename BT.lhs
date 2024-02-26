@@ -412,7 +412,7 @@ If such a function \lstinline{cd'} could be constructed, a bottom-up algorithm c
 bu' :: (a -> s) -> (L s -> s) -> L a -> s
 bu' f g = head . loop . map f
   where loop [y] = [y]
-        loop ys  = loop (map g (cd ys))
+        loop ys  = loop (map g (cd' ys))
 \end{lstlisting}
 Level~$1$ is obtained by applying \lstinline{f} to each element of the input list.
 Then the \lstinline{loop} function keeps applying\csp\lstinline{map g . cd'}\csp to get the next level.
@@ -512,7 +512,7 @@ Indeed, each level~$k$ in the lattice~(\cref{fig:sublists-lattice}) contains val
 For example, level~$2$ has |CHOOSE 4 2 =' 6| values, and there are $6$~ways of choosing $2$~elements from a $4$-list.
 
 Aha!
-I can even see a pattern related to the choices in the tree representation of level~$2$~(\cref{fig:map_g_cd}): the right subtree is about all the 2-sublists that end with~\lstinline{'d'}, and the left subtree about the other 2-sublists not containing~\lstinline{'d'}.
+I can even see a pattern related to the choices in the tree representation of level~$2$\todo{Label the numbers in the figures with `level'; position of figure(s)}~(\cref{fig:map_g_cd}): the right subtree is about all the 2-sublists that end with~\lstinline{'d'}, and the left subtree about the other 2-sublists not containing~\lstinline{'d'}.
 To choose $2$~elements from \lstinline{"abcd"}, I can include the rightmost element~\lstinline{'d'} or not.
 If \lstinline{'d'}~is included, there are |CHOOSE 3 1| ways of choosing $1$~element from \lstinline{"abc"} to go with~\lstinline{'d'}.
 If \lstinline{'d'}~is not included, there are |CHOOSE 3 2| ways of choosing $2$~elements from \lstinline{"abc"}.
@@ -617,7 +617,7 @@ So much for the shape.
 But how do I know that the contents are correct~--- that \lstinline{cd} is correctly rearranging the values?
 %\Jeremy{I don't really understand the TODO: ``What to say? Need a spec: the equational one using \lstinline{choose} (marking the element positions with sublists and specifying where the elements should go); but requires a lot of proving''. Update 20240124: A lot of equational reasoning. Do we mention Shin's paper? Josh: This has to be in the Afterword.}
 
-Most likely, the key is parametricity.\todo{explain general intuition}
+Most likely, the key is parametricity.\todo{explain general intuition; parametricity does not directly specify the behaviour}
 The input to \lstinline{cd} is a tree of values associated with $k$-sublists (for some $1 \le k < n$), and these values are rearranged in relation to |(1 + k)|-sublists.
 Since \lstinline{cd} is parametric in the type of these values, I can just take |k|-sublists themselves and specify how \lstinline{cd} should rearrange them, and then \lstinline{cd} will have to do the same rearrangement for any type of values.
 
@@ -632,7 +632,7 @@ choose (k+1) xs || length xs == k+1 = Tip xs
 choose (k+1) (xs ++ [x])           = Bin (choose (k+1) xs)
                                          (mapB (++[x]) (choose k xs))
 \end{lstlisting}
-The pattern-matching structure of \lstinline{choose} is the same as how |B(C n k)|analyses its indices~(\cref{sec:shape}), except that here I need to deal with a list rather than just its length.
+The pattern-matching structure of \lstinline{choose} is the same as how |B(C n k)| analyses its indices~(\cref{sec:shape}), except that here I need to deal with a list rather than just its length.
 The function formalises the pattern I saw in Richard's trees~(\cref{sec:binomial}).
 It also generalises Richard's \lstinline{dc} that computes the immediate sublists~(\cref{sec:algorithms}):\csp\lstinline{dc xs}\csp can be redefined as\csp\lstinline{flatten (choose (length xs - 1) xs)}, where
 \begin{lstlisting}
@@ -1664,8 +1664,8 @@ He would've liked the new languages and the new ways of reasoning.
 
 This work is presented as a kind of `Socratic monologue', recording the thought processes of a dependently typed programmer as they solve a programming mystery.
 We were inspired by the science fiction novel \textit{Project Hail Mary} by Andy Weir (in particular the opening chapters), where the narrative masterfully weaves together intuitive presentations of scientific knowledge and applications of that knowledge to solve problems faced by the protagonist.
-We envisaged to do something similar with this paper, although it ends up being not as leisurely and entertaining as Weir's novel, because we need to cover more technical detail, and there is very little action in our story apart from sitting in front of a computer and racking one's brains.
-However, compared to the traditional rational reconstruction of a finished piece of work, we believe that this format helps both the writer and the reader to focus on currently available clues and how to make progress based on those clues, and to pass on that experience.
+We envisaged to do something similar in this paper, although it ends up being not as leisurely and entertaining as Weir's novel, because we need to cover more technical detail, and there is very little action in our story apart from sitting in front of a computer and racking one's brains.
+However, compared to the traditional rational reconstruction of a finished piece of work, we believe that this format helps both the writer and the reader to focus on currently available clues and how to make progress based on those clues by recreating the experience of solving a mystery.
 In fact, our telling largely follows our actual development (tracing what \lstinline{cd} does in \cref{fig:map_g_cd}, generalising |B|~and~|B'| to |BT| in \cref{sec:BT}, realising that the |BT-isProp| argument works more generally after proving |rotation| in \cref{sec:diagrammatic-reasoning}, etc) --- that is, this paper is `based on a true story'.
 
 The format also works well with various decisions regarding what (not) to include in the paper.
@@ -1686,7 +1686,7 @@ These properties are only the simplest ones that string diagrams can handle --- 
 Our comparison between diagrammatic and traditional equational reasoning (\cref{fig:bu-diagram,fig:naturality-rewriting}, for example) should be a good, albeit modest, demonstration of the power of string diagrams in a more practical, algorithmic scenario.
 
 \begin{acks}
-We would like to thank Liang-Ting Chen for offering helpful suggestions about the development; Julie Summers, Royal Literary Fund Fellow at Kellogg College, Oxford, for commenting on an early draft; and Gene Tsai\todo{check again how he wants to be named} for proofreading a draft.
+We would like to thank Liang-Ting Chen for offering helpful suggestions about the development; Julie Summers, Royal Literary Fund Fellow at Kellogg College, Oxford, for commenting on an early draft; and Gene Tsai\todo{check again how he wants to be named} and Zhixuan Yang for proofreading a draft.
 \end{acks}
 
 \bibliographystyle{ACM-Reference-Format}
