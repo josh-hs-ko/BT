@@ -933,6 +933,7 @@ That'll probably be a fun exercise\ldots but I'll leave that for another day.
 Right now I'm more eager to find out why the bottom-up algorithm \lstinline{bu} equals the top-down \lstinline{td}~(\cref{sec:algorithms,sec:bu}).
 Will dependent types continue to be helpful?
 I should try and find out by transcribing the two algorithms into Agda too.\todo{Goal: upgrade the type of \lstinline{cd}}
+\todo{choose subsection title}
 % \Jeremy{This is a long subsection: can we introduce another break?}
 
 I go back to the type of the combining function~\lstinline{g}.
@@ -1161,7 +1162,6 @@ The remaining |(GOAL(0 ↓≤ n)(G0))| is actually non-trivial, but the Agda sta
 \subsection{Equality from Types}
 
 Okay, I've made the type of both |td| and |bu| precise.
-\todo{choose subsection title}
 How does this help me prove |td| equals |bu|?
 The definitions still look rather different except for their type\ldots
 
