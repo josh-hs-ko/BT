@@ -59,6 +59,7 @@ acmsmall,fleqn,screen,review]{acmart}
 \newenvironment{aha}{\medskip}{\unskip\medskip} % for one-line paragraphs
 \makeatletter
 \newcommand{\pause}{\medskip\centerline{$\ast\quad\ast\quad\ast$}\medskip\@@afterindentfalse\@@afterheading} % for a mid-section pause
+\newcommand{\bigpause}{\medskip\centerline{$\ast\quad\ast\quad\ast\quad\ast\quad\ast\quad\ast\quad\ast\quad\ast\quad\ast\quad\ast\quad\ast$}\medskip\@@afterindentfalse\@@afterheading} % to set off the Afterword
 \makeatother
 
 \newcommand{\csp}{\hspace{.5em}}
@@ -1659,9 +1660,13 @@ He would've liked the new languages and the new ways of reasoning.
 %The bottom-up algorithm avoids the repetitive computation because it always uses~|g| to produce only one layer of table.
 %(Two layers of tables only appear due to |retabulate|, which only duplicates and redistributes already computed solutions and doesn't recompute them.)}
 
+% \bigpause % Plan A
+
 \section*{Afterword}
 
-\todo[inline]{sans? lots of asterisks?}
+\begingroup
+% \sffamily % Plan B - but it's actually rather too subtle?
+\itshape % Plan C - maybe too shouty?
 
 This work is presented as a kind of `Socratic monologue', recording the thought processes of a dependently typed programmer as they solve a programming mystery.
 We were inspired by the science fiction novel \textit{Project Hail Mary} by Andy Weir (in particular the opening chapters), where the narrative masterfully weaves together intuitive presentations of scientific knowledge and applications of that knowledge to solve problems faced by the protagonist.
@@ -1687,6 +1692,8 @@ As for category theory, even though we use it only in a lightweight manner, it s
 More importantly, the categorical abstraction enables the use of string diagrams to simplify proofs about functoriality and naturality.
 These properties are only the simplest ones that string diagrams can handle --- for other kinds of proofs~\citep{Coecke-PQP,Hinze-string-diagrams} the simplification can be even more dramatic, although a lot of those proofs are highly abstract.
 Our comparison between diagrammatic and traditional equational reasoning (\cref{fig:bu-diagram,fig:naturality-rewriting}, for example) should be a good, albeit modest, demonstration of the power of string diagrams in a more practical, algorithmic scenario.
+
+\endgroup
 
 \begin{acks}
 We would like to thank Liang-Ting Chen for offering helpful suggestions about the development; Julie Summers, Royal Literary Fund Fellow at Kellogg College, Oxford, for commenting on an early draft; and Gene Tsai\todo{check again how he wants to be named} and Zhixuan Yang for proofreading a draft.
