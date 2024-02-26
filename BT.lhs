@@ -331,7 +331,7 @@ data B a = Tip a || Bin (B a) (B a)
 And presumably \lstinline{mapB} and \lstinline{zipBWith} are the usual map and zip functions for these trees, and \lstinline{L}~is the standard data type of lists.
 But how did Richard come up with such an incomprehensible function definition?
 %\Jeremy{We should be more consistent about whether to call him Richard or Bird. Shin: does it work if we say "Richard" when we refer to the person and say Bird (2008) when we refer to the paper?}
-He didn't bother to explain it in his paper.
+He didn't bother to explain it in his paper. It might have helped if he had provided some examples.
 %\Jeremy{Such contractions are fine, when ``in character''.}
 
 \subsection{Top-Down and Bottom-Up Algorithms}
@@ -512,7 +512,7 @@ Indeed, each level~$k$ in the lattice~(\cref{fig:sublists-lattice}) contains val
 For example, level~$2$ has |CHOOSE 4 2 =' 6| values, and there are $6$~ways of choosing $2$~elements from a $4$-list.
 
 Aha!
-I can even see a pattern related to the choices in the tree representation of level~$2$\todo{Label the numbers in the figures with `level'; position of figure(s)}~(\cref{fig:map_g_cd}): the right subtree is about all the 2-sublists that end with~\lstinline{'d'}, and the left subtree about the other 2-sublists not containing~\lstinline{'d'}.
+I can even see a pattern related to the choices in the tree representation of level~$2$\todo{Label the numbers in the figures with `level'; position of figure(s)}~(\cref{fig:map_g_cd}):\todo{for final version, move Fig 3 and Fig 2 later} the right subtree is about all the 2-sublists that end with~\lstinline{'d'}, and the left subtree about the other 2-sublists not containing~\lstinline{'d'}.
 To choose $2$~elements from \lstinline{"abcd"}, I can include the rightmost element~\lstinline{'d'} or not.
 If \lstinline{'d'}~is included, there are |CHOOSE 3 1| ways of choosing $1$~element from \lstinline{"abc"} to go with~\lstinline{'d'}.
 If \lstinline{'d'}~is not included, there are |CHOOSE 3 2| ways of choosing $2$~elements from \lstinline{"abc"}.
@@ -589,7 +589,7 @@ cd (bin  t @  (bin _ _)  u @  (bin _ _)  ) = bin   (cd t) (zipBWith _∷_ t (cd 
 In the first case, |bin (tipS y) (tipZ z)|, Agda conveniently figures out for me whether a \lstinline{Tip} in the pattern should be a |tipS| or |tipZ|.
 I expect Agda to fill in the right constructor for the goal type |B(C 2 2) (Vec 2 a)| too, but Agda complains that it cannot decide between |tipS| and |bin|.
 Indeed, |B(C 2 2) (Vec 2 a)| matches the result type of both |tipS| and |bin|.
-But |bin| is actually impossible because its left subtree would have type |B(C sk ssk) a|, which can be proved to be uninhabited.
+But |bin| is actually impossible because its left subtree would have type |B(C sk ssk) a|, and this type is uninhabited.
 So the indices of~|B| still determine the constructor, though not as directly as in the case of |Vec|.
 
 I go through the cases |bin (tipS y) u| and |bin t (tipZ z)| without difficulties, after supplying the definitions of |unTipB  : B(C n n) a → a| and |mapB : (a → b) → B(C n k) a → B(C n k) b|.
@@ -765,7 +765,7 @@ That paper will have to wait though.
 I've still got a problem to solve: how do I use |BT| to specify \lstinline{cd}?
 
 What's special about |BT| is that the element types are indexed by sublists, so I know from the type of an element which sublist it is associated with.
-\Shin{"I know from the type of an element which sublist it is associated."? Should there be a "with"? Josh: There is one before `which'. JG: I've rearranged this, moving the `with' to the end; the grammar is now unorthodox, but more like what a normal person would actually say.}
+% \Shin{"I know from the type of an element which sublist it is associated."? Should there be a "with"? Josh: There is one before `which'. JG: I've rearranged this, moving the `with' to the end; the grammar is now unorthodox, but more like what a normal person would actually say.}
 That is, I can now directly say `values associated with sublists' and rearrange these values, rather than indirectly specify the rearrangement in terms of sublists and then extend to other types of values through parametricity.
 |BT_ n k p xs| is the type of a tree of |p|-typed values associated with the |k|-sublists of |xs|, and that's precisely the intended meaning of \lstinline{cd}'s input.
 What about the output?
@@ -782,7 +782,7 @@ I think it's time to rename \lstinline{cd} to something more meaningful, and dec
 And a side condition |k < n| is needed to guarantee that the output shape |BT_ n sk| is valid.
 %\Shin{In the following paragraphs I try to describe how |retabulate| can be constructed from its type. Some changes were made: 1. |_∷ᴮᵀ_| is introduced earlier and slightly more detailed because I will use it later. 2. definition of |mapBT| is omitted because I think it is probably not needed and now we might be running out of space. BTW, I don't know how to say ``everything related to |k < n| is omitted'' in an early stage, therefore all my calls to |retabulate| still have the |k < n| argument in underline. It is preferable to find a reason to omit it. Josh: I think it's fine to assume that they're only managed mentally (and not formally in Agda) in the `first pass' presented in the paper, like what we did when transcribing \lstinline{cd}.}
 
-The type of |retabulate| looks like a sensible refinement of the type of \lstinline{cd}, except that I'm letting |retabulate| return a tree of trees, rather than a tree of lists.
+The type of |retabulate| \todo{is this the point to smell comonads?} looks like a sensible refinement of the type of \lstinline{cd}, except that I'm letting |retabulate| return a tree of trees, rather than a tree of lists.
 Could that change be too drastic?
 Hm\ldots actually, no --- the shape of |BT_ sk k| is always a (non-empty) list!
 If |k|~is |zero|, a |BT_ 1 0|-tree has to be a |tipZ|.
@@ -852,7 +852,6 @@ An entry and a table of entries --- aren't they exactly the arguments of |_∷�
 Indeed, I can fulfil |(GOAL(BLANK)(G7))| by combining all the corresponding entries in~|t| and |retabulate u| (that share the same index |zs|) using |_∷ᴮᵀ_|\,, that is, |zipBTWith _∷ᴮᵀ_ t (retabulate u)|!
 
 The rest of the cases are much easier, and I come up with a definition of |retabulate|,
-\Jeremy{different indentation---ok?}
 %if False
 \begin{code}
 retabulate : (SUPPRESSED(k < n)) → BT(C n k) p xs → BT(C n sk) (BT(C sk k) p) xs
@@ -930,13 +929,13 @@ In fact, looking at the type more closely, I suspect that the extensional behavi
 Formally, the proof will most likely be based on parametricity (and might be similar to \varcitet{Voigtlander-BX-for-free}{'s}).
 That'll probably be a fun exercise\ldots but I'll leave that for another day.
 
-\subsection{Equality from Types}
-\label{sec:equality-from-types}
+\subsection{Families of Types? More Precise Types?}
+\label{sec:equality-from-types} % label is now misleading...
 
 Right now I'm more eager to find out why the bottom-up algorithm \lstinline{bu} equals the top-down \lstinline{td}~(\cref{sec:algorithms,sec:bu}).
 Will dependent types continue to be helpful?
 I should try and find out by transcribing the two algorithms into Agda too.\todo{Goal: upgrade the type of \lstinline{cd}}
-\Jeremy{This is a long subsection: can we introduce another break?}
+% \Jeremy{This is a long subsection: can we introduce another break?}
 
 I go back to the type of the combining function~\lstinline{g}.
 Its type \lstinline{L s -> s}
@@ -989,9 +988,9 @@ e : s []
 \end{temp}
 at level~0, and work upwards using~|g|.
 There's no problem going from level~0 to level~1, because there's now additional context in the indices so that |g|~knows for which singleton list a solution should be computed.
-Making types precise has helped me to find a more natural and general form of recursive computation over immediate sublists!
+Making types precise has helped me to find a more natural and general form of recursive computation over immediate sublists.
 
-And it's not just any recursive computation --- it's now an alternative \emph{induction principle} for lists!
+And it's not just any recursive computation --- it's now an alternative \emph{induction principle} for lists.
 The base case~|e| is still about the empty list, and the inductive case~|g| assumes that the induction hypothesis holds for all the immediate sublists.
 (I~guess I've been instinctively drawn towards induction principles, in common with most dependently typed programmers.)
 \begin{temp}
@@ -1127,7 +1126,7 @@ The revised |ImmediateSublistInduction| may not be too user-friendly, but that c
 
 \pause
 
-And it'll be wonderful if the revised |ImmediateSublistInduction| works for |bu| too!
+And it'd be wonderful if the revised |ImmediateSublistInduction| worked for |bu| too!
 I proceed to transcribe \lstinline{bu}~(\cref{sec:bu}):
 \begin{code}
 bu : ImmediateSublistInduction
@@ -1159,9 +1158,10 @@ The remaining |(GOAL(0 ↓≤ n)(G0))| is actually non-trivial, but the Agda sta
 %Another nice implementation of |ImmediateSublistInduction|!
 %\end{aha}
 
-\pause
+\subsection{Equality from Types}
 
 Okay, I've made the type of both |td| and |bu| precise.
+\todo{choose subsection title}
 How does this help me prove |td| equals |bu|?
 The definitions still look rather different except for their type\ldots
 
@@ -1400,7 +1400,7 @@ It's time to find out.
 
 I'm not confident enough to work with the full recursive definitions straight away, so I take the special case |td s e g 3| of the top-down algorithm and unfold it into a deeply nested expression involving |mapBT|s and |blank|s (as on the left of \cref{fig:td-diagram}). \todo{move diagram earlier}
 Transcribing that into a string diagram is basically a matter of writing down all the intermediate type information and laying out the layered type structures horizontally~(as on the right of \cref{fig:td-diagram}). For example, the rightmost component |blank(C 3 2)| in the expression has type |const ⊤ ⇉ BT(C n k) (const ⊤)|, which ---~after eliding the |const|s, as I've just decided to do~--- is drawn as the bottom Y-junction in the string diagram.%
-\todo{can be expanded more}
+\todo{can be expanded more: explain composition and map too}
 %\Jeremy{How's this? Do you think of it as a ``Y-junction''? A ``fork''?
 % ``Recall that |s| here is a type family, an object in this category, so is drawn as a wire label, whereas |e| and |g| are natural transformations, so drawn as dots.'' Worth saying? Josh: I didn't see this comment was about the |td| diagram. We've just seen the string-diagrammatic definitions of |blank|, |g|, and~|e|, so maybe the info needed here is how to get from those definitions to this diagram?}
 
@@ -1661,6 +1661,8 @@ He would've liked the new languages and the new ways of reasoning.
 
 \section*{Afterword}
 
+\todo[inline]{sans? lots of asterisks?}
+
 This work is presented as a kind of `Socratic monologue', recording the thought processes of a dependently typed programmer as they solve a programming mystery.
 We were inspired by the science fiction novel \textit{Project Hail Mary} by Andy Weir (in particular the opening chapters), where the narrative masterfully weaves together intuitive presentations of scientific knowledge and applications of that knowledge to solve problems faced by the protagonist.
 We envisaged to do something similar in this paper, although it ends up being not as leisurely and entertaining as Weir's novel, because we need to cover more technical detail, and there is very little action in our story apart from sitting in front of a computer and racking one's brains.
@@ -1673,6 +1675,8 @@ We have strived to keep the paper fairly self-contained: the reader should be ab
 But we do not intend this paper to be a tutorial of dependently typed programming (in Agda) or category theory --- this paper is best thought of as a companion to such tutorials or textbooks, giving a larger but not overly complicated example, and applying the abstract tools to the example.
 To make the paper more accessible, we have also resisted the temptation to generalise or to answer every question (because when we are solving a problem, we usually put aside ideas that are not directly relevant).
 For example, we do not generalise |ImmediateSublistInduction| for dynamic programming more broadly (as \citet{Bird-zippy-tabulations} attempted to do); we leave the question of whether the type of |retabulate| uniquely determines the extensional behaviour of its inhabitants as a conjecture~(\cref{sec:spec}); and we avoid digressions into topics such as how data types like |BT| can be derived systematically~(\cref{sec:BT}) and whether |BT| is a graded comonad.\todo{Citation?}
+
+\todo[inline]{What \emph{is} in the paper: our contribution. Comparison with related work \cite{Bird&Hinze-nexus,Bird-zippy-tabulations,Mu-sublists}. We haven't given concrete examples: neither do our predecessors. As \citet{Mu-sublists} observes, this kind of tabulation is a standard technique in algorithm design, but the examples aren't quick to introduce.}
 
 The general message we want to deliver is that we can discover, explain, and prove things by writing them down in appropriate languages.
 More specifically, dependent types, category theory, and string diagrams are some of those languages, and they should be in the mathematically inclined functional programmer's toolbox.
