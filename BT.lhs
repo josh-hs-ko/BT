@@ -56,7 +56,7 @@ acmsmall,fleqn,screen,review]{acmart}
 \newcommand{\Shin}[1]{\footnote{\color{blue}Shin: #1}}
 \newcommand{\Jeremy}[1]{\footnote{\color{blue}Jeremy: #1}}
 
-\newenvironment{aha}{\medskip}{\medskip} % for one-line paragraphs
+\newenvironment{aha}{\medskip}{\unskip\medskip} % for one-line paragraphs
 \makeatletter
 \newcommand{\pause}{\medskip\centerline{$\ast\quad\ast\quad\ast$}\medskip\@@afterindentfalse\@@afterheading} % for a mid-section pause
 \makeatother
@@ -1246,7 +1246,7 @@ But before I get to string diagrams, I need to work through some basic category 
 \label{sec:basic-category-theory}
 
 Functional programmers are familiar with types and functions, and know when functions can be composed sequentially --- when adjacent functions meet at the same type.
-And it's possible to compose an empty sequence of functions, in which case the result is an identify function.
+And it's possible to compose an empty sequence of functions, in which case the result is the identity function.
 \emph{Categories} are settings in which the same intuition about sequential composition works.
 Instead of types and functions, the categorical programmer can switch to work with some \emph{objects} and \emph{morphisms} specified by a category, where each morphism is labelled with a source object and a target object (like the source and target types of a function), and morphisms can be composed sequentially when adjacent morphisms meet at the same object.
 And, like identity functions, there are identity morphisms too.
@@ -1274,7 +1274,7 @@ _⇉_ : Fam a → Fam a → Set
 p ⇉ q = ∀ {x} → p x → q x
 \end{code}
 That is, a morphism from~|p| to~|q| is a family of functions between corresponding types (with the same index) in |p|~and~|q|.
-Everything in the definition is parametrised by~|a|, so actually I'm working in not just one but many related categories of families, with different index types.
+Everything in the definition is parametrised by the index type~|a|, so actually I'm working in not just one but many related categories of families, with different index types.
 These categories are still inherently types and functions, so it's no surprise that their sequential composition works in the way familiar to the functional programmer.
 
 With the definition of |Fam'|, now I can rewrite the parametric function types of |retabulate| and |unTip| to look more like the ones in Haskell:
@@ -1297,7 +1297,7 @@ e  : const ⊤       ⇉' s {0}
 
 I haven't done much really.
 It's just a bit of abstraction that hides part of the indices, and might even be described as cosmetic.
-What's important is that, by fitting my programs into the |Fam'| categories, I can start talking about them in the categorical language.
+What's important is that, by fitting my programs into the |Fam'| categories, I can start talking about them in categorical language.
 In particular, I want to talk about naturality.
 That means I should look for \emph{functors} and \emph{natural transformations} in my programs.
 
@@ -1310,26 +1310,26 @@ The |BT|-typed trees are made up of the constructors of |BT| and hold elements o
 A categorical insight is that the constructors constitute an \emph{independent} layer of data added by the functor outside the elements.
 The independence of this functor layer is described formally by the definitions of functors and natural transformations.
 
-One aspect of the independence is that the functor layer can stay the same and impervious to whatever is happening at the inner layer.
+One aspect of this independence is that the functor layer can stay the same and impervious to whatever is happening at the inner layer.
 Categorically, `whatever is happening' means an arbitrary morphism.
 In the case of |BT|, the inner layer (the elements) may be changed by some arbitrary morphism of type |p ⇉ q|, and that can always be lifted to a morphism of type |BT_ n k p ⇉ (BT_ n k) q| that doesn't change the functor layer (the tree constructors).
-This lifting is the morphism part of a functor, and is the map function that comes with any (normal) parametric data type.
+This lifting is the morphism part of a functor, and is the `map' function that comes with any (normal) parametric data type.
 I've already had a map function for |BT|, and indeed its type can be rewritten as
 \begin{code}
 mapBT : (p ⇉ q) → ((BT_ n k) p ⇉ (BT_ n k) q)
 \end{code}
-In a sense, a lifted morphism such as |mapBT f| is essentially just~|f| since |mapBT f| does nothing to the functor layer, so when |f|~is a composition, that composition shows up at the level of lifted morphisms too.
+In a sense, a lifted morphism such as |mapBT f| is essentially just~|f| since |mapBT f| does nothing to the functor layers. So when |f|~is a composition, that composition shows up at the level of lifted morphisms too.
 Formally, this is stated as a \emph{functoriality} equation:
 \begin{code}
 mapBT (f' · f) = mapBT f' · mapBT f
 \end{code}
-(Also |mapBT id =' id| in the extreme case of composing no morphisms.)
+(Also |mapBT id =' id| in the degenerate case of composing no morphisms.)
 
 The functor layer may also be changed by \emph{natural transformations} independently of whatever is happening at the inner layer.
 In |Fam'| categories, a natural transformation has type |∀ {p} → F p ⇉ G p| for some functors |F|~and~|G|, and transforms an |F|-layer to a |G|-layer without changing the inner layer~|p|, whatever |p|~is.
 For example, |retabulate| transforms the functor layer |BT_ n k| to a \emph{composition} of functors |BT_ n sk · (BT_ sk k)| (which can be regarded as two functor layers) without changing~|p|.
-(Indeed, |retabulate| transforms only the tree constructors and doesn't change the elements to something else.)
-Moreover, this transformation of the functor layer is not interfered by whatever is happening at the inner layer.
+Indeed, |retabulate| transforms only the tree constructors and doesn't change the elements to something else.
+Moreover, this transformation of the functor layer does not interfere with whatever is happening at the inner layer.
 Again `whatever is happening' amounts to a quantification over all morphisms: for any |f : p ⇉ q| happening at the inner layer, if |retabulate| is happening at the functor layer too, it doesn't make a difference whether |f|~or |retabulate| happens first, because they happen at independent layers.
 Formally, this is stated as a \emph{naturality} equation (where |f|~needs to be lifted appropriately):
 \begin{code}
@@ -1348,24 +1348,24 @@ In string diagrams, functors are drawn as wires, and natural transformations are
 (I learned string diagrams mainly from \citet{Coecke-PQP}, so my string diagrams have inputs below and outputs on top.)
 The natural transformations I've got are |retabulate| and |unTip|, and I can draw their types as
 \[ \tikzfig{pics/retabulate-unTip} \]
-String diagrams focus on the functor layers and represent them explicitly as a bunch of wires --- functor composition is represented as juxtaposition of wires, and the identity functor is omitted (since it's the composition of no functors).
-Drawn as a string diagram, |retabulate| has one input wire labelled |BT_ n k| and two output wires |BT_ n sk| and |BT_ sk k|, since it transforms a |BT_ n k| layer to two layers |BT_ n sk · (BT_ sk k)|.
+String diagrams focus on the functor layers and represent them explicitly as a bunch of wires --- functor composition is represented as juxtaposition of wires, and the identity functor is omitted (it is drawn as no wires).
+As a string diagram, |retabulate| has one input wire labelled |BT_ n k| and two output wires |BT_ n sk| and |BT_ sk k|, since it transforms a |BT_ n k| layer to two layers |BT_ n sk · (BT_ sk k)|.
 The diagram of |unTip| goes from one wire to none, since |unTip| transforms |BT_ n n| to the identity functor.
-(Indeed, what |unTip| does is get rid of the |tipZ| or |tipS| constructor.)
+Indeed, what |unTip| does is get rid of the |tipZ| or |tipS| constructor.
 
 \begin{wrapfigure}{r}{.075\textwidth}
 \ctikzfig{pics/vertical-right}
 \end{wrapfigure}
-Whereas functor composition spreads horizontally, sequential composition of natural transformations goes vertically.
+Whereas functor composition is arranged horizontally, sequential composition of natural transformations goes vertically.
 Given transformations |α : ∀ {p} → F p ⇉ G p| and |β : ∀ {p} → G p ⇉ H p|, their sequential composition |β ∘ α : ∀ {p} → F p ⇉ H p| is drawn in a string diagram as |α|~and~|β| juxtaposed vertically and sharing the middle wire with label~|G| (obscuring a section of the wire).
 
 The power of string diagrams becomes evident when things happen in both the horizontal and vertical dimensions.
 For example, suppose there are two layers |F|~and~|F'|, where the outer layer~|F| should be transformed by~|α| and the inner layer~|F'| by |α' : ∀ {p} → F' p ⇉ G' p|.
 There are two ways of doing this: either |map(sub G) α' ∘ α|, where the outer layer~|F| is transformed to~|G| first, or |α ∘ map(sub F) α'|, where the inner layer~|F'| is transformed to~|G'| first.
-The two ways can be proved equal using the naturality of~|α|, but the equality can be seen more directly with string diagrams:
+The two ways are equal by naturality of~|α|, but the equality can be seen more directly with string diagrams:
 \[ \tikzfig{pics/horizontal-definitions} \]
 The |map| means skipping over the outer/left functor and transforming the inner/right functor; so in the diagrams, |α'|~is applied to the inner/right wire.
-(The dashed lines are added to emphasise that both diagrams are constructed as the sequential composition of two transformations.)
+(I've added dashed lines to emphasise that both diagrams are constructed as the sequential composition of two transformations.)
 By placing layers of functors in a separate dimension, it's much easier to see which layers are being transformed, and determine whether two sequentially composed transformations are in fact applied independently, so that their order of application can be swapped.
 This is abstracted as a diagrammatic reasoning principle: dots in a diagram can be moved upwards or downwards, possibly changing their vertical positions relative to other dots (while stretching or shrinking the wires, which can be thought of as elastic strings), and the (extensional) meaning of the diagram will remain the same.
 
@@ -1398,8 +1398,8 @@ All the abstract nonsense took me some time.
 But I still don't know whether string diagrams will actually help me to understand the two algorithms from \cref{sec:equality-from-types}.
 It's time to find out.
 
-I'm not confident enough to work with the recursive definitions straight away, so I take the special case |td s e g 3| of the top-down algorithm and unfold it into a deeply nested expression involving |mapBT|s and |blank|s (as on the left of \cref{fig:td-diagram}).
-Transcribing that into a string diagram is basically writing down all the intermediate type information and laying out the layered type structures horizontally~(as on the right of \cref{fig:td-diagram}). For example, the rightmost component |blank(C 3 2)| in the expression has type |const ⊤ ⇉ BT(C n k) (const ⊤)|, which ---~after eliding the |const|s, as I've just decided to do~--- is drawn as the bottom Y-junction in the string diagram.%
+I'm not confident enough to work with the full recursive definitions straight away, so I take the special case |td s e g 3| of the top-down algorithm and unfold it into a deeply nested expression involving |mapBT|s and |blank|s (as on the left of \cref{fig:td-diagram}). \todo{move diagram earlier}
+Transcribing that into a string diagram is basically a matter of writing down all the intermediate type information and laying out the layered type structures horizontally~(as on the right of \cref{fig:td-diagram}). For example, the rightmost component |blank(C 3 2)| in the expression has type |const ⊤ ⇉ BT(C n k) (const ⊤)|, which ---~after eliding the |const|s, as I've just decided to do~--- is drawn as the bottom Y-junction in the string diagram.%
 \todo{can be expanded more}
 %\Jeremy{How's this? Do you think of it as a ``Y-junction''? A ``fork''?
 % ``Recall that |s| here is a type family, an object in this category, so is drawn as a wire label, whereas |e| and |g| are natural transformations, so drawn as dots.'' Worth saying? Josh: I didn't see this comment was about the |td| diagram. We've just seen the string-diagrammatic definitions of |blank|, |g|, and~|e|, so maybe the info needed here is how to get from those definitions to this diagram?}
@@ -1427,11 +1427,11 @@ td s e g 3 =  g ∘
 \label{fig:td-diagram}
 \end{figure}
 
-All the |mapBT|s are gone in the diagram, because I can directly apply a transformation to the intended layers/wires, rather than count awkwardly how many outer layers I have to skip using |mapBT|, one layer at a time.
-Functoriality is also transparent in the diagram, so it's slightly easier to see that |td| has two phases (between which I draw a dashed line): the first phase constructs deeply nested blank tables, and the second phase fills and demolishes the tables inside out.
+All the |mapBT|s are gone in the diagram, because I can directly apply a transformation to the intended layers/wires, rather than count awkwardly how many outer layers I have to skip, using |mapBT| one layer at a time.
+Functoriality is also transparent in the diagram, so it's slightly easier to see that |td| has two phases (which I have separated by a dashed line): the first phase constructs deeply nested blank tables, and the second phase fills and demolishes the tables inside out.
 
 Functoriality is already somewhat transparent in the traditional expression though, thanks to the infix notation of function composition.
-So I suppose I don't absolutely need the string diagram to see that |td| has two phases, although the required rewriting~(\cref{fig:functoriality-rewriting}) is not as trivial as just seeing the two phases in the diagram.
+So I suppose I don't absolutely need the string diagram to see that |td| has two phases, although the required rewriting~(\cref{fig:functoriality-rewriting}) is not as perspicuous as just seeing the two phases in the diagram.
 Moreover, there's nothing I can meaningfully move in the diagram --- all the transformations here are lifted after all.
 
 \begin{figure}
@@ -1457,7 +1457,7 @@ The loop in the expression unfolds into a sequence of functions, alternating bet
 
 `A sequence\ldots'
 I mutter.
-I didn't expect anything else from unfolding a loop. But the sequential structure is so different from the deeply nested structure of |td|.
+I shouldn't have expected anything else from unfolding a loop. But the sequential structure is so different from the deeply nested structure of |td|.
 
 And then, something unexpected yet familiar appears in the transcribed diagram~(\cref{fig:bu-diagram}).
 
@@ -1496,7 +1496,7 @@ There are also two phases for table construction and demolition, and the |g|s an
 
 The string diagram is truly helpful this time.
 Now I see, as Richard hinted, that I could rewrite the traditional expression using the naturality of |unTip| and |retabulate| to push |g|~and~|e| to the left of the sequence and separate the two phases~(\cref{fig:naturality-rewriting}).
-But in the string diagram, all those rewritings amount to nothing more than gently pulling the two phases apart, eventually making the dashed line horizontal.
+But in the string diagram, all those rewritings amount to nothing more than gradually pulling the two phases apart, eventually making the dashed line horizontal.
 In fact I don't even bother to pull, because on this diagram I can already see simultaneously both the sequence (the dots appearing one by one vertically) and the result of rewriting the sequence using naturality.
 
 \begin{figure}
@@ -1539,7 +1539,7 @@ Maybe what I need is an equation about |blank| and |retabulate| that can help me
 \[ \text{\lstinline{cd (choose k xs)}} \equals \text{\lstinline{mapB (flatten . choose k) (choose (k+1) xs)}} \]
 
 The equation~\cref{eq:cd-spec} flashes through my mind.
-Of course it has to be this equation --- I used it as a specification for \lstinline{cd}, the Haskell predecessor of |retabulate|.
+Of course it has to be this equation --- I used it as a specification for \lstinline{cd}, the Haskell progenitor of |retabulate|.
 How else would I introduce |retabulate| into the picture?
 But first let me update this for my dependently typed string diagrams:
 %\todo{No need for \lstinline{flatten}}
@@ -1573,7 +1573,7 @@ The three functors at the top of the diagrams~\cref{eq:rotation} catch my attent
 In Agda, they expand to the type |BT(C n sk) (BT(C sk k) (const ⊤)) xs|.
 An inhabitant of this type is a table of \emph{blank} tables, so there is no choice of table entries;
 and moreover the structures of all the tables are completely determined by the indices\ldots the type has a unique inhabitant!
-So the equation is actually trivial to prove, because, forced by the type, the two sides have to construct the same table, and I don't need to look into the definitions of |retabulate| and |blank|!
+So the equation is actually trivial to prove: the two sides are forced by the type to construct the same table. And I don't need to look into the definitions of |retabulate| and |blank| at all!
 
 Relieved, I start to work on the proof.
 The precise notion I need here is (mere) propositions~\citep[Chapter~3]{UFP-HoTT}:
@@ -1595,8 +1595,7 @@ Usually they make proofs more complex, but not in this case because the proof do
 As long as the type is blank nested tables, the two sides of an equation can be arbitrarily complicated, and I can still prove them equal just by using |BT-isProp|.
 
 \begin{aha}
-Wait, blank nested tables --- aren't those what the construction phases of both algorithms produce?%
-\todo{bad spacing after aha}
+Wait, blank nested tables --- aren't those what the construction phases of both algorithms produce?
 \end{aha}
 
 I face-palm.
@@ -1614,7 +1613,7 @@ Conceptually I've figured it all out: both algorithms have two phases modulo nat
 But the general proof is still going to take some work.
 If I want to stick to string diagrams, I'll need to transcribe the algorithms into inductively defined diagrams.
 Moreover, the |BT-isProp| reasoning is formally an induction (on the length of the input list), which needs to be worked out.
-And actually, compared with a diagrammatic but unformalised proof, I prefer a full Agda formalisation.
+And actually, compared with a diagrammatic but informal proof, I prefer a full Agda formalisation.
 That means I'll need to spell out a lot of detail, including functoriality and naturality rewriting~(\cref{fig:functoriality-rewriting,fig:naturality-rewriting}).
 Whining, I finish the entire proof in Agda.
 But as usual, in the end there's a dopamine hit from seeing everything checked.
@@ -1627,22 +1626,22 @@ Still, I can't help feeling that I’ve neglected a fundamental aspect of the pr
 After making all the effort adopting dependent types and string diagrams, do these state-of-the-art languages help me say something about efficiency too?
 
 String diagrams make it easier for me to see that the table construction phases of both algorithms produce the same layers of tables but in opposite orders.
-Only the order used by the bottom-up algorithm allows table construction and demolition to be interleaved, and consequently the algorithm keeps no more than two layers of tables at any time.
+Only the order used by the bottom-up algorithm allows table construction and demolition to be interleaved, and consequently the algorithm needs no more than two layers of tables at any time.
 That's the crucial difference between the two algorithms.
 Now I need to figure out what the difference means algorithmically.
 
 More specifically, why is it good to keep \emph{two} layers of tables and not more?
 
 When there are multiple layers of tables of type |BT(C n k)| with |k < n|, meaning that the input list is split into proper sublists multiple times, all the final sublists will appear (as indices in the element types) in the entire nested table multiple times --- that is, overlapping subproblems will appear.
-Therefore, when I use~|g| to fill in a nested table, I'm invoking~|g| to compute solutions for overlapping subproblems repetitively, which is what I want to avoid.
-More precisely, `using~|g| to fill in a nested table' means applying~|g| under at least two layers, for example |mapBT (mapBT g) : BT(C 3 2) (BT(C 2 1) (BT(C 1 0) s)) ⇉ BT(C 3 2) (BT(C 2 1) s)|, where the result is at least two layers of tables, so there should be at least \emph{three} layers of tables (to which |mapBT (mapBT g)| is applied) for overlapping subproblems to be solved repetitively.
+Therefore, when I use~|g| to fill in a nested table, I'm invoking~|g| to compute duplicate solutions for overlapping subproblems, which is what I want to avoid.
+More precisely, `using~|g| to fill in a nested table' means applying~|g| under at least two layers, for example |mapBT (mapBT g) : BT(C 3 2) (BT(C 2 1) (BT(C 1 0) s)) ⇉ BT(C 3 2) (BT(C 2 1) s)|, where the result is at least two layers of tables, so there need to be at least \emph{three} layers of tables (to which |mapBT (mapBT g)| is applied) for overlapping subproblems to occur.
 The bottom-up algorithm never gets to three layers of tables, and therefore avoids solving overlapping subproblems.
 
 That reasoning doesn't sound too bad, although it's clear that there's much more to be done.
 The whole argument is still too informal and lacks detail.
-It's easy to poke holes in the reasoning --- for example, if the input list has duplicate elements, then the bottom-up algorithm won't be able to entirely avoid solving overlapping subproblems repetitively.
+It's easy to poke holes in the reasoning --- for example, if the input list has duplicate elements, then the bottom-up algorithm won't be able to entirely avoid duplicate solutions of overlapping subproblems.
 To fix this, the algorithm will need a redesign.
-And of course it's tempting to explore more problem-decomposing strategies other than immediate sublists.
+And of course it's tempting to explore more problem-decomposing strategies beyond immediate sublists.
 Eventually I may arrive at something general about dynamic programming, which was what Richard wanted to work out in his paper.
 
 All those are for another day, however.
@@ -1676,7 +1675,7 @@ To make the paper more accessible, we have also resisted the temptation to gener
 For example, we do not generalise |ImmediateSublistInduction| for dynamic programming more broadly (as \citet{Bird-zippy-tabulations} attempted to do); we leave the question of whether the type of |retabulate| uniquely determines the extensional behaviour of its inhabitants as a conjecture~(\cref{sec:spec}); and we avoid digressions into topics such as how data types like |BT| can be derived systematically~(\cref{sec:BT}) and whether |BT| is a graded comonad.\todo{Citation?}
 
 The general message we want to deliver is that we can discover, explain, and prove things by writing them down in appropriate languages.
-More specifically, dependent types, category theory, and string diagrams are some of those languages, and they should be in the (mathematically inclined) functional programmer's toolbox.
+More specifically, dependent types, category theory, and string diagrams are some of those languages, and they should be in the mathematically inclined functional programmer's toolbox.
 In the case of dependent types, they can be expressive enough to replace traditional (equational) specifications and proofs --- for example, the dependently typed |td| and |bu| can be proved equal simply by showing that they have the same, uniquely inhabited type~(\cref{sec:equality-from-types}).
 This approach to program equality is still under-explored, and has potential to reduce proof burdens drastically.
 For a comparison, \citet{Mu-sublists} derives \lstinline{cd} from the specification~\cref{eq:cd-spec} and proves the equality between \lstinline{td} and \lstinline{bu} using traditional equational reasoning on simply typed terms; we do away with these by designing types carrying more information for our terms.
