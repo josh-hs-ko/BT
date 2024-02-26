@@ -323,12 +323,11 @@ cd (Bin (Tip y) u      ) = Tip (y : ys) where Tip ys = cd u
 cd (Bin t       (Tip z)) = Bin (cd t) (mapB (: [z]) t)
 cd (Bin t       u      ) = Bin (cd t) (zipBWith (:) t (cd u))
 \end{lstlisting}
-
 I know \lstinline{B} is this Haskell data type of binary trees:
 \begin{lstlisting}
 data B a = Tip a || Bin (B a) (B a)
 \end{lstlisting}
-And presumably \lstinline{mapB} and \lstinline{zipBWith} are the usual map and zip functions for these trees, and \lstinline{L}~is the standard data type of lists.
+Presumably \lstinline{mapB} and \lstinline{zipBWith} are the usual map and zip functions for these trees, and \lstinline{L}~is the standard list type. 
 But how did Richard come up with such an incomprehensible function definition?
 %\Jeremy{We should be more consistent about whether to call him Richard or Bird. Shin: does it work if we say "Richard" when we refer to the person and say Bird (2008) when we refer to the paper?}
 He didn't bother to explain it in his paper. It might have helped if he had provided some examples.
@@ -338,7 +337,8 @@ He didn't bother to explain it in his paper. It might have helped if he had prov
 \label{sec:algorithms}
 
 From the explanations that \emph{are} in the paper, I suppose I can guess roughly what \lstinline{cd} should do.
-Richard was studying the relationship between top-down and bottom-up algorithms that solve problems specified recursively on some input data structure.\todo{A concrete example?}
+Richard was studying the relationship between top-down and bottom-up algorithms that solve problems specified recursively on some input data structure.
+% \todo{A concrete example?} % snark inserted above
 When the input is a non-empty list, a generic top-down algorithm is defined by
 %\todo{Make the function polymorphic}
 %\Josh{Include |f| and |g| as arguments (like |foldr| etc). Shin: Done.}
@@ -655,7 +655,6 @@ I'm not thrilled by the prospect.
 
 \pause
 
-\todo{No indentation after a pause? JG: fixed.}%
 My editor is still running Agda and showing the shape-indexed version of |cd|, with |B(C n k)| in its type~(\cref{sec:shape}).
 The whole point of programming with \emph{inductive families}~\citep{Dybjer-inductive-families} such as |B(C n k)| is to `say more and prove less': encode more properties in the indices, so that those properties are automatically taken care of as programs construct and deconstruct indexed data, requiring fewer manual proofs.
 %\Jeremy{Well: the same proofs, but relegating them to the typechecker.}
