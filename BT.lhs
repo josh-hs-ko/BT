@@ -781,8 +781,7 @@ I think it's time to rename \lstinline{cd} to something more meaningful, and dec
 And a side condition |k < n| is needed to guarantee that the output shape |BT_ n sk| is valid.
 %\Shin{In the following paragraphs I try to describe how |retabulate| can be constructed from its type. Some changes were made: 1. |_∷ᴮᵀ_| is introduced earlier and slightly more detailed because I will use it later. 2. definition of |mapBT| is omitted because I think it is probably not needed and now we might be running out of space. BTW, I don't know how to say ``everything related to |k < n| is omitted'' in an early stage, therefore all my calls to |retabulate| still have the |k < n| argument in underline. It is preferable to find a reason to omit it. Josh: I think it's fine to assume that they're only managed mentally (and not formally in Agda) in the `first pass' presented in the paper, like what we did when transcribing \lstinline{cd}.}
 
-The type of |retabulate| \todo{is this the point to smell comonads?} looks like a sensible refinement of the type of \lstinline{cd}, except that I'm letting |retabulate| return a tree of trees, rather than a tree of lists.
-Could that change be too drastic?
+The type of |retabulate| looks like a sensible refinement of the type of \lstinline{cd}, except that I'm letting |retabulate| return a tree of trees, rather than a tree of lists. Could that change be too drastic?
 Hm\ldots actually, no --- the shape of |BT_ sk k| is always a (non-empty) list!
 If |k|~is |zero|, a |BT_ 1 0|-tree has to be a |tipZ|.
 Otherwise, a |BT_ ssk sk|-tree has to take the form |bin (tipS y) t|.
@@ -1142,7 +1141,9 @@ unTip : BT(C n n) p xs → p xs
 unTip             (tipS  p) = p
 unTip {xs =' []}  (tipZ  p) = p
 \end{code}
-(The |bin| case is impossible and ignored.)
+The |bin| case is impossible and ignored.
+(Hm, |retabulate : BT -> BT ∘ BT| and |unTip : BT -> Id| smell comonadic, and maybe the indexes constitute a grading\ldots but I can't get distracted now.)
+
 The argument/counter~|k| of |loop| should satisfy the invariant |k ↓≤ n|.
 The data type |m ↓≤ n| is another version of natural number inequality, which is dual to |_≤↑_| in the sense that |n|~is fixed throughout the new definition, and |m|~moves away from~|n|:
 \begin{code}
