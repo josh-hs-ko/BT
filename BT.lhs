@@ -385,12 +385,7 @@ For example, a solution for \lstinline{"ab"} is required for solving the problem
 And it gets worse further down: a solution for each $1$-sublist is computed $6$~times!
 %\Josh{We probably have space for the entire call tree. And how about making all the \lstinline{td}s in all the figures slightly transparent and less obtrusive? SCM: Tried to fit them all in, and used grey for \lstinline{td}.}
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.75\textwidth]{pics/sublists-lattice.pdf}
-\caption{Computing\csp\lstinline{td "abcd"}\csp bottom-up.}
-\label{fig:sublists-lattice}
-\end{figure}
+% Figure~\ref{fig:sublists-lattice} belongs here
 
 It's better to proceed bottom-up instead, working upwards through a lattice of sublists~(\cref{fig:sublists-lattice}), level by level.
 Level~$1$ consists of solutions for the $1$-sublists.
@@ -424,6 +419,13 @@ Like \lstinline{td}, this \lstinline{bu'} is a simplified version.
 To cope with more general problems, Richard had to store something more complex in each level, but I don't think I need that.
 %\Jeremy{``\ldots next level. We stop when\ldots''---and generally, shorter sentences is punchier, and more plausible as direct speech/thought.}
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.75\textwidth]{pics/sublists-lattice.pdf}
+\caption{Computing\csp\lstinline{td "abcd"}\csp bottom-up.}
+\label{fig:sublists-lattice}
+\end{figure}
+
 \subsection{Rearranging Binary Trees}
 \label{sec:bu}
 
@@ -451,13 +453,6 @@ All I get is a 4-list.
 This 4-list could be level~1, but it could well be level~3.
 And I don't get any information from the elements --- the element type is parametrically quantified.
 So there isn't enough context for me to decide whether I should produce a 6-list (level~2) or a 1-list (level~4).
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.8\textwidth]{pics/map_g_cd.pdf}
-\caption{How\csp\lstinline{mapB g . cd}\csp constructs a new level.}
-\label{fig:map_g_cd}
-\end{figure}
 
 Presumably, Richard's trees gave him more context.
 I try to trace Richard's \lstinline{cd} to find out how it works.
@@ -509,8 +504,15 @@ The binomial coefficient~|CHOOSE n k| is the number of ways of choosing $k$~elem
 Indeed, each level~$k$ in the lattice~(\cref{fig:sublists-lattice}) contains values about $k$-sublists.
 For example, level~$2$ has |CHOOSE 4 2 =' 6| values, and there are $6$~ways of choosing $2$~elements from a $4$-list.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{pics/map_g_cd.pdf}
+\caption{How\csp\lstinline{mapB g . cd}\csp constructs a new level.}
+\label{fig:map_g_cd}
+\end{figure}
+
 Aha!
-I can even see a pattern related to the choices in the tree representation of level~$2$\todo{Label the numbers in the figures with `level'; position of figure(s)}~(\cref{fig:map_g_cd}):\todo{for final version, move Fig 3 and Fig 2 later} the right subtree is about all the 2-sublists that end with~\lstinline{'d'}, and the left subtree about the other 2-sublists not containing~\lstinline{'d'}.
+I can even see a pattern related to the choices in the tree representation of level~$2$\todo{Label the numbers in the figures with `level'; position of figure(s)}~(\cref{fig:map_g_cd}): the right subtree is about all the 2-sublists that end with~\lstinline{'d'}, and the left subtree about the other 2-sublists not containing~\lstinline{'d'}.
 To choose $2$~elements from \lstinline{"abcd"}, I can include the rightmost element~\lstinline{'d'} or not.
 If \lstinline{'d'}~is included, there are |CHOOSE 3 1| ways of choosing $1$~element from \lstinline{"abc"} to go with~\lstinline{'d'}.
 If \lstinline{'d'}~is not included, there are |CHOOSE 3 2| ways of choosing $2$~elements from \lstinline{"abc"}.
