@@ -268,8 +268,9 @@ acmsmall,fleqn,screen,review]{acmart}
 \title{Binomial Tabulation: A Short Story (Functional Pearl)}
 
 \begin{abstract}
-\todo[inline]{Abstract: a demonstration of dependent types and string diagrams for the functional programmer (ideally already with a bit exposure to dependent types and category theory and not put off by basic concepts like indexed types, functors, and so on); an outline of the paper
-\vspace{10\baselineskip}}
+We reconstruct some of the development in Richard Bird's paper \textit{Zippy Tabulations of Recursive Functions} (2008), using propositions-as-types and string diagrams rather than mere simple types. This paper serves as an introduction to and demonstration of these concepts for the curious functional programmer, who ideally already has some exposure to dependent types and category theory and is not put off by basic concepts like indexed types and functors.
+
+The paper is presented in the form of a short story, narrated from the perspective of a functional programmer trying to follow the development in Bird's paper. The first section recaps the original simply typed presentation. The second section explores a series of refinements that can be made using dependent types. The third section uses string diagrams to greatly simplify arguments involving functors and naturality. The short story ends there, but the paper concludes with a discussion and reflection in the afterword.
 \end{abstract}
 
 %\begin{CCSXML}
