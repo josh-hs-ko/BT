@@ -1386,10 +1386,8 @@ But I still don't know whether string diagrams will actually help me to understa
 It's time to find out.
 
 I'm not confident enough to work with the full recursive definitions straight away, so I take the special case |td s e g 3| of the top-down algorithm and unfold it into a deeply nested expression involving |mapBT|s and |blank|s (as on the left of \cref{fig:td-diagram}). \todo{move diagram earlier}
-Transcribing that into a string diagram is basically a matter of writing down all the intermediate type information and laying out the layered type structures horizontally~(as on the right of \cref{fig:td-diagram}). For example, the rightmost component |blank(C 3 2)| in the expression has type |const ⊤ ⇉ BT(C n k) (const ⊤)|, which ---~after eliding the |const|s, as I've just decided to do~--- is drawn as the bottom Y-junction in the string diagram.%
-\todo{can be expanded more: explain composition and map too}
-%\Jeremy{How's this? Do you think of it as a ``Y-junction''? A ``fork''?
-% ``Recall that |s| here is a type family, an object in this category, so is drawn as a wire label, whereas |e| and |g| are natural transformations, so drawn as dots.'' Worth saying? Josh: I didn't see this comment was about the |td| diagram. We've just seen the string-diagrammatic definitions of |blank|, |g|, and~|e|, so maybe the info needed here is how to get from those definitions to this diagram?}
+Transcribing that into a string diagram is basically a matter of writing down all the intermediate type information and laying out the layered type structures horizontally~(as on the right of \cref{fig:td-diagram}). For example, the rightmost component |blank(C 3 2)| in the expression has type |const ⊤ ⇉ BT(C n k) (const ⊤)|, which ---~after eliding the |const|s, as I've just decided to do~--- is drawn as the bottom Y-junction in the string diagram.
+The |mapBT|s manifest as wires on the left, and sequential composition as vertical jusxtaposition.
 
 \begin{figure}
 \begin{center}
