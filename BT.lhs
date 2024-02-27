@@ -1361,6 +1361,29 @@ This is abstracted as a diagrammatic reasoning principle: dots in a diagram can 
 
 \pause
 
+\begin{figure}
+\begin{center}
+\begin{varwidth}{\textwidth}
+\setlength{\mathindent}{0em}
+\begin{code}
+td s e g 3 =  g ∘
+              mapBT  (  g ∘
+                        mapBT  (  g ∘
+                                  mapBT e ∘
+                                  blank(C 1 0)) ∘
+                        blank(C 2 1)) ∘
+              blank(C 3 2)
+\end{code}
+\end{varwidth}%
+\hspace{.1\textwidth}%
+\begin{varwidth}{\textwidth}
+\ctikzfig{pics/td}
+\end{varwidth}
+\end{center}
+\caption{A special case of the top-down algorithm as a string diagram.}
+\label{fig:td-diagram}
+\end{figure}
+
 I want to draw |td| and |bu| as string diagrams.
 However, some of their components, namely |blank|, |e|, and~|g|, are not natural transformations.
 Technically, only natural transformations can go into string diagrams.
@@ -1388,32 +1411,11 @@ All the abstract nonsense took me some time.
 But I still don't know whether string diagrams will actually help me to understand the two algorithms from \cref{sec:equality-from-types}.
 It's time to find out.
 
-I'm not confident enough to work with the full recursive definitions straight away, so I take the special case |td s e g 3| of the top-down algorithm and unfold it into a deeply nested expression involving |mapBT|s and |blank|s (as on the left of \cref{fig:td-diagram}). \todo{move diagram earlier}
+I'm not confident enough to work with the full recursive definitions straight away, so I take the special case |td s e g 3| of the top-down algorithm and unfold it into a deeply nested expression involving |mapBT|s and |blank|s (as on the left of \cref{fig:td-diagram}). 
 Transcribing that into a string diagram is basically a matter of writing down all the intermediate type information and laying out the layered type structures horizontally~(as on the right of \cref{fig:td-diagram}). For example, the rightmost component |blank(C 3 2)| in the expression has type |const ⊤ ⇉ BT(C n k) (const ⊤)|, which ---~after eliding the |const|s, as I've just decided to do~--- is drawn as the bottom Y-junction in the string diagram.
 The |mapBT|s manifest as wires on the left, and sequential composition as vertical jusxtaposition.
 
-\begin{figure}
-\begin{center}
-\begin{varwidth}{\textwidth}
-\setlength{\mathindent}{0em}
-\begin{code}
-td s e g 3 =  g ∘
-              mapBT  (  g ∘
-                        mapBT  (  g ∘
-                                  mapBT e ∘
-                                  blank(C 1 0)) ∘
-                        blank(C 2 1)) ∘
-              blank(C 3 2)
-\end{code}
-\end{varwidth}%
-\hspace{.1\textwidth}%
-\begin{varwidth}{\textwidth}
-\ctikzfig{pics/td}
-\end{varwidth}
-\end{center}
-\caption{A special case of the top-down algorithm as a string diagram.}
-\label{fig:td-diagram}
-\end{figure}
+% Figure~\ref{fig:td-diagram} belongs here
 
 All the |mapBT|s are gone in the diagram, because I can directly apply a transformation to the intended layers/wires, rather than count awkwardly how many outer layers I have to skip, using |mapBT| one layer at a time.
 Functoriality is also transparent in the diagram, so it's slightly easier to see that |td| has two phases (which I have separated by a dashed line): the first phase constructs deeply nested blank tables, and the second phase fills and demolishes the tables inside out.
