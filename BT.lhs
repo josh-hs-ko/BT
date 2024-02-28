@@ -1685,13 +1685,13 @@ for example, we do not generalise |ImmediateSublistInduction| for dynamic progra
 
 \todo[inline]{What \emph{is} in the paper: our contribution. Comparison with related work \cite{Bird&Hinze-nexus,Bird-zippy-tabulations,Mu-sublists}. We haven't given concrete examples: neither do our predecessors. As \citet{Mu-sublists} observes, this kind of tabulation is a standard technique in algorithm design, but the examples aren't quick to introduce.}
 
-The sublists problem was one of the examples in \citet{Bird&Hinze-nexus}, the topic of which was a technique of function memorization using trees of shared nodes, which they called \emph{nexuses}.
-Afterwards, \citet{Bird-zippy-tabulations} went on to study top-down and bottom-up algorithms, where the sublists problem was the last example.
-To cover all the examples in the paper, the generic bottom-up algorithm in \citet{Bird-zippy-tabulations} also employed a form of nexus, but it is not needed for the sublists problem and thus omitted in our work.
-Neither of the two papers discussed applications of the sublists problem.
-\citet{Mu-sublists} focused on the problem and derived \lstinline{cd}.
-It was briefly mentioned in \citet{Mu-sublists} that many problems can be cast into the sublists problem after a pre-processing phase that is standard in algorithm community.
-None of the papers used dependent types.
+The sublists problem was one of the examples used by \citet{Bird&Hinze-nexus} when studying a technique of function memoization using trees of shared nodes, which they called \emph{nexuses}.
+\citet{Bird-zippy-tabulations} went on to study top-down and bottom-up algorithms, where the sublists problem was the final example.
+To cover all the examples in the paper, \citeauthor{Bird-zippy-tabulations}'s generic bottom-up algorithm also employed a form of nexus, but it is not needed for the sublists problem and thus omitted here.
+Neither paper discussed applications of the sublists problem.
+\citet{Mu-sublists} focused on the problem and derived \lstinline{cd}. \todo{Shin to shift a sentence from the next paragraph to here? or I'll do it, later today}
+\citet{Mu-sublists} observed that it is a standard technique in the algorithms community to reduce other problems to the sublists problem.
+None of these papers used dependent types.
 %All the three papers stayed in the realm of simple-typed functional programming.
 
 The general message we want to deliver is that we can discover, explain, and prove things by writing them down in appropriate languages.
