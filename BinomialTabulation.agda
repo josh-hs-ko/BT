@@ -220,33 +220,29 @@ bu s e g n = unTip ∘ bu-loop g 0 (≤⇒≤‴ z≤n) ∘ mapBT e ∘ blank n 
 --------
 -- Section 2.5
 
-module ℕ-InductionPrinciple where
+ℕ-Induction : Set₁
+ℕ-Induction = (p  : ℕ → Set)
+              (pz : p zero)
+              (ps : ∀ {m} → p m → p (suc m))
+              (n  : ℕ) → p n
 
-  ℕ-Induction : Set₁
-  ℕ-Induction = (p  : ℕ → Set)
-                (pz : p zero)
-                (ps : ∀ {m} → p m → p (suc m))
-                (n  : ℕ) → p n
+ind : ℕ-Induction
+ind P pz ps  zero   = pz
+ind P pz ps (suc n) = ps (ind P pz ps n)
 
-  ind : ℕ-Induction
-  ind P pz ps  zero   = pz
-  ind P pz ps (suc n) = ps (ind P pz ps n)
+ℕ-Induction-unary-parametricity : ℕ-Induction → Set₁
+ℕ-Induction-unary-parametricity f =
+    {p  : ℕ → Set}                 (q : ∀ {m} → p m → Set)
+  → {pz : p zero}                  (qz : q pz)
+  → {ps : ∀ {m} → p m → p (suc m)} (qs : ∀ {m} {x : p m} → q x → q (ps x))
+  → {n  : ℕ} → q (f p pz ps n)
 
-  ℕ-Induction-unary-parametricity : ℕ-Induction → Set₁
-  ℕ-Induction-unary-parametricity f =
-      {p  : ℕ → Set}                 (q : ∀ {m} → p m → Set)
-    → {pz : p zero}                  (qz : q pz)
-    → {ps : ∀ {m} → p m → p (suc m)} (qs : ∀ {m} {x : p m} → q x → q (ps x))
-    → {n  : ℕ} → q (f p pz ps n)
-
-  ℕ-Induction-uniqueness-from-parametricity :
-      (f : ℕ-Induction) → ℕ-Induction-unary-parametricity f
-    → (P : ℕ → Set) (pz : P zero) (ps : ∀ {m} → P m → P (suc m)) (n : ℕ)
-    → f P pz ps n ≡ ind P pz ps n
-  ℕ-Induction-uniqueness-from-parametricity f param p pz ps n =
-    param (λ {m} x → x ≡ ind p pz ps m) refl (cong ps)
-
-  -- end of module ℕ-InductionPrinciple
+ℕ-Induction-uniqueness-from-parametricity :
+    (f : ℕ-Induction) → ℕ-Induction-unary-parametricity f
+  → (P : ℕ → Set) (pz : P zero) (ps : ∀ {m} → P m → P (suc m)) (n : ℕ)
+  → f P pz ps n ≡ ind P pz ps n
+ℕ-Induction-uniqueness-from-parametricity f param p pz ps n =
+  param (λ {m} x → x ≡ ind p pz ps m) refl (cong ps)
 
 BT' : ({ys : Vec a k} → p ys → Set) → BT n k p xs → Set
 BT' q (tipZ x)  = q x

@@ -1,5 +1,6 @@
 %let anonymous = True
 %let draft = False
+%let mentionICFP = True
 
 \documentclass[%
 %if anonymous
@@ -270,16 +271,20 @@ acmsmall,fleqn,screen,review]{acmart}
   \postcode{OX1 3QD}
 }
 
-\title{Binomial Tabulation: A Short Story (Functional Pearl)}
+\title{Binomial Tabulation: A Short Story
+%if mentionICFP
+(Functional Pearl)
+%endif
+}
 
 \begin{abstract}
 We reconstruct some of the development in Richard Bird's~[2008] paper \textit{Zippy Tabulations of Recursive Functions}, using dependent types and string diagrams rather than mere simple types.
-This paper serves as an intuitive introduction to and demonstration of these concepts for the curious functional programmer, who ideally already has some exposure to dependent types and category theory, is not put off by basic concepts like indexed types and functors, and wants to see a more practical example.\todo{revised}
+This paper serves as an intuitive introduction to and demonstration of these concepts for the curious functional programmer, who ideally already has some exposure to dependent types and category theory, is not put off by basic concepts like indexed types and functors, and wants to see a more practical example.
 
 The paper is presented in the form of a short story, narrated from the perspective of a functional programmer trying to follow the development in Bird's paper.
 The first section recaps the original simply typed presentation.
 The second section explores a series of refinements that can be made using dependent types.
-The third section uses string diagrams to\todo{greatly} simplify arguments involving functors and naturality.
+The third section uses string diagrams to simplify arguments involving functors and naturality.
 The short story ends there, but the paper concludes with a discussion and reflection in the afterword.
 \end{abstract}
 
@@ -326,7 +331,9 @@ The short story ends there, but the paper concludes with a discussion and reflec
 
 `What on earth is this function doing?'
 
-I stare at the late Richard Bird's~\citeyearpar{Bird-zippy-tabulations} paper `Zippy Tabulations of Recursive Functions', frowning.
+\medskip
+
+I stare at the late Richard Bird's~\citeyearpar{Bird-zippy-tabulations} paper \textit{Zippy Tabulations of Recursive Functions}, frowning.
 
 \begin{lstlisting}
 cd :: B a -> B (L a)
@@ -352,7 +359,7 @@ It might have helped if he had provided some examples.
 From the explanations that \emph{are} in the paper, I suppose I can guess roughly what \lstinline{cd} should do.
 Richard was studying the relationship between top-down and bottom-up algorithms that solve problems specified recursively on some input data structure.
 % \todo{A concrete example?} % snark inserted above
-When the input is a non-empty list, a generic top-down algorithm is defined by
+When the input is a nonempty list, a generic top-down algorithm is defined by
 %\todo{Make the function polymorphic}
 %\Josh{Include |f| and |g| as arguments (like |foldr| etc). Shin: Done.}
 %\Jeremy{Can we avoid using \lstinline{$}? Richard wouldn't have used it\ldots. Shin: Used application instead.}
@@ -361,9 +368,9 @@ td :: (a -> s) -> (L s -> s) -> L a -> s
 td f g [x] = f x
 td f g xs  = g (map (td f g) (dc xs))
 \end{lstlisting}
-The input of \lstinline{td} is a non-empty list of \lstinline{a}'s, and the output is a solution of type \lstinline{s} for the input list.
+The input of \lstinline{td} is a nonempty list of \lstinline{a}'s, and the output is a solution of type \lstinline{s} for the input list.
 Singleton lists form the base case, for which the given function~\lstinline{f} computes a solution directly.
-If an input list \lstinline{xs} is non-singleton, it is decomposed into shorter lists by some\csp\lstinline{dc :: L a -> L (L a)}.
+If an input list \lstinline{xs} is not singleton, it is decomposed into shorter lists by some\csp\lstinline{dc :: L a -> L (L a)}.
 Then \lstinline{td} recursively computes a subsolution for each shorter list.
 Finally, \lstinline{g}~combines the subsolutions into a solution for \lstinline{xs}.
 In fact, in order to cover a wider range of algorithms, Richard's definition is more abstract and general.
@@ -380,7 +387,7 @@ But I'm working with this simplified version as an easier starting point.
 \label{fig:td-call-tree}
 \end{figure}
 
-In the last (and the most difficult) example in the paper, \lstinline{dc} computes all the \emph{immediate sublists} of a given list --- all the lists with exactly one element missing:
+In the last example of the paper, \lstinline{dc} computes all the \emph{immediate sublists} of a given list --- all the lists with exactly one element missing:
 %\Josh{Inline monospace code with spaces will need space corrections before and after.}
 \begin{lstlisting}
 dc :: L a -> L (L a)
@@ -741,13 +748,13 @@ It's simpler to think of a tree of type |BT_ n k p xs| as a table with all the |
 (So the `T' in |BT| stands for both `tree' and `table'.)
 %\Josh{We could explain in more detail how to find a key in a tree, but that doesn't seem too important because we don't work with individual entries but all the entries about all the sublists of a particular length at once, and the position of each entry in the tree is not important.}
 
-This |BT| definition is really intriguing\ldots\todo{removed the unclear sentences}
+This |BT| definition is really intriguing\ldots
 %I gaze out of my window.
 %The ad hoc feeling I had with~|B'| is completely gone.
 %This is probably because there's no arbitrary information  |BT| with respect to \lstinline{choose}.
 %\Shin{Does it mean there is no unnecessary information apart from those relevant to \lstinline{choose}, or there is no information about \lstinline{choose}?}
 Most likely, there is a way to derive |BT| from \lstinline{choose}, and that'll work for a whole class of functions.
-The type of |BT_ n k : (p : Vec k a → Set) → Vec n a → Set| looks just like a continuation-passing version of some |Vec n a ↝ Vec k a|, which would be the type of a version of \lstinline{choose} that non-deterministically returns a |k|-sublist of an |n|-list.
+The type of |BT_ n k : (p : Vec k a → Set) → Vec n a → Set| looks just like a continuation-passing version of some |Vec n a ↝ Vec k a|, which would be the type of a version of \lstinline{choose} that nondeterministically returns a |k|-sublist of an |n|-list.
 And the index~|p| works like a continuation too.
 Take the (expanded) type of |bin| for example:
 \begin{code}
@@ -765,8 +772,14 @@ data All : (a → Set) → Vec n a → Set where
   []   :                   All p []
   _∷_  : p x → All p xs →  All p (x ∷ xs)
 \end{code}
-This should be derivable from the function that non-deterministically returns an element of a list.
-I'm onto something general --- maybe it's interesting enough for an ICFP paper!
+This should be derivable from the function that nondeterministically returns an element of a list.
+I'm onto something general --- maybe it's interesting enough for
+%if mentionICFP
+an ICFP
+%else
+a research
+%endif
+paper!
 %\Josh{A paragraph about generality --- worth saying? Make it clear that the paragraph is about future work.}
 
 \subsection{Specifications as Types}
@@ -794,7 +807,7 @@ And a side condition |k < n| is needed to guarantee that the output shape |BT_ n
 %\Shin{In the following paragraphs I try to describe how |retabulate| can be constructed from its type. Some changes were made: 1. |_∷ᴮᵀ_| is introduced earlier and slightly more detailed because I will use it later. 2. definition of |mapBT| is omitted because I think it is probably not needed and now we might be running out of space. BTW, I don't know how to say ``everything related to |k < n| is omitted'' in an early stage, therefore all my calls to |retabulate| still have the |k < n| argument in underline. It is preferable to find a reason to omit it. Josh: I think it's fine to assume that they're only managed mentally (and not formally in Agda) in the `first pass' presented in the paper, like what we did when transcribing \lstinline{cd}.}
 
 The type of |retabulate| looks like a sensible refinement of the type of \lstinline{cd}, except that I'm letting |retabulate| return a tree of trees, rather than a tree of lists. Could that change be too drastic?
-Hm\ldots actually, no --- the shape of |BT_ sk k| is always a (non-empty) list!
+Hm\ldots actually, no --- the shape of |BT_ sk k| is always a (nonempty) list!
 If |k|~is |zero|, a |BT_ 1 0|-tree has to be a |tipZ|.
 Otherwise, a |BT_ ssk sk|-tree has to take the form |bin (tipS y) t|.
 This expression is in fact a cons-like operation:
@@ -932,7 +945,7 @@ That'll probably be a fun exercise\ldots but I'll leave that for another day.
 
 Right now I'm more eager to understand why the bottom-up algorithm \lstinline{bu} equals the top-down \lstinline{td}~(\cref{sec:algorithms,sec:bu}).
 Will dependent types continue to be helpful?
-I should try and find out by transcribing the two algorithms into Agda too.\todo{section title}
+I should try and find out by transcribing the two algorithms into Agda too.
 
 The first thing to do is make the type of the two algorithms as precise as the type of |retabulate|.
 I~start from the combining function~\lstinline{g}.
@@ -987,7 +1000,7 @@ e : s []
 \end{temp}
 at level~0, and work upwards using~|g|.
 There's no problem going from level~0 to level~1, because there's now additional context in the indices so that |g|~knows for which singleton list a solution should be computed.
-Making types precise has helped me to find a more natural and general form of recursive computation over immediate sublists!\todo{restoring this `!'}
+Making types precise has helped me to find a more natural and general form of recursive computation over immediate sublists!
 
 And it's not just any recursive computation --- it's now an alternative \emph{induction principle} for lists.
 The base case~|e| is still about the empty list, and the inductive case~|g| assumes that the induction hypothesis holds for all the immediate sublists.
@@ -1139,7 +1152,7 @@ unTip             (tipS  p) = p
 unTip {xs =' []}  (tipZ  p) = p
 \end{code}
 The |bin| case is impossible and ignored.
-(Hm, |retabulate| and |unTip|\todo{removed the types} smell comonadic, and maybe the indices constitute a grading \citep{grading}\ldots but I can't get distracted now.)
+(Hm, |retabulate| and |unTip| smell comonadic, and maybe the indices constitute a grading~\citep{grading}\ldots but I can't get distracted now.)
 
 The argument/counter~|k| of |loop| should satisfy the invariant |k ↓≤ n|.
 Again, this version of natural number inequality is chosen to align with the inductive structure of |loop|.
@@ -1150,7 +1163,7 @@ data _↓≤_ : ℕ → ℕ → Set where
   suc   : suc m ↓≤ n →  m  ↓≤' n
 \end{code}
 Then |loop| simply performs induction on the distance |k ↓≤ n|; the counter~|k| goes up as the distance decreases in inductive calls, and eventually reaches~|n| when the distance becomes |zero|.
-The remaining |(GOAL(0 ↓≤ n)(G0))| is actually non-trivial, but the Agda standard library covers that.
+The remaining |(GOAL(0 ↓≤ n)(G0))| is actually nontrivial, but the Agda standard library covers that.
 
 %\begin{aha}
 %Another nice implementation of |ImmediateSublistInduction|!
@@ -1318,7 +1331,7 @@ I've already had a map function for |BT|, and indeed its type can be rewritten a
 \begin{code}
 mapBT : (p ⇉ q) → ((BT_ n k) p ⇉ (BT_ n k) q)
 \end{code}
-In a sense, a lifted morphism such as |mapBT f| is essentially just~|f| since |mapBT f| does nothing to the functor layer.\todo{layers}
+In a sense, a lifted morphism such as |mapBT f| is essentially just~|f| since |mapBT f| does nothing to the functor layer.
 So when |f|~is a composition, that composition shows up at the level of lifted morphisms too.
 Formally, this is stated as a \emph{functoriality} equation:
 \begin{code}
@@ -1426,7 +1439,7 @@ I'm not confident enough to work with the full recursive definitions straight aw
 The rightmost component |blank(C 3 2)| has type |const ⊤ ⇉ BT(C 3 2) (const ⊤)|, which ---~after eliding the |const|s, as I've just decided to do~--- is drawn as the bottom Y-junction in the string diagram (as on the right of \cref{fig:td-diagram}), transforming the input |⊤|-wire at the bottom into two wires |BT(C 3 2)| and~|⊤|.
 Then the |mapBT| means that the left wire |BT(C 3 2)| is skipped over and unchanged.
 The right |⊤|-wire continues to be transformed by |blank(C 2 1)| and so on, and eventually becomes an |s|-wire.
-Finally, I apply~|g| to the |BT(C 3 2)|-wire I skipped over and the |s|-wire to produce the output |s|-wire at the top.\todo{rewritten}
+Finally, I apply~|g| to the |BT(C 3 2)|-wire I skipped over and the |s|-wire to produce the output |s|-wire at the top.
 
 % Figure~\ref{fig:td-diagram} belongs here
 
@@ -1641,7 +1654,7 @@ More specifically, why is it good to keep \emph{two} layers of tables and not mo
 When there are multiple layers of tables of type |BT(C n k)| with |k < n|, meaning that the input list is split into proper sublists multiple times, all the final sublists will appear (as indices in the element types) in the entire nested table multiple times --- that is, overlapping subproblems will appear.
 Therefore, when I use~|g| to fill in a nested table, I'm invoking~|g| to compute duplicate solutions for overlapping subproblems, which is what I want to avoid.
 More precisely, `using~|g| to fill in a nested table' means applying~|g| under at least two layers, for example |mapBT (mapBT g) : BT(C 3 2) (BT(C 2 1) (BT(C 1 0) s)) ⇉ BT(C 3 2) (BT(C 2 1) s)|, where the result is at least two layers of tables, so there need to be at least \emph{three} layers of tables (to which |mapBT (mapBT g)| is applied) for duplicate solutions of overlapping subproblems to be recomputed.
-\todo{two layers for overlapping subproblems to occur (which is unavoidable); three layers for them to be solved repetitively (which we want to avoid). JG: fixed?}
+%\todo{two layers for overlapping subproblems to occur (which is unavoidable); three layers for them to be solved repetitively (which we want to avoid). JG: fixed?}
 The bottom-up algorithm never gets to three layers of tables, and therefore avoids recomputing solutions for overlapping subproblems.
 
 That reasoning doesn't sound too bad, although it's clear that there's much more to be done.
@@ -1675,13 +1688,14 @@ He would've liked the new languages and the new ways of reasoning.
 %\itshape % Plan C - maybe too shouty?
 
 This work is presented as a kind of `Socratic monologue', recording the thought processes of a functional programmer as they solve a programming mystery.
-We were inspired by\todo{the opening chapters of} the science fiction novel \textit{Project Hail Mary} by Andy Weir, where the narrative masterfully weaves together intuitive presentations of scientific knowledge and the protagonist's application of that knowledge to solve the problems they are facing.
+We were inspired by the science fiction novel \textit{Project Hail Mary} by Andy Weir, where the narrative masterfully weaves together intuitive presentations of scientific knowledge and the protagonist's application of that knowledge to solve the problems they are facing.
 We envisaged to do something similar in this paper, although it ends up being not as leisurely and entertaining as Weir's novel, because we need to cover more technical detail, and there is very little action in our story apart from sitting in front of a computer and racking one's brains.
 However, compared to the traditional rational reconstruction of a finished piece of work, we believe that this format helps both the writer and the reader to focus on currently available clues and how to make progress based on those clues by recreating the experience of solving a mystery.
 In fact, our telling largely follows our actual development (tracing what \lstinline{cd} does in \cref{sec:bu}, generalising |B|~and~|B'| to |BT| in \cref{sec:BT}, revising |ImmediateSublistInduction| in \cref{sec:td-and-bu-in-Agda}, realising that the |BT-isProp| argument works more generally after proving |rotation| in \cref{sec:diagrammatic-reasoning}, etc) --- that is, this paper is `based on a true story'.
 
 The format also works well with various decisions regarding what to include in the paper, and what to omit.
 We put emphasis on intuitive explanations, and give formal definitions, theorems, and proofs only when necessary: we usually rely on intuitive reasoning to tackle a problem at first, and do not hurry to write things down formally.
+The supplementary Agda code provides the omitted formal detail though.
 We have striven to keep the paper fairly self-contained: the reader should be able to get a sense of the main ideas just from the intuitive explanations.
 But we do not intend this paper to be a tutorial on dependently typed programming in Agda or on category theory --- the paper is best thought of as a companion to such tutorials or textbooks, giving a larger but not overly complicated example, and applying the abstract tools to that example.
 To make the paper more accessible, we have also resisted the temptation to generalise or to answer every question:
@@ -1690,9 +1704,11 @@ for example, we do not generalise |ImmediateSublistInduction| for dynamic progra
 
 %\todo[inline]{What \emph{is} in the paper: our contribution. Comparison with related work \cite{Bird&Hinze-nexus,Bird-zippy-tabulations,Mu-sublists}. We haven't given concrete examples: neither do our predecessors. As \citet{Mu-sublists} observes, this kind of tabulation is a standard technique in algorithm design, but the examples aren't quick to introduce.}
 
-The sublists problem was one of the examples used by \citet{Bird&Hinze-nexus} when studying a technique of function memoization using trees of shared nodes, which they called \emph{nexuses}.
+This work gives a dependently typed treatment of the sublists problem.
+The problem has been studied in other settings.
+It was one of the examples used by \citet{Bird&Hinze-nexus} when studying a technique of function memoisation using trees of shared nodes, which they called \emph{nexuses}.
 \citet{Bird-zippy-tabulations} went on to study top-down and bottom-up algorithms, where the sublists problem was the final example.
-To cover all the examples in the paper, \citeauthor{Bird-zippy-tabulations}'s generic bottom-up algorithm also employed a form of nexus, but it is not needed for the sublists problem and thus omitted here.
+To cover all the examples in the paper, \citeauthor{Bird-zippy-tabulations}'s generic bottom-up algorithm also employed a form of nexus, but it is not needed for the sublists problem and thus omitted in our work.
 \citet{Mu-sublists} derived \lstinline{cd} from the specification~(\cref{eq:cd-spec}) and proved the equality between \lstinline{td} and \lstinline{bu} using traditional equational reasoning.
 Neither \citet{Bird&Hinze-nexus} nor \citet{Bird-zippy-tabulations} discussed applications of the sublists problem, but \citet{Mu-sublists} observed that reduction to it is a standard technique in the algorithms community.
 None of these papers used dependent types.
@@ -1700,9 +1716,9 @@ None of these papers used dependent types.
 The general message we want to deliver is that we can discover, explain, and prove things by writing them down in appropriate languages.
 More specifically, dependent types, category theory, and string diagrams are some of those languages, and they should be in the toolbox of the mathematically inclined functional programmer.
 In the case of dependent types, they can be expressive enough to replace traditional (equational) specifications and proofs.
-For example, in place of \citeauthor{Mu-sublists}'s derivation, |retabulate| can be constructed by assigning it a type having sufficient information (\cref{sec:spec}), and
+For example, in place of \varcitet{Mu-sublists}{'s} derivation, |retabulate| can be constructed by assigning it a type having sufficient information (\cref{sec:spec}), and
 the dependently typed |td| and |bu| can be proved equal simply by showing that they have the same, uniquely inhabited type~(\cref{sec:equality-from-types}).
-This approach to program equality is still under-explored, and has potential to reduce proof burdens drastically.
+This approach to program correctness and program equality is still under-explored, and has potential to reduce proof burdens drastically.
 %For a comparison, \citet{Mu-sublists} derived \lstinline{cd} from the specification~(\cref{eq:cd-spec}) and proved the equality between \lstinline{td} and \lstinline{bu} using traditional equational reasoning on simply typed terms; we do away with these by designing types carrying more information for our terms.
 As for category theory, even though we use it only in a lightweight manner, it still offers a somewhat useful abstraction for managing more complex (in our case, indexed) definitions as if they were simply typed~(\cref{sec:basic-category-theory}).
 More importantly, the categorical abstraction enables the use of string diagrams to simplify proofs about functoriality and naturality.
