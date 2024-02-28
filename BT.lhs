@@ -334,7 +334,7 @@ I know \lstinline{B} is this Haskell data type of binary trees:
 \begin{lstlisting}
 data B a = Tip a || Bin (B a) (B a)
 \end{lstlisting}
-Presumably \lstinline{mapB} and \lstinline{zipBWith} are the usual map and zip functions for these trees, and \lstinline{L}~is the standard list type. 
+Presumably \lstinline{mapB} and \lstinline{zipBWith} are the usual map and zip functions for these trees, and \lstinline{L}~is the standard list type.
 But how did Richard come up with such an incomprehensible function definition?
 %\Jeremy{We should be more consistent about whether to call him Richard or Bird. Shin: does it work if we say "Richard" when we refer to the person and say Bird (2008) when we refer to the paper?}
 He didn't bother to explain it in his paper.
@@ -511,13 +511,15 @@ For example, level~$2$ has |CHOOSE 4 2 =' 6| values, and there are $6$~ways of c
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.8\textwidth]{pics/map_g_cd.pdf}
+\includegraphics[width=0.85\textwidth]{pics/map_g_cd.pdf}
 \caption{How\csp\lstinline{mapB g . cd}\csp constructs a new level.}
 \label{fig:map_g_cd}
 \end{figure}
 
 Aha!
-I can even see a pattern related to the choices in the tree representation of level~$2$\todo{Label the numbers in the figures with `level'; position of figure(s)}~(\cref{fig:map_g_cd}): the right subtree is about all the 2-sublists that end with~\lstinline{'d'}, and the left subtree about the other 2-sublists not containing~\lstinline{'d'}.
+I can even see a pattern related to the choices in the tree representation of level~$2$
+%\todo{Label the numbers in the figures with `level'; position of figure(s). SCM: Done.}
+(\cref{fig:map_g_cd}): the right subtree is about all the 2-sublists that end with~\lstinline{'d'}, and the left subtree about the other 2-sublists not containing~\lstinline{'d'}.
 To choose $2$~elements from \lstinline{"abcd"}, I can include the rightmost element~\lstinline{'d'} or not.
 If \lstinline{'d'}~is included, there are |CHOOSE 3 1| ways of choosing $1$~element from \lstinline{"abc"} to go with~\lstinline{'d'}.
 If \lstinline{'d'}~is not included, there are |CHOOSE 3 2| ways of choosing $2$~elements from \lstinline{"abc"}.
