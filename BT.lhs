@@ -1684,16 +1684,21 @@ For example, we do not generalise |ImmediateSublistInduction| for dynamic progra
 
 \todo[inline]{What \emph{is} in the paper: our contribution. Comparison with related work \cite{Bird&Hinze-nexus,Bird-zippy-tabulations,Mu-sublists}. We haven't given concrete examples: neither do our predecessors. As \citet{Mu-sublists} observes, this kind of tabulation is a standard technique in algorithm design, but the examples aren't quick to introduce.}
 
-The sublists problem was one of the examples in \citet{Bird&Hinze-nexus}, the topic of which was a technique of function memorization using trees of shared nodes (which they called \emph{nexuses}).
-Afterwards, \citet{Bird-zippy-tabulations} went on to study top-down and bottom-up algorithms, where the sublists problem was the last and the most difficult example.
-Neither papers discussed applications of this problem.
-It was briefly mentioned in \citet{Mu-sublists} that many problems can be cast into the sublists problem after pre-processing, which is a standard technique in algorithm community.
+The sublists problem was one of the examples in \citet{Bird&Hinze-nexus}, the topic of which was a technique of function memorization using trees of shared nodes, which they called \emph{nexuses}.
+Afterwards, \citet{Bird-zippy-tabulations} went on to study top-down and bottom-up algorithms, where the sublists problem was the last example.
+To cover all the examples in the paper, the generic bottom-up algorithm in \citet{Bird-zippy-tabulations} also employed a form of nexus, but it is not needed for the sublists problem and thus omitted in our work.
+Neither of the two papers discussed applications of the sublists problem.
+\citet{Mu-sublists} focused on the problem and derived \lstinline{cd}.
+It was briefly mentioned in \citet{Mu-sublists} that many problems can be cast into the sublists problem after a pre-processing phase that is standard in algorithm community.
+All the three papers stayed in the realm of simple-typed functional programming.
 
 The general message we want to deliver is that we can discover, explain, and prove things by writing them down in appropriate languages.
 More specifically, dependent types, category theory, and string diagrams are some of those languages, and they should be in the toolbox of the mathematically inclined functional programmer.
 In the case of dependent types, they can be expressive enough to replace traditional (equational) specifications and proofs --- for example, the dependently typed |td| and |bu| can be proved equal simply by showing that they have the same, uniquely inhabited type~(\cref{sec:equality-from-types}).
 This approach to program equality is still under-explored, and has potential to reduce proof burdens drastically.
-For a comparison, \citet{Mu-sublists} derives \lstinline{cd} from the specification~(\cref{eq:cd-spec}) and proves the equality between \lstinline{td} and \lstinline{bu} using traditional equational reasoning on simply typed terms; we do away with these by designing types carrying more information for our terms.
+For a comparison, \citet{Mu-sublists} derives
+\todo{"derives" or "derived"? Should we use present or past tense for previous work?}
+\lstinline{cd} from the specification~(\cref{eq:cd-spec}) and proves the equality between \lstinline{td} and \lstinline{bu} using traditional equational reasoning on simply typed terms; we do away with these by designing types carrying more information for our terms.
 As for category theory, even though we use it only in a lightweight manner, it still offers a somewhat useful abstraction for managing more complex (in our case, indexed) definitions as if they were simply typed~(\cref{sec:basic-category-theory}).
 More importantly, the categorical abstraction enables the use of string diagrams to simplify proofs about functoriality and naturality.
 These properties are only the simplest ones that string diagrams can handle --- for other kinds of properties~\citep{Coecke-PQP,Hinze-string-diagrams} the proof simplification can be even more dramatic, although many of those properties are highly abstract.
