@@ -217,6 +217,9 @@ bu-loop g k (≤‴-step d) = bu-loop g (1 + k) d ∘ mapBT g ∘ retabulate (�
 bu : ImmediateSublistInduction
 bu s e g n = unTip ∘ bu-loop g 0 (≤⇒≤‴ z≤n) ∘ mapBT e ∘ blank n 0 (≤⇒≤′ z≤n)
 
+--------
+-- Section 2.5
+
 module ℕ-InductionPrinciple where
 
   ℕ-Induction : Set₁

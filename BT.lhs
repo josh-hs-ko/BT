@@ -1417,7 +1417,7 @@ All the abstract nonsense took me some time.
 But I still don't know whether string diagrams will actually help me to understand the two algorithms (\cref{sec:td-and-bu-in-Agda}).
 It's time to find out.
 
-I'm not confident enough to work with the full recursive definitions straight away, so I take the special case |td s e g 3| of the top-down algorithm and unfold it into a deeply nested expression |g ∘ mapBT LDOTS ∘ blank(C 3 2)| (as on the left of \cref{fig:td-diagram}).
+I'm not confident enough to work with the full recursive definitions straight away, so I take the special case |td s e g 3| of the top-down algorithm and unfold it into a deeply nested expression |g ∘ mapBT (LDOTS) ∘ blank(C 3 2)| (as on the left of \cref{fig:td-diagram}).
 The rightmost component |blank(C 3 2)| has type |const ⊤ ⇉ BT(C 3 2) (const ⊤)|, which ---~after eliding the |const|s, as I've just decided to do~--- is drawn as the bottom Y-junction in the string diagram (as on the right of \cref{fig:td-diagram}), transforming the input |⊤|-wire at the bottom into two wires |BT(C 3 2)| and~|⊤|.
 Then the |mapBT| means that the left wire |BT(C 3 2)| is skipped over and unchanged.
 The right |⊤|-wire continues to be transformed by |blank(C 2 1)| and so on, and eventually becomes an |s|-wire.
@@ -1635,9 +1635,9 @@ More specifically, why is it good to keep \emph{two} layers of tables and not mo
 
 When there are multiple layers of tables of type |BT(C n k)| with |k < n|, meaning that the input list is split into proper sublists multiple times, all the final sublists will appear (as indices in the element types) in the entire nested table multiple times --- that is, overlapping subproblems will appear.
 Therefore, when I use~|g| to fill in a nested table, I'm invoking~|g| to compute duplicate solutions for overlapping subproblems, which is what I want to avoid.
-More precisely, `using~|g| to fill in a nested table' means applying~|g| under at least two layers, for example |mapBT (mapBT g) : BT(C 3 2) (BT(C 2 1) (BT(C 1 0) s)) ⇉ BT(C 3 2) (BT(C 2 1) s)|, where the result is at least two layers of tables, so there need to be at least \emph{three} layers of tables (to which |mapBT (mapBT g)| is applied) for duplicate solutions of overlapping subproblems to occur.
+More precisely, `using~|g| to fill in a nested table' means applying~|g| under at least two layers, for example |mapBT (mapBT g) : BT(C 3 2) (BT(C 2 1) (BT(C 1 0) s)) ⇉ BT(C 3 2) (BT(C 2 1) s)|, where the result is at least two layers of tables, so there need to be at least \emph{three} layers of tables (to which |mapBT (mapBT g)| is applied) for duplicate solutions of overlapping subproblems to be recomputed.
 \todo{two layers for overlapping subproblems to occur (which is unavoidable); three layers for them to be solved repetitively (which we want to avoid). JG: fixed?}
-The bottom-up algorithm never gets to three layers of tables, and therefore avoids solving overlapping subproblems.
+The bottom-up algorithm never gets to three layers of tables, and therefore avoids recomputing solutions for overlapping subproblems.
 
 That reasoning doesn't sound too bad, although it's clear that there's much more to be done.
 The whole argument is still too informal and lacks detail.
@@ -1673,14 +1673,15 @@ This work is presented as a kind of `Socratic monologue', recording the thought 
 We were inspired by\todo{the opening chapters of} the science fiction novel \textit{Project Hail Mary} by Andy Weir, where the narrative masterfully weaves together intuitive presentations of scientific knowledge and the protagonist's application of that knowledge to solve the problems they are facing.
 We envisaged to do something similar in this paper, although it ends up being not as leisurely and entertaining as Weir's novel, because we need to cover more technical detail, and there is very little action in our story apart from sitting in front of a computer and racking one's brains.
 However, compared to the traditional rational reconstruction of a finished piece of work, we believe that this format helps both the writer and the reader to focus on currently available clues and how to make progress based on those clues by recreating the experience of solving a mystery.
-In fact, our telling largely follows our actual development (tracing what \lstinline{cd} does in \cref{fig:map_g_cd}, generalising |B|~and~|B'| to |BT| in \cref{sec:BT}, realising that the |BT-isProp| argument works more generally after proving |rotation| in \cref{sec:diagrammatic-reasoning}, etc) --- that is, this paper is `based on a true story'.
+In fact, our telling largely follows our actual development (tracing what \lstinline{cd} does in \cref{sec:bu}, generalising |B|~and~|B'| to |BT| in \cref{sec:BT}, revising |ImmediateSublistInduction| in \cref{sec:td-and-bu-in-Agda}, realising that the |BT-isProp| argument works more generally after proving |rotation| in \cref{sec:diagrammatic-reasoning}, etc) --- that is, this paper is `based on a true story'.
 
 The format also works well with various decisions regarding what to include in the paper, and what to omit.
-We put emphasis on intuitive explanations, and give formal definitions, theorems, and proofs only when necessary: we usually rely on intuitive reasoning to tackle a problem at first, and do not hurry to write things down formally.\todo{consistency; too many colons?}
+We put emphasis on intuitive explanations, and give formal definitions, theorems, and proofs only when necessary: we usually rely on intuitive reasoning to tackle a problem at first, and do not hurry to write things down formally.
 We have striven to keep the paper fairly self-contained: the reader should be able to get a sense of the main ideas just from the intuitive explanations.
 But we do not intend this paper to be a tutorial on dependently typed programming in Agda or on category theory --- the paper is best thought of as a companion to such tutorials or textbooks, giving a larger but not overly complicated example, and applying the abstract tools to that example.
-To make the paper more accessible, we have also resisted the temptation to generalise or to answer every question: when we are solving a problem, we usually put aside ideas that are not directly relevant.
-For example, we do not generalise |ImmediateSublistInduction| for dynamic programming more broadly (as \citet{Bird-zippy-tabulations} attempted to do); we leave the question of whether the type of |retabulate| uniquely determines the extensional behaviour of its inhabitants as a conjecture~(\cref{sec:spec}); and we avoid digressions into topics such as how data types like |BT| can be derived systematically~(\cref{sec:BT}) and whether |BT| is a graded comonad~(\cref{sec:td-and-bu-in-Agda}).
+To make the paper more accessible, we have also resisted the temptation to generalise or to answer every question:
+%When we are solving a problem, we usually put aside ideas that are not directly relevant.
+for example, we do not generalise |ImmediateSublistInduction| for dynamic programming more broadly (as \citet{Bird-zippy-tabulations} attempted to do); we leave the question of whether the type of |retabulate| uniquely determines the extensional behaviour of its inhabitants as a conjecture~(\cref{sec:spec}); and we avoid digressions into topics such as how data types like |BT| can be derived systematically~(\cref{sec:BT}) and whether |BT| is a graded comonad~(\cref{sec:td-and-bu-in-Agda}).
 
 \todo[inline]{What \emph{is} in the paper: our contribution. Comparison with related work \cite{Bird&Hinze-nexus,Bird-zippy-tabulations,Mu-sublists}. We haven't given concrete examples: neither do our predecessors. As \citet{Mu-sublists} observes, this kind of tabulation is a standard technique in algorithm design, but the examples aren't quick to introduce.}
 
@@ -1690,19 +1691,20 @@ To cover all the examples in the paper, the generic bottom-up algorithm in \cite
 Neither of the two papers discussed applications of the sublists problem.
 \citet{Mu-sublists} focused on the problem and derived \lstinline{cd}.
 It was briefly mentioned in \citet{Mu-sublists} that many problems can be cast into the sublists problem after a pre-processing phase that is standard in algorithm community.
-All the three papers stayed in the realm of simple-typed functional programming.
+None of the papers used dependent types.
+%All the three papers stayed in the realm of simple-typed functional programming.
 
 The general message we want to deliver is that we can discover, explain, and prove things by writing them down in appropriate languages.
 More specifically, dependent types, category theory, and string diagrams are some of those languages, and they should be in the toolbox of the mathematically inclined functional programmer.
 In the case of dependent types, they can be expressive enough to replace traditional (equational) specifications and proofs --- for example, the dependently typed |td| and |bu| can be proved equal simply by showing that they have the same, uniquely inhabited type~(\cref{sec:equality-from-types}).
 This approach to program equality is still under-explored, and has potential to reduce proof burdens drastically.
-For a comparison, \citet{Mu-sublists} derives
+For a comparison, \citet{Mu-sublists} derived
 \todo{"derives" or "derived"? Should we use present or past tense for previous work?}
-\lstinline{cd} from the specification~(\cref{eq:cd-spec}) and proves the equality between \lstinline{td} and \lstinline{bu} using traditional equational reasoning on simply typed terms; we do away with these by designing types carrying more information for our terms.
+\lstinline{cd} from the specification~(\cref{eq:cd-spec}) and proved the equality between \lstinline{td} and \lstinline{bu} using traditional equational reasoning on simply typed terms; we do away with these by designing types carrying more information for our terms.
 As for category theory, even though we use it only in a lightweight manner, it still offers a somewhat useful abstraction for managing more complex (in our case, indexed) definitions as if they were simply typed~(\cref{sec:basic-category-theory}).
 More importantly, the categorical abstraction enables the use of string diagrams to simplify proofs about functoriality and naturality.
 These properties are only the simplest ones that string diagrams can handle --- for other kinds of properties~\citep{Coecke-PQP,Hinze-string-diagrams} the proof simplification can be even more dramatic, although many of those properties are highly abstract.
-Our comparison between diagrammatic and traditional equational reasoning (\cref{fig:bu-diagram,fig:naturality-rewriting}, for example) should be a good, albeit modest, demonstration of the power of string diagrams in a more practical, algorithmic scenario.
+Our comparison between diagrammatic and traditional equational reasoning (\cref{fig:td-diagram,fig:functoriality-rewriting}, and \cref{fig:bu-diagram,fig:naturality-rewriting}) should be a good, albeit modest, demonstration of the power of string diagrams in a more practical, algorithmic scenario.
 
 \endgroup
 
