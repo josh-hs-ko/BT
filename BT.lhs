@@ -1684,6 +1684,11 @@ For example, we do not generalise |ImmediateSublistInduction| for dynamic progra
 
 \todo[inline]{What \emph{is} in the paper: our contribution. Comparison with related work \cite{Bird&Hinze-nexus,Bird-zippy-tabulations,Mu-sublists}. We haven't given concrete examples: neither do our predecessors. As \citet{Mu-sublists} observes, this kind of tabulation is a standard technique in algorithm design, but the examples aren't quick to introduce.}
 
+The sublists problem was one of the examples in \citet{Bird&Hinze-nexus}, the topic of which was a technique of function memorization using trees of shared nodes (which they called \emph{nexuses}).
+Afterwards, \citet{Bird-zippy-tabulations} went on to study top-down and bottom-up algorithms, where the sublists problem was the last and the most difficult example.
+Neither papers discussed applications of this problem.
+It was briefly mentioned in \citet{Mu-sublists} that many problems can be cast into the sublists problem after pre-processing, which is a standard technique in algorithm community.
+
 The general message we want to deliver is that we can discover, explain, and prove things by writing them down in appropriate languages.
 More specifically, dependent types, category theory, and string diagrams are some of those languages, and they should be in the toolbox of the mathematically inclined functional programmer.
 In the case of dependent types, they can be expressive enough to replace traditional (equational) specifications and proofs --- for example, the dependently typed |td| and |bu| can be proved equal simply by showing that they have the same, uniquely inhabited type~(\cref{sec:equality-from-types}).
