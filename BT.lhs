@@ -1683,24 +1683,24 @@ To make the paper more accessible, we have also resisted the temptation to gener
 %When we are solving a problem, we usually put aside ideas that are not directly relevant.
 for example, we do not generalise |ImmediateSublistInduction| for dynamic programming more broadly (as \citet{Bird-zippy-tabulations} attempted to do); we leave the question of whether the type of |retabulate| uniquely determines the extensional behaviour of its inhabitants as a conjecture~(\cref{sec:spec}); and we avoid digressions into topics such as how data types like |BT| can be derived systematically~(\cref{sec:BT}) and whether |BT| is a graded comonad~(\cref{sec:td-and-bu-in-Agda}).
 
-\todo[inline]{What \emph{is} in the paper: our contribution. Comparison with related work \cite{Bird&Hinze-nexus,Bird-zippy-tabulations,Mu-sublists}. We haven't given concrete examples: neither do our predecessors. As \citet{Mu-sublists} observes, this kind of tabulation is a standard technique in algorithm design, but the examples aren't quick to introduce.}
+%\todo[inline]{What \emph{is} in the paper: our contribution. Comparison with related work \cite{Bird&Hinze-nexus,Bird-zippy-tabulations,Mu-sublists}. We haven't given concrete examples: neither do our predecessors. As \citet{Mu-sublists} observes, this kind of tabulation is a standard technique in algorithm design, but the examples aren't quick to introduce.}
 
 The sublists problem was one of the examples used by \citet{Bird&Hinze-nexus} when studying a technique of function memoization using trees of shared nodes, which they called \emph{nexuses}.
 \citet{Bird-zippy-tabulations} went on to study top-down and bottom-up algorithms, where the sublists problem was the final example.
 To cover all the examples in the paper, \citeauthor{Bird-zippy-tabulations}'s generic bottom-up algorithm also employed a form of nexus, but it is not needed for the sublists problem and thus omitted here.
 Neither paper discussed applications of the sublists problem.
-\citet{Mu-sublists} focused on the problem and derived \lstinline{cd}. \todo{Shin to shift a sentence from the next paragraph to here? or I'll do it, later today}
-\citet{Mu-sublists} observed that it is a standard technique in the algorithms community to reduce other problems to the sublists problem.
+\todo{Shin to shift a sentence from the next paragraph to here? or I'll do it, later today. Shin: Done. The next paragraph is changed a bit too.}
+\citet{Mu-sublists} derived \lstinline{cd} from the specification~(\cref{eq:cd-spec}) and proved the equality between \lstinline{td} and \lstinline{bu} using traditional equational reasoning.
+He observed that it is a standard technique in the algorithms community to reduce other problems to the sublists problem.
 None of these papers used dependent types.
-%All the three papers stayed in the realm of simple-typed functional programming.
 
 The general message we want to deliver is that we can discover, explain, and prove things by writing them down in appropriate languages.
 More specifically, dependent types, category theory, and string diagrams are some of those languages, and they should be in the toolbox of the mathematically inclined functional programmer.
-In the case of dependent types, they can be expressive enough to replace traditional (equational) specifications and proofs --- for example, the dependently typed |td| and |bu| can be proved equal simply by showing that they have the same, uniquely inhabited type~(\cref{sec:equality-from-types}).
+In the case of dependent types, they can be expressive enough to replace traditional (equational) specifications and proofs.
+For example, in place of \citeauthor{Mu-sublists}'s derivation, |retabulate| can be constructed by assigning it a type having sufficient information (\cref{sec:spec}), and
+the dependently typed |td| and |bu| can be proved equal simply by showing that they have the same, uniquely inhabited type~(\cref{sec:equality-from-types}).
 This approach to program equality is still under-explored, and has potential to reduce proof burdens drastically.
-For a comparison, \citet{Mu-sublists} derived
-\todo{"derives" or "derived"? Should we use present or past tense for previous work?}
-\lstinline{cd} from the specification~(\cref{eq:cd-spec}) and proved the equality between \lstinline{td} and \lstinline{bu} using traditional equational reasoning on simply typed terms; we do away with these by designing types carrying more information for our terms.
+%For a comparison, \citet{Mu-sublists} derived \lstinline{cd} from the specification~(\cref{eq:cd-spec}) and proved the equality between \lstinline{td} and \lstinline{bu} using traditional equational reasoning on simply typed terms; we do away with these by designing types carrying more information for our terms.
 As for category theory, even though we use it only in a lightweight manner, it still offers a somewhat useful abstraction for managing more complex (in our case, indexed) definitions as if they were simply typed~(\cref{sec:basic-category-theory}).
 More importantly, the categorical abstraction enables the use of string diagrams to simplify proofs about functoriality and naturality.
 These properties are only the simplest ones that string diagrams can handle --- for other kinds of properties~\citep{Coecke-PQP,Hinze-string-diagrams} the proof simplification can be even more dramatic, although many of those properties are highly abstract.
