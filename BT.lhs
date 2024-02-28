@@ -1688,10 +1688,8 @@ for example, we do not generalise |ImmediateSublistInduction| for dynamic progra
 The sublists problem was one of the examples used by \citet{Bird&Hinze-nexus} when studying a technique of function memoization using trees of shared nodes, which they called \emph{nexuses}.
 \citet{Bird-zippy-tabulations} went on to study top-down and bottom-up algorithms, where the sublists problem was the final example.
 To cover all the examples in the paper, \citeauthor{Bird-zippy-tabulations}'s generic bottom-up algorithm also employed a form of nexus, but it is not needed for the sublists problem and thus omitted here.
-Neither paper discussed applications of the sublists problem.
-\todo{Shin to shift a sentence from the next paragraph to here? or I'll do it, later today. Shin: Done. The next paragraph is changed a bit too.}
 \citet{Mu-sublists} derived \lstinline{cd} from the specification~(\cref{eq:cd-spec}) and proved the equality between \lstinline{td} and \lstinline{bu} using traditional equational reasoning.
-He observed that it is a standard technique in the algorithms community to reduce other problems to the sublists problem.
+Neither \citet{Bird&Hinze-nexus} nor \citet{Bird-zippy-tabulations} discussed applications of the sublists problem, but \citet{Mu-sublists} observed that reduction to it is a standard technique in the algorithms community.
 None of these papers used dependent types.
 
 The general message we want to deliver is that we can discover, explain, and prove things by writing them down in appropriate languages.
