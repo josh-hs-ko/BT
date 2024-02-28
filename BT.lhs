@@ -1134,7 +1134,7 @@ unTip             (tipS  p) = p
 unTip {xs =' []}  (tipZ  p) = p
 \end{code}
 The |bin| case is impossible and ignored.
-(Hm, |retabulate| and |unTip|\todo{removed the types} smell comonadic, and maybe the indices constitute a grading\todo{Cite?}\ldots but I can't get distracted now.)
+(Hm, |retabulate| and |unTip|\todo{removed the types} smell comonadic, and maybe the indices constitute a grading \citep{grading}\ldots but I can't get distracted now.)
 
 The argument/counter~|k| of |loop| should satisfy the invariant |k ↓≤ n|.
 Again, this version of natural number inequality is chosen to align with the inductive structure of |loop|.
