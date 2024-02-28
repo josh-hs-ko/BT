@@ -1,4 +1,5 @@
 %let anonymous = True
+%let draft = False
 
 \documentclass[%
 %if anonymous
@@ -50,7 +51,11 @@ acmsmall,fleqn,screen,review]{acmart}
 \setlist[inlineenum]{label=(\arabic*)}
 
 \setlength{\marginparwidth}{1.25cm}
-\usepackage[obeyFinal,color=yellow,textsize=scriptsize]{todonotes}
+\usepackage[obeyFinal,color=yellow,textsize=scriptsize%
+%if not draft
+,disable%
+%endif
+]{todonotes}
 
 \newcommand{\Josh}[1]{\footnote{\color{blue}Josh: #1}}
 \newcommand{\Shin}[1]{\footnote{\color{blue}Shin: #1}}
