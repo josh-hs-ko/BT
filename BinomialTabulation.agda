@@ -57,8 +57,8 @@ module ShapeIndexing where
   zipBWith f (bin t t') (bin u u') = bin (zipBWith f t u) (zipBWith f t' u')
 
   cd : 1 ≤ k → k < n → B n k a → B n (1 + k) (Vec a (1 + k))
-  cd () _      (tipZ _)
-  cd _ 1+k<1+k (tipS _) = ⊥-elim (<-irrefl refl 1+k<1+k)
+  cd () _            (tipZ _)
+  cd _ 1+k<1+k       (tipS _)                       = ⊥-elim (<-irrefl refl 1+k<1+k)
   cd _ _             (bin   (tipS y  )   (tipZ z )) = tipS (y ∷ z ∷ [])
   cd _ _             (bin   (tipS y  ) u@(bin _ _)) = tipS (y ∷ unTipB (cd (s≤s z≤n) ≤-refl u))
   cd _ _             (bin t@(bin t' _)   (tipZ z )) = bin (cd ≤-refl (s≤s (bounded t')) t) (mapB (_∷ (z ∷ [])) t)
@@ -135,9 +135,9 @@ _∷ᴮᵀ_ : p xs → BT (1 + k) k (p ∘ (x ∷_)) xs → BT (2 + k) (1 + k) p
 p ∷ᴮᵀ t = bin (tipS p) t
 
 retabulate : k < n → BT n k p xs → BT n (1 + k) (BT (1 + k) k p) xs
-retabulate            1+k<1+k (tipS _) = ⊥-elim (<-irrefl refl 1+k<1+k)
-retabulate {xs = _ ∷ []   } _ (tipZ y) = tipS (tipZ y)
-retabulate {xs = _ ∷ _ ∷ _} _ (tipZ y) = bin (retabulate (s≤s z≤n) (tipZ y)) (tipZ (tipZ y))
+retabulate            1+k<1+k (tipS _)                  = ⊥-elim (<-irrefl refl 1+k<1+k)
+retabulate {xs = _ ∷ []   } _ (tipZ y)                  = tipS (tipZ y)
+retabulate {xs = _ ∷ _ ∷ _} _ (tipZ y)                  = bin (retabulate (s≤s z≤n) (tipZ y)) (tipZ (tipZ y))
 retabulate _             (bin   (tipS y  ) u          ) = tipS (y ∷ᴮᵀ u)
 retabulate _             (bin t@(bin t' _)   (tipZ z )) = bin (retabulate (s≤s (bounded t')) t) (mapBT (_∷ᴮᵀ (tipZ z)) t)
 retabulate 2+n<2+n       (bin   (bin _  _)   (tipS _ )) = ⊥-elim (<-irrefl refl 2+n<2+n)
@@ -220,29 +220,33 @@ bu s e g n = unTip ∘ bu-loop g 0 (≤⇒≤‴ z≤n) ∘ mapBT e ∘ blank n 
 --------
 -- Section 2.5
 
-ℕ-Induction : Set₁
-ℕ-Induction = (p  : ℕ → Set)
-              (pz : p zero)
-              (ps : ∀ {m} → p m → p (suc m))
-              (n  : ℕ) → p n
+module ℕ-InductionPrinciple where
 
-ind : ℕ-Induction
-ind P pz ps  zero   = pz
-ind P pz ps (suc n) = ps (ind P pz ps n)
+  ℕ-Induction : Set₁
+  ℕ-Induction = (p  : ℕ → Set)
+                (pz : p zero)
+                (ps : ∀ {m} → p m → p (suc m))
+                (n  : ℕ) → p n
 
-ℕ-Induction-unary-parametricity : ℕ-Induction → Set₁
-ℕ-Induction-unary-parametricity f =
-    {p  : ℕ → Set}                 (q : ∀ {m} → p m → Set)
-  → {pz : p zero}                  (qz : q pz)
-  → {ps : ∀ {m} → p m → p (suc m)} (qs : ∀ {m} {x : p m} → q x → q (ps x))
-  → {n  : ℕ} → q (f p pz ps n)
+  ind : ℕ-Induction
+  ind P pz ps  zero   = pz
+  ind P pz ps (suc n) = ps (ind P pz ps n)
 
-ℕ-Induction-uniqueness-from-parametricity :
-    (f : ℕ-Induction) → ℕ-Induction-unary-parametricity f
-  → (P : ℕ → Set) (pz : P zero) (ps : ∀ {m} → P m → P (suc m)) (n : ℕ)
-  → f P pz ps n ≡ ind P pz ps n
-ℕ-Induction-uniqueness-from-parametricity f param p pz ps n =
-  param (λ {m} x → x ≡ ind p pz ps m) refl (cong ps)
+  ℕ-Induction-unary-parametricity : ℕ-Induction → Set₁
+  ℕ-Induction-unary-parametricity f =
+      {p  : ℕ → Set}                 (q : ∀ {m} → p m → Set)
+    → {pz : p zero}                  (qz : q pz)
+    → {ps : ∀ {m} → p m → p (suc m)} (qs : ∀ {m} {x : p m} → q x → q (ps x))
+    → {n  : ℕ} → q (f p pz ps n)
+
+  ℕ-Induction-uniqueness-from-parametricity :
+      (f : ℕ-Induction) → ℕ-Induction-unary-parametricity f
+    → (P : ℕ → Set) (pz : P zero) (ps : ∀ {m} → P m → P (suc m)) (n : ℕ)
+    → f P pz ps n ≡ ind P pz ps n
+  ℕ-Induction-uniqueness-from-parametricity f param p pz ps n =
+    param (λ {m} x → x ≡ ind p pz ps m) refl (cong ps)
+
+  -- end of module ℕ-InductionPrinciple
 
 BT' : ({ys : Vec a k} → p ys → Set) → BT n k p xs → Set
 BT' q (tipZ x)  = q x
@@ -294,8 +298,7 @@ IsProp' a = (x y : a) → x ≡ y
 BT-isProp' : (∀ {ys} → IsProp (p ys)) → IsProp' (BT n k p xs)
 BT-isProp' p-isProp (tipZ _)  (tipZ _)    = cong tipZ p-isProp
 BT-isProp' p-isProp (tipS _)  (tipS _)    = cong tipS p-isProp
-BT-isProp' p-isProp (bin t u) (bin t' u') = cong₂ bin (BT-isProp' p-isProp t t')
-                                                      (BT-isProp' p-isProp u u')
+BT-isProp' p-isProp (bin t u) (bin t' u') = cong₂ bin (BT-isProp' p-isProp t t') (BT-isProp' p-isProp u u')
 BT-isProp' p-isProp (tipS _)  (bin t' _)  = ⊥-elim (unbounded t')
 BT-isProp' p-isProp (bin t _) (tipS _)    = ⊥-elim (unbounded t)
 
