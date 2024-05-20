@@ -1,0 +1,254 @@
+ICFP 2024 Paper #43 Reviews and Comments
+===========================================================================
+Paper #43 Binomial Tabulation: A Short Story (Functional Pearl)
+
+
+Review #43A
+===========================================================================
+* Updated: May 10, 2024, 2:28:21 PM UTC
+
+Overall merit
+-------------
+C. Weak paper, though I will not fight strongly against it
+
+Reviewer Expertise
+------------------
+Y. I am knowledgeable in this area, but not an expert
+
+Reviewer Confidence
+-------------------
+3. Good: I am reasonably sure of my assessment
+
+Paper summary
+-------------
+This Functional Pearl takes the reader on the functional programmer author's thought journey upon reading Bird's 2008 Zippy Tabulations of Recursive Functions. It recounts how the author ultimately arrives at an understanding of Bird's cd function, is led to some refinements of it using dependent types, and, finally, uses string diagrams to simplify categorical arguments about the correctness of cd and those refinements.
+
+Assessment of the paper
+-----------------------
+The Pearl considers a problem that should be of interest to a wide swath of the ICFP community. It is clearly written, illuminating, interesting, and entertaining, and draws connections that are not immediately obvious. The solution it conveys to the original task of understanding the function cd does seem be oddly complex, though, and after a dozen pages or so I find that my enthusiasm has started to lag behind that of the authors. (And I note that even the authors are "whining" by the end of page 23!) Overall, I'd say I enjoyed reading this submission, but perhaps some of the to-ing and fro-ing could be suppressed, and perhaps the discussion of rotation is too much in an already overfull discussion?
+
+Questions for authors’ response
+-------------------------------
+My main question is the final one posed above: Could  some of the to-ing and fro-ing be suppressed? For example, could the discussion of rotation be removed or streamlined?
+
+Comments for authors
+--------------------
+p1 and throughout: We usually refer to research colleagues by their last names, not by their first. I'm guessing you know Richard Bird personally, and I know that things are a lot less formal since the pandemic. But it might still be better to follow the traditional publication conventions.
+
+p1, l-6: "The input of td is..." -> "The input of td f g is..."
+
+p3, l4: It would be helpful to say what you mean by "size" here rather than just referring to some annotations in Figure 3.
+
+p4, l8: Why is Section 1.3 referenced here?
+
+p4, 18: Please indicate that "Richard's hint about sizes" appears at the start of the second paragraph of Section 1.3.
+
+p6, l11: Is "parametrically quantified" an actual notion? Not in any work I've ever seen, although I know what you mean by it. Perhaps you mean to say "polymorphically quantified"? Otherwise, you are assuming that you have a parametric model for your object language. Do you?
+
+p7, l3-4: This sentence does not parse for me. Not only should "processed" be "process", but you also need to indicate what is to be processed "using a mapB". Why "a mapB"? Just mapB? A call to mapB?
+
+p7, l18: "inductive" -> "recursive"
+
+p15, l11: Bernardy et al.'s parametricity only applies in a specific setting. Are you actually working in this setting? Also, it might be helpful to indicate the "bit of simplication" done.
+
+p22, l-2: "(mere)" -> "that of (mere)"
+
+
+
+Review #43B
+===========================================================================
+
+Overall merit
+-------------
+B. OK paper, but I will not champion it
+
+Reviewer Expertise
+------------------
+X. I am an expert in this area
+
+Reviewer Confidence
+-------------------
+3. Good: I am reasonably sure of my assessment
+
+Paper summary
+-------------
+This pearl presents a reconstruction of Richard Bird's binomial trees used in the paper _Zippy tabulations of recursive functions_. It begins by sketching what they should do, before reimplementing these trees in Agda. Using dependent types, the relation with binomial coefficients can be made more clear, eventually leading to a _retabulate_ function (called `cd` in the original paper). This retabulation forms the key ingredient required to relate a top down and a bottom up algorithm. Although this paper does not present an equational proof (or one formalised in Agda), it shows how the expressive types -- together with parametricity -- ensure that both algorithms must be extensionally equal. Finally, the naturality of the construction can be visualised using string diagrams, providing an alternative proof of the same result.
+
+Assessment of the paper
+-----------------------
+I find it quite hard to review pearls for ICFP. The usual criteria that Jeremy Gibbons laid out, based on Richard Bird's original advice and included in the ICFP CFP, mention that pearls should 'polished, elegant, instructive, entertaining' -- this paper ticks many of these boxes. 
+
+The paper describes the many dead-ends, reconstructing the authors' thought process along the way; while certainly instructive, it does make for a rather long-winded paper in the end. The digression on induction principles, intermediate B' datatype, parametricity, rotations and string diagrams are all tangentially related to the main goal: relating the memoization of top down and tabulation of bottom up algorithms. And yet this key motivation for Bird's work does not get much attention. There are no example functions defined using `td` or `bu`, making it hard to appreciate what has been achieved, offering readers unfamiliar with Bird's work little motivation for why these questions are interesting at all. 
+
+In its defence, I did enjoy reading this paper. It is fascinating to see how dependent types uncover previously implicit structure in rather cunning functional datastructures. The writing flows well, even though I found the 'Sophocratic monologue' rather cutesy at times.
+
+Comments for authors
+--------------------
+* Page 2 (line 82) and Figure 2: why not use bu rather than td? And why use cd' instead of cd? I found these switches in naming more confusing than helpful.
+
+* line 124 - "I wonder if I have to use B instead of lists" -- but the type of 'cd' can be found on line 112. Why wonder if the answer is right there?
+
+* Iine 346 - when introducing the BT data type -- it may be worth making the connection with the sublist relation clear, taken here from Ulf Norell's tutorial paper _Dependently typed programming in Agda_:
+
+```
+data _⊆_ {A : Set} : List A -> List A -> Set where
+  stop : [] ⊆ []
+  drop : forall {xs y ys} -> xs ⊆ ys -> xs ⊆ y :: ys
+  keep : forall {x xs ys} -> xs ⊆ ys -> x :: xs ⊆ x :: ys
+```
+
+Tabulating a function that works takes a sublist as its input, requires two sub-tables one for the keep and one for the drop constructor. Taking a page from Hinze's paper on 'Generalizing generalized tries' -- but now in the dependently typed setting -- this might give insight in the structure of the BT type. Is this worth making more explicit? After all the vectors are used for counting the lengths, but the initial arguments to `td` and `bu` are simply typed.
+
+* line 562 - why use `Exactly` rather than `const a`? The extra generality is immediately discarded - once the blank tables are introduced.
+
+* line 621 - 'I look aghast at the monster I've created' - does not sound particularly 'pearly'...
+
+* I am unfamiliar with the equational proof by Mu, but the appeal to parametricity (line 725) is somewhat unconvincing. I would hope that the dependent types uncover hidden structure, making such a proof easier somehow, rather than invoking parametricity -- which is quite a technical result, especially in the presence of dependent types.
+
+
+
+Review #43C
+===========================================================================
+
+Overall merit
+-------------
+C. Weak paper, though I will not fight strongly against it
+
+Reviewer Expertise
+------------------
+X. I am an expert in this area
+
+Reviewer Confidence
+-------------------
+4. High: I am very sure of my assessment
+
+Paper summary
+-------------
+The paper is centered around a particular (somewhat inscrutable) function written by Richard Bird, which performs a "bottom-up" (i.e. memoizing) traversal over all the sublists of a given list.  Presented in the form of a short story or "Socratic monologue", it follows the thought processes of a functional programmer trying to understand the function.  The narrator first rewrites the function (and related functions) in Agda, giving it a much fancier indexed type involving "binomial trees", where a tree of type $BT\;n\;k\;a$ stores exactly $\binom n k$ elements of type $a$ at its leaves.  This fancier-typed version ultimately helps guide and shed light on the implementation.
+
+The narrator then turns to proving that the bottom-up traversal is equivalent to the more perspicuous yet inefficient top-down traversal, using string diagrams to reason about naturality.
+
+Assessment of the paper
+-----------------------
+I was excited by the topic of this paper, and there is indeed a lot to like about it. For example, there are many cool insights involving the BT type, including the initial idea for and construction of the type itself, as well as the generalization to indexing it by a type family; the paper contains a very nice explanation of functors and natural transformations, and some beautiful string diagrams; the details and writing are very polished, so that I found very little in the way of typos or awkwardly phrased things to point out.
+My biggest issue with the paper is simply that I found it very hard to follow, even though I would consider myself an expert in all the topics discussed (combinatorics, dependently-typed programming in Agda, naturality and string diagrams).  I fear this means the set of people who can read and appreciate this paper, as it currently stands, is very small.
+
+Overall, I liked the "first person omniscient" narrative style, where the reader is taken along on a journey with the author's thought processes.  However, I did not like the way the narrative began --- it reminded me of the kind of speculative fiction or mystery novel where the reader is simply dropped into the middle of a story in a strange world and only gradually is able to figure out what is going on.  And while it can be fun and suspenseful reading fiction in that style, I found it very frustrating for technical content.  I think I understand what you were trying to do---since the narrator is indeed contemplating a mystery (namely, the mystery of what the `cd` function does and how it works), the reader should be taken along on this journey of mystery as well.  I am just not sure how well this works in practice.
+
+So I started to figure out what was going on, but was also feeling somewhat lost in details (what is going on with these trees? Why are they these shapes in particular?  level 2 1/2 ?? Why does the BT type have three constructors instead of two? What exactly is `cd` doing again, and why does it have this type?) By the time we reach the definition of `cd` in Agda I was thoroughly lost.  I tried to transcribe it myself in Agda but got bogged down in details and was initially unable to complete it.  This was demoralizing, especially when I read "What's nice is that I didn't need to do much. The type checker took care of most of the proof..."  I had to stop for the day.  The next day, I put away both the paper and my Agda code, got out a blank sheet of paper, and played with drawing out lots of values of type `BT n k` for various `n` and `k`, until some things finally started to click.  I think I do now understand the answers to all the above questions, but it took me a surprising amount of effort just to be able to follow the first couple sections of the paper.  And I still don't think I have really grokked all the details of `retabulate`.
+
+Another, minor, issue is that it feels a bit like two separate papers glued together.  Yes, there is the overarching goal of understanding the `cd` and `bu` functions and their relationship to `td`, and there are certainly threads connecting the two parts, but overall the first part about dependently typed programming in Agda and the second part about naturality and string diagrams still feel very different.  I think I would rather have seen the space used for just the first part, but expanded with a lot more explanation and examples.
+
+In the end, this paper has a lot of great insights, I learned a lot from working through it, and I love the experiment with a nontraditional narrative style.  But currently I think it requires an unreasonable amount of effort from the reader to follow along, so I think it's not yet ready for publication as a functional pearl.
+
+
+
+Rebuttal Response by Author [Hsiang-Shang ‘Josh’ Ko <joshko@iis.sinica.edu.tw>] (1701 words)
+---------------------------------------------------------------------------
+Thank you for your time, especially Reviewer C for carrying out your own experiments during the tight reviewing period.
+
+This paper is challenging to review. For regular papers, we can hide a lot of the technical development behind theorem statements and proof sketches and make them look easier to understand, but for pearls we need to go into parts of the development that are usually hidden — we guess this is why this paper appears more difficult than usual, especially when it needs to be read within a severe time limit.
+
+However, ‘easy’ is not one of the defining characteristics of pearls in the call for papers. There are inherent depths in the problem and the techniques used. We ourselves have spent months drawing even more trees and going through even more versions of Agda code than what is presented in the paper, and it is unlikely that the reader can get a detailed understanding in a few hours, or even a couple of days.
+
+What we can do is preserve a distilled version of our experience to help the reader, and we are happy to see that Reviewer B thinks it is ‘certainly instructive’, and that all the reviewers agree that the paper is ‘clearly written’, ‘illuminating’, ‘interesting’, ‘entertaining’, enjoyable, ‘polished’, with ‘many cool insights’, etc. What we can hope to achieve is to show the main ideas, and it seems all the reviewers get them: Reviewer A says the paper ‘draws connections that are not immediately obvious’, Reviewer B says ‘It is fascinating to see how dependent types uncover previously implicit structure in rather cunning functional data structures.’, and Reviewer C lists ‘many cool insights involving the BT type’, ‘a very nice explanation of functors and natural transformations’, and ‘beautiful string diagrams’.
+
+Given the depth of the problem, different readers will most likely ask different questions, try different experiments, and find different solutions from ours. We cannot possibly anticipate all these, and can only present our own journey and share the ideas that prove to be useful to us. Eventually, to figure out the detail (which is tedious to include in the paper), the reader does not need to read the paper within a tight reviewing period, and can — and probably should — work through the paper more slowly, possibly consulting tutorials and textbooks, as we suggested in the afterword, and carrying out their own experiments, just like Reviewer C did successfully.
+
+With a page limit of 25 PACMPL pages, ICFP pearls have the opportunity to be deep and encompassing rather than just a light read. In that respect, they are different from JFP pearls. We hope that the reviewers would welcome that kind of ICFP pearl.
+
+# Detailed response
+
+## Review A
+
+### Summary
+
+It is not just about `cd`, but also about relating the generic top-down and bottom-up algorithms (Section 1.1). `cd` is a component of the bottom-up algorithm.
+
+### Assessment
+
+> And I note that even the authors are "whining" by the end of page 23!
+
+That’s when the narrator does the bulk of the Agda formalisation, which is not shown in the paper.
+
+### Questions
+
+> Could some of the to-ing and fro-ing be suppressed? For example, could the discussion of rotation be removed or streamlined?
+
+Maybe — after all, we can always get back to the format of a regular research paper, and present the final products directly. But there are scientific reasons for preserving the detours. For example, rotation would correspond to the traditional way of proving the two algorithms equal, and needs to be compared to the full `BT-isProp` argument. It also provides a simpler instance of the `BT-isProp` argument that we can put in the paper formally, which can be helpful even in a regular paper.
+
+### Comments
+
+> p1 and throughout: We usually refer to research colleagues by their last names, not by their first.
+
+Since the story is about the narrator reading Richard Bird’s paper and, in a sense, interacting with him, it feels right for the narrator to use his first name. Everyone else is named in the conventional way.
+
+> p6, l11: Is "parametrically quantified" an actual notion? Not in any work I've ever seen, although I know what you mean by it. Perhaps you mean to say "polymorphically quantified"? Otherwise, you are assuming that you have a parametric model for your object language. Do you?
+
+For example, Nuyts, Vezzosi, and Devriese have a paper ‘Parametric quantifiers for dependent type theory’ at ICFP 2017. Agda has no formal semantics, but quantification over `Set` is usually considered parametric (because we cannot do pattern matching on some `A : Set`).
+
+> p15, l11: Bernardy et al.'s parametricity only applies in a specific setting. Are you actually working in this setting?
+
+Again, Agda has no formal semantics. But if we want to be serious about foundation, then (a standard subset of) Agda is usually considered more convenient syntax for programming in Martin-Löf type theory (MLTT). Bernardy et al’s translation is specified generically for pure type systems, and they give Calculus of Constructions (which is more complex than MLTT) as an example of a pure type system.
+
+## Review B
+
+### Assessment
+
+> The digression [...] are all tangentially related to the main goal: relating the memoization of top down and tabulation of bottom up algorithms
+
+Due to parametricity, the induction principle type is uniquely inhabited, which implies that the top-down and bottom-up algorithms are extensionally equal. String diagrams express the naturality-based argument that intensionally rewrites one algorithm into the other. They are powerful tools for establishing the main goal (and not just tangentially related).
+
+> offering readers unfamiliar with Bird's work little motivation
+
+Bird also offered no examples. We mentioned this in the afterword and referred the reader to Mu’s paper for some motivation. This paper focuses on the problem-solving techniques using dependent types and string diagrams.
+
+### Comments
+
+> Iine 346 - when introducing the BT data type -- it may be worth making the connection with the sublist relation clear
+
+This is a good observation. Inhabitants of the sublist relation type roughly correspond to paths in `BT`-trees, though not quite perfectly. We are more inclined to leave them out because it would be slightly complicated to explain the imperfect correspondence, but if it is fine for the paper to get a bit longer, this sublist relation is indeed worth discussing, or at least mentioning.
+
+> line 562 - why use `Exactly` rather than `const a`? The extra generality is immediately discarded - once the blank tables are introduced.
+
+At that point we are giving precise types to functions, and using `const a` does not specify what should be in the table produced by `choose`.
+
+> line 621 - 'I look aghast at the monster I've created' - does not sound particularly 'pearly'...
+
+...which is why we fix it right after. And this monstrous definition is included to justify the switch to the bizarre-looking form of the induction principle. (If we used the natural form of the induction principle, we would end up with the monstrous definition.)
+
+> I am unfamiliar with the equational proof by Mu, but the appeal to parametricity (line 725) is somewhat unconvincing. I would hope that the dependent types uncover hidden structure, making such a proof easier somehow, rather than invoking parametricity -- which is quite a technical result, especially in the presence of dependent types.
+
+...which is why the narrator says they ‘feel empty’ and decide to switch to string diagrams to work out the naturality-based proof (which is close to Mu’s). And that proof is indeed greatly simplified due to the use of dependent types.
+
+## Review C
+
+### Assessment
+
+> And while it can be fun and suspenseful reading fiction in that style, I found it very frustrating for technical content.
+
+It is an experiment, and it can still work for others. We do expect it requires some getting used to though.
+
+> So I started to figure out what was going on, but was also feeling somewhat lost in details (what is going on with these trees? Why are they these shapes in particular? level 2 1/2 ?? Why does the BT type have three constructors instead of two? What exactly is `cd` doing again, and why does it have this type?) By the time we reach the definition of `cd` in Agda I was thoroughly lost.
+
+It is too early at that point in the paper to want answers to all the questions, where we have just started working on a small part of the problem (the shape constraint). It seems that you couldn’t bear the suspense, so you stopped and worked out the details you needed, but others may be satisfied for now with just a rough idea (that the trees have some kind of binomial shape) and read on. In fact, if we explain every detail, we will almost surely get complaints from others about being too low-level.
+
+> it took me a surprising amount of effort just to be able to follow the first couple sections of the paper. And I still don't think I have really grokked all the details of `retabulate`.
+
+We haven’t either. It is a deep problem. But at least there is now a precise type to help. And the paper would stagnate if we dwelt more on `retabulate`.
+
+> it feels a bit like two separate papers glued together
+
+True, because we switch to a different language. But the story is not resolved at the end of Section 2 — actually, the last comment of Reviewer B seems to echo our dissatisfaction with the parametricity-based proof. The alternative, naturality-based proof is necessary, and these days we feel that you want string diagrams for reasoning with naturality.
+
+> currently I think it requires an unreasonable amount of effort from the reader to follow along
+
+The amount of effort required depends on how much detail the reader needs. We expect that a lot of the readers will want to get only rough ideas (first), and they can do that by going through the paper at the usual pace. If they are interested and want a more detailed understanding, then they need to spend more time going into the depth of the problem (like you did).
+
+If the technical content is all right (and actually you like it a lot), why not permit the experiment in the presentation style?
+
+
+
+Comment @A1 by Reviewer B
+---------------------------------------------------------------------------
+The reviewers carefully considered the author response and discussed the role of pearls at ICFP. The call for papers asks for pearls to be 'concise', yet the reviewers agreed that the paper lacked focus (Reviewer A mentions the 'to-ing and fro-ing' in their review) and the clarity of the explanation was difficult to follow (Reviewer C gives a detailed account of their attempt at reconstructing the work in Agda). We feel that the work could be published as a pearl, but that more polishing is necessary for it to reach the high standards of presentation to which pearls are held.

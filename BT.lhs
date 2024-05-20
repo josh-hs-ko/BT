@@ -1,20 +1,20 @@
-%let anonymous = True
+%let anonymous = False
 %let draft = False
-%let mentionICFP = True
+%let mentionICFP = False
 
 \documentclass[%
 %if anonymous
 anonymous,
 %endif
-acmsmall,fleqn,screen,review]{acmart}
+acmsmall,fleqn,screen,nonacm]{acmart}
 
 \settopmatter{printccs=false, printacmref=false}
 \setcopyright{none}
 
-\acmJournal{PACMPL}
-\acmVolume{0}
-\acmNumber{0}
-\acmArticle{0}
+%\acmJournal{PACMPL}
+%\acmVolume{0}
+%\acmNumber{0}
+%\acmArticle{0}
 %\acmMonth{9}
 
 %\ifPDFTeX
@@ -463,7 +463,7 @@ unTip (Tip x) = x            cvt [x]         = Tip x
 \end{lstlisting}
 
 I wonder if I have to use~\lstinline{B} instead of lists in \lstinline{cd}.
-If I'm given level~1 of the lattice~(\cref{fig:sublists-lattice}) as a 4-list, I know they are solutions for the four 1-sublists, and surely there's no problem rearranging them into level~2\ldots?
+If I'm given level~1 of the lattice~(\cref{fig:sublists-lattice}) as a 4-list, I know they are solutions for the four 1-sublists, and surely there's no problem rearranging them for level~2\ldots?
 
 Oh wait, I don't actually know.
 All I get is a 4-list.
@@ -956,7 +956,7 @@ The intention ---~that \lstinline{g}~should compute the solution for a list from
 %\Josh{The type of~\lstinline{g} is actually not parametric in~\lstinline{b}, but \lstinline{b}~is parametrically quantified in a bigger context; worth clarifying (throughout the paper, and for Agda code too)?}
 
 But now I have the right vocabulary to state the intention precisely in Agda.
-I can use |BT| to say things about all sublists of a particular length.
+I can use |BT| to quantify over all sublists of a particular length.
 And to say `a solution for a list' (instead of just `a solution') I should switch from a type to a type family
 \begin{code}
 s : ∀ {k} → Vec k a → Set
@@ -1659,14 +1659,14 @@ The bottom-up algorithm never gets to three layers of tables, and therefore avoi
 
 That reasoning doesn't sound too bad, although it's clear that there's much more to be done.
 The whole argument is still too informal and lacks detail.
-It's easy to poke holes in the reasoning --- for example, if the input list has duplicate elements, then the bottom-up algorithm won't be able to entirely avoid duplicate solutions of overlapping subproblems.
+It's easy to poke holes in the reasoning --- for example, if the input list has duplicate elements, then the bottom-up algorithm won't be able to entirely avoid recomputing solutions of overlapping subproblems.
 To fix this, the algorithm will need a redesign.
 And of course it's tempting to explore more problem-decomposing strategies beyond immediate sublists.
 Eventually I may arrive at something general about dynamic programming, which was what Richard wanted to work out in his paper.
 
 All those are for another day, however.
 I've had enough fun today.
-Mostly, what I did was transcribe programs into new languages, but that helped me to reason in new ways, using more convenient tools to tackle Richard's problem.
+Mostly, what I did was transcribe Richard's programs into new languages, but that helped me to reason in new ways, using more convenient tools to make sense of the programs.
 
 I wish Richard was still around so that I could show all these to him.
 He would've liked the new languages and the new ways of reasoning.
@@ -1688,7 +1688,7 @@ He would've liked the new languages and the new ways of reasoning.
 %\itshape % Plan C - maybe too shouty?
 
 This work is presented as a kind of `Socratic monologue', recording the thought processes of a functional programmer as they solve a programming mystery.
-We were inspired by the science fiction novel \textit{Project Hail Mary} by Andy Weir, where the narrative masterfully weaves together intuitive presentations of scientific knowledge and the protagonist's application of that knowledge to solve the problems they are facing.
+We were inspired by the science fiction novel \textit{Project Hail Mary} by Andy Weir, where the narrative masterfully weaves together intuitive presentations of scientific knowledge and the protagonist's application of that knowledge to solve the problems he is facing.
 We envisaged to do something similar in this paper, although it ends up being not as leisurely and entertaining as Weir's novel, because we need to cover more technical detail, and there is very little action in our story apart from sitting in front of a computer and racking one's brains.
 However, compared to the traditional rational reconstruction of a finished piece of work, we believe that this format helps both the writer and the reader to focus on currently available clues and how to make progress based on those clues by recreating the experience of solving a mystery.
 In fact, our telling largely follows our actual development (tracing what \lstinline{cd} does in \cref{sec:bu}, generalising |B|~and~|B'| to |BT| in \cref{sec:BT}, revising |ImmediateSublistInduction| in \cref{sec:td-and-bu-in-Agda}, realising that the |BT-isProp| argument works more generally after proving |rotation| in \cref{sec:diagrammatic-reasoning}, etc) --- that is, this paper is `based on a true story'.
@@ -1711,7 +1711,7 @@ It was one of the examples used by \citet{Bird&Hinze-nexus} when studying a tech
 To cover all the examples in the paper, \citeauthor{Bird-zippy-tabulations}'s generic bottom-up algorithm also employed a form of nexus, but it is not needed for the sublists problem and thus omitted in our work.
 \citet{Mu-sublists} derived \lstinline{cd} from the specification~(\cref{eq:cd-spec}) and proved the equality between \lstinline{td} and \lstinline{bu} using traditional equational reasoning.
 Neither \citet{Bird&Hinze-nexus} nor \citet{Bird-zippy-tabulations} discussed applications of the sublists problem, but \citet{Mu-sublists} observed that reduction to it is a standard technique in the algorithms community.
-None of these papers used dependent types.
+None of these papers used dependent types (except that \citet[Section~4.3]{Mu-sublists} mentioned the shape-indexed |B| and |cd| in \cref{sec:shape}).
 
 The general message we want to deliver is that we can discover, explain, and prove things by writing them down in appropriate languages.
 More specifically, dependent types, category theory, and string diagrams are some of those languages, and they should be in the toolbox of the mathematically inclined functional programmer.
