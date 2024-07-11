@@ -1,21 +1,33 @@
 %let anonymous = False
 %let draft = False
 %let mentionICFP = False
+%let jfp = True
 
+%if jfp
+\documentclass{jfp}
+\journaltitle{JFP}
+\cpr{Cambridge University Press}
+\doival{10.1017/xxxxx}
+\lefttitle{\LaTeX\ Supplement}
+\righttitle{Journal of Functional Programming}
+\totalpg{\pageref{lastpage01}}
+\jnlDoiYr{2022}
+\def\acks{\section*{Acknowledgements}}
+\let\endacks\relax
+%else
 \documentclass[%
 %if anonymous
 anonymous,
 %endif
 acmsmall,fleqn,screen,nonacm]{acmart}
-
 \settopmatter{printccs=false, printacmref=false}
 \setcopyright{none}
-
 %\acmJournal{PACMPL}
 %\acmVolume{0}
 %\acmNumber{0}
 %\acmArticle{0}
 %\acmMonth{9}
+%endif
 
 %\ifPDFTeX
 %\usepackage[T1]{fontenc}
@@ -26,9 +38,11 @@ acmsmall,fleqn,screen,nonacm]{acmart}
 %\setdefaultlanguage{british}
 %\fi
 
+%if not jfp
 \usepackage[capitalise,noabbrev]{cleveref}
 \citestyle{acmauthoryear}
 \crefformat{equation}{#2#1#3}
+%endif
 
 \usepackage{mathtools}
 \usepackage{varwidth}
@@ -245,6 +259,23 @@ acmsmall,fleqn,screen,nonacm]{acmart}
 
 \setlength{\mathindent}{2\parindent}
 
+%if jfp
+\begin{authgrp}
+\author{Hsiang-Shang Ko}
+\affiliation{Academia Sinica, Taiwan\\
+        (\email{joshko@@iis.sinica.edu.tw})}
+%\end{authgrp}
+%\begin{authgrp}
+\author{Shin-Cheng Mu}
+\affiliation{Academia Sinica, Taiwan\\
+        (\email{scm@@iis.sinica.edu.tw})}
+%\end{authgrp}
+%\begin{authgrp}
+\author{Jeremy Gibbons}
+\affiliation{University of Oxford, UK\\
+        (\email{jeremy.gibbons@@cs.ox.ac.uk})}
+\end{authgrp}
+%else
 \author{Hsiang-Shang Ko}
 \email{joshko@@iis.sinica.edu.tw}
 \orcid{0000-0002-2439-1048}
@@ -270,6 +301,7 @@ acmsmall,fleqn,screen,nonacm]{acmart}
   \country{UK}
   \postcode{OX1 3QD}
 }
+%endif
 
 \title{Binomial Tabulation: A Short Story
 %if mentionICFP
@@ -1731,7 +1763,11 @@ Our comparison between diagrammatic and traditional equational reasoning (\cref{
 We would like to thank Liang-Ting Chen for offering helpful suggestions about the development; Julie Summers, Royal Literary Fund Fellow at Kellogg College, Oxford, for commenting on an early draft; and Gene Tsai\todo{check again how he wants to be named} and Zhixuan Yang for proofreading a draft.
 \end{acks}
 
+%if jfp
+\bibliographystyle{jfplike}
+%else
 \bibliographystyle{ACM-Reference-Format}
+%endif
 \bibliography{bib}
 
 \end{document}
