@@ -1,0 +1,211 @@
+%%% -*-BibTeX-*-
+%%% Do NOT edit. File created by BibTeX with style
+%%% ACM-Reference-Format-Journals [18-Jan-2012].
+
+\begin{thebibliography}{12}
+
+%%% ====================================================================
+%%% NOTE TO THE USER: you can override these defaults by providing
+%%% customized versions of any of these macros before the \bibliography
+%%% command.  Each of them MUST provide its own final punctuation,
+%%% except for \shownote{}, \showDOI{}, and \showURL{}.  The latter two
+%%% do not use final punctuation, in order to avoid confusing it with
+%%% the Web address.
+%%%
+%%% To suppress output of a particular field, define its macro to expand
+%%% to an empty string, or better, \unskip, like this:
+%%%
+%%% \newcommand{\showDOI}[1]{\unskip}   % LaTeX syntax
+%%%
+%%% \def \showDOI #1{\unskip}           % plain TeX syntax
+%%%
+%%% ====================================================================
+
+\ifx \showCODEN    \undefined \def \showCODEN     #1{\unskip}     \fi
+\ifx \showDOI      \undefined \def \showDOI       #1{#1}\fi
+\ifx \showISBNx    \undefined \def \showISBNx     #1{\unskip}     \fi
+\ifx \showISBNxiii \undefined \def \showISBNxiii  #1{\unskip}     \fi
+\ifx \showISSN     \undefined \def \showISSN      #1{\unskip}     \fi
+\ifx \showLCCN     \undefined \def \showLCCN      #1{\unskip}     \fi
+\ifx \shownote     \undefined \def \shownote      #1{#1}          \fi
+\ifx \showarticletitle \undefined \def \showarticletitle #1{#1}   \fi
+\ifx \showURL      \undefined \def \showURL       {\relax}        \fi
+% The following commands are used for tagged output and should be
+% invisible to TeX
+\providecommand\bibfield[2]{#2}
+\providecommand\bibinfo[2]{#2}
+\providecommand\natexlab[1]{#1}
+\providecommand\showeprint[2][]{arXiv:#2}
+
+\bibitem[Bernardy et~al\mbox{.}(2012)]%
+        {Bernardy-proofs-for-free}
+\bibfield{author}{\bibinfo{person}{Jean-Philippe Bernardy},
+  \bibinfo{person}{Patrik Jansson}, {and} \bibinfo{person}{Ross Paterson}.}
+  \bibinfo{year}{2012}\natexlab{}.
+\newblock \showarticletitle{Proofs for Free: Parametricity for Dependent
+  Types}.
+\newblock \bibinfo{journal}{\emph{Journal of Functional Programming}}
+  \bibinfo{volume}{22}, \bibinfo{number}{2} (\bibinfo{year}{2012}),
+  \bibinfo{pages}{107--152}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1017/S0956796812000056}
+\showDOI{\tempurl}
+
+
+\bibitem[Bird and Hinze(2003)]%
+        {Bird&Hinze-nexus}
+\bibfield{author}{\bibinfo{person}{Richard Bird} {and} \bibinfo{person}{Ralf
+  Hinze}.} \bibinfo{year}{2003}\natexlab{}.
+\newblock \showarticletitle{Functional Pearl: Trouble Shared is Trouble
+  Halved}. In \bibinfo{booktitle}{\emph{Workshop on Haskell}}.
+  \bibinfo{publisher}{ACM}, \bibinfo{pages}{1--6}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1145/871895.871896}
+\showDOI{\tempurl}
+
+
+\bibitem[Bird(2008)]%
+        {Bird-zippy-tabulations}
+\bibfield{author}{\bibinfo{person}{Richard~S. Bird}.}
+  \bibinfo{year}{2008}\natexlab{}.
+\newblock \showarticletitle{Zippy Tabulations of Recursive Functions}. In
+  \bibinfo{booktitle}{\emph{International Conference on Mathematics of Program
+  Construction (MPC)}} \emph{(\bibinfo{series}{Lecture Notes in Computer
+  Science}, Vol.~\bibinfo{volume}{5133})}. \bibinfo{publisher}{Springer},
+  \bibinfo{pages}{92--109}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1007/978-3-540-70594-9_7}
+\showDOI{\tempurl}
+
+
+\bibitem[Chapman et~al\mbox{.}(2010)]%
+        {Chapman-levitation}
+\bibfield{author}{\bibinfo{person}{James Chapman},
+  \bibinfo{person}{Pierre-{\'E}variste Dagand}, \bibinfo{person}{Conor
+  McBride}, {and} \bibinfo{person}{Peter Morris}.}
+  \bibinfo{year}{2010}\natexlab{}.
+\newblock \showarticletitle{The Gentle Art of Levitation}. In
+  \bibinfo{booktitle}{\emph{International Conference on Functional Programming
+  (ICFP)}}. \bibinfo{publisher}{ACM}, \bibinfo{pages}{3--14}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1145/1863543.1863547}
+\showDOI{\tempurl}
+
+
+\bibitem[Coecke and Kissinger(2017)]%
+        {Coecke-PQP}
+\bibfield{author}{\bibinfo{person}{Bob Coecke} {and} \bibinfo{person}{Aleks
+  Kissinger}.} \bibinfo{year}{2017}\natexlab{}.
+\newblock \bibinfo{booktitle}{\emph{Picturing Quantum Processes}}.
+\newblock \bibinfo{publisher}{Cambridge University Press}.
+\newblock
+\showISBNx{9781107104228}
+\urldef\tempurl%
+\url{https://doi.org/10.1017/9781316219317}
+\showDOI{\tempurl}
+
+
+\bibitem[Dybjer(1994)]%
+        {Dybjer-inductive-families}
+\bibfield{author}{\bibinfo{person}{Peter Dybjer}.}
+  \bibinfo{year}{1994}\natexlab{}.
+\newblock \showarticletitle{Inductive Families}.
+\newblock \bibinfo{journal}{\emph{Formal Aspects of Computing}}
+  \bibinfo{volume}{6}, \bibinfo{number}{4} (\bibinfo{year}{1994}),
+  \bibinfo{pages}{440--465}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1007/BF01211308}
+\showDOI{\tempurl}
+
+
+\bibitem[Gaboardi et~al\mbox{.}(2016)]%
+        {grading}
+\bibfield{author}{\bibinfo{person}{Marco Gaboardi}, \bibinfo{person}{Shin{-}ya
+  Katsumata}, \bibinfo{person}{Dominic Orchard}, \bibinfo{person}{Flavien
+  Breuvart}, {and} \bibinfo{person}{Tarmo Uustalu}.}
+  \bibinfo{year}{2016}\natexlab{}.
+\newblock \showarticletitle{Combining Effects and Coeffects via Grading}. In
+  \bibinfo{booktitle}{\emph{International Conference on Functional Programming
+  (ICFP)}}. \bibinfo{publisher}{ACM}, \bibinfo{pages}{476--489}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1145/2951913.2951939}
+\showDOI{\tempurl}
+
+
+\bibitem[Hinze and Marsden(2023)]%
+        {Hinze-string-diagrams}
+\bibfield{author}{\bibinfo{person}{Ralf Hinze} {and} \bibinfo{person}{Dan
+  Marsden}.} \bibinfo{year}{2023}\natexlab{}.
+\newblock \bibinfo{booktitle}{\emph{Introducing String Diagrams: The Art of
+  Category Theory}}.
+\newblock \bibinfo{publisher}{Cambridge University Press}.
+\newblock
+\showISBNx{9781009317863}
+\urldef\tempurl%
+\url{https://doi.org/10.1017/9781009317825}
+\showDOI{\tempurl}
+
+
+\bibitem[Mu(2023)]%
+        {Mu-sublists}
+\bibfield{author}{\bibinfo{person}{Shin-Cheng Mu}.}
+  \bibinfo{year}{2023}\natexlab{}.
+\newblock \bibinfo{title}{Bottom-Up Computation Using Trees of Sublists
+  (Functional Pearl)}.
+\newblock
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.48550/arXiv.2311.18528}
+\showDOI{\tempurl}
+
+
+\bibitem[{The Univalent Foundations Program}(2013)]%
+        {UFP-HoTT}
+\bibfield{author}{\bibinfo{person}{{The Univalent Foundations Program}}.}
+  \bibinfo{year}{2013}\natexlab{}.
+\newblock \bibinfo{booktitle}{\emph{Homotopy Type Theory: Univalent Foundations
+  of Mathematics}}.
+\newblock \bibinfo{publisher}{Institute for Advanced Study}.
+\newblock
+\urldef\tempurl%
+\url{https://homotopytypetheory.org/book/}
+\showURL{%
+\tempurl}
+
+
+\bibitem[Van~Muylder et~al\mbox{.}(2024)]%
+        {Van-Muylder-internal-parametricity}
+\bibfield{author}{\bibinfo{person}{Antoine Van~Muylder},
+  \bibinfo{person}{Andreas Nuyts}, {and} \bibinfo{person}{Dominique Devriese}.}
+  \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{Internal and Observational Parametricity for
+  {Cubical Agda}}.
+\newblock \bibinfo{journal}{\emph{Proceedings of the ACM on Programming
+  Languages}} \bibinfo{volume}{8}, \bibinfo{number}{POPL}
+  (\bibinfo{year}{2024}), \bibinfo{pages}{8:1--32}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1145/3632850}
+\showDOI{\tempurl}
+
+
+\bibitem[Voigtl{\"a}nder(2009)]%
+        {Voigtlander-BX-for-free}
+\bibfield{author}{\bibinfo{person}{Janis Voigtl{\"a}nder}.}
+  \bibinfo{year}{2009}\natexlab{}.
+\newblock \showarticletitle{Bidirectionalization for Free!}. In
+  \bibinfo{booktitle}{\emph{Symposium on Principles of Programming Languages
+  (POPL)}}. \bibinfo{publisher}{ACM}, \bibinfo{pages}{165--176}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1145/1480881.1480904}
+\showDOI{\tempurl}
+
+
+\end{thebibliography}

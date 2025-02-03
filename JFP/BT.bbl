@@ -1,0 +1,34 @@
+\begin{thebibliography}{6}
+
+\bibitem[{Altenkirch et~al.}(2015){Altenkirch, Ghani, Hancock, McBride, \&
+  Morris}]{Altenkirch-indexed-containers}
+{Altenkirch, T., Ghani, N., Hancock, P., McBride, C. \& Morris, P.} (2015)
+  Indexed containers. \textit{Journal of Functional Programming}. {\bf 25},
+  e5:1--41.
+
+\bibitem[{Bernardy et~al.}(2012){Bernardy, Jansson, \&
+  Paterson}]{Bernardy-proofs-for-free}
+{Bernardy, J.-P., Jansson, P. \& Paterson, R.} (2012) Proofs for free:
+  Parametricity for dependent types. \textit{Journal of Functional
+  Programming}. {\bf 22}(2), 107--152.
+
+\bibitem[{Bird}(2008)]{Bird-zippy-tabulations}
+{Bird, R.~S.} (2008) Zippy tabulations of recursive functions. International
+  Conference on Mathematics of Program Construction (MPC). Springer. pp.
+  92--109.
+
+\bibitem[{Filinski}(1994)]{Filinski-representing-monads}
+{Filinski, A.} (1994) Representing monads. Symposium on Principles of
+  Programming Languages (POPL). ACM. pp. 446--457.
+
+\bibitem[{Mu}(2024)]{Mu-sublists}
+{Mu, S.-C.} (2024) Bottom-up computation using trees of sublists.
+  \textit{Journal of Functional Programming}. {\bf 34}, e14:1--16.
+
+\bibitem[{Van~Muylder et~al.}(2024){Van~Muylder, Nuyts, \&
+  Devriese}]{Van-Muylder-internal-parametricity}
+{Van~Muylder, A., Nuyts, A. \& Devriese, D.} (2024) Internal and observational
+  parametricity for {Cubical Agda}. \textit{Proceedings of the ACM on
+  Programming Languages}. {\bf 8}(POPL), 8:1--32.
+
+\end{thebibliography}
