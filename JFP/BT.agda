@@ -1,18 +1,18 @@
 -- Checked with Agda 2.7.0.1 and Standard Library 2.2
 
-{-# OPTIONS --safe --large-indices --no-forced-argument-recursion #-}
+{-# OPTIONS --safe --with-K --large-indices --no-forced-argument-recursion #-}
 
 open import Level using (Level; Setω)
 open import Function using (_∘_)
 open import Data.Empty using (⊥)
 open import Data.Unit using (⊤; tt)
-open import Data.Product using (_,_; _×_)
+open import Data.Product using (Σ; Σ-syntax; _,_; _×_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Nat using (ℕ; zero; suc; pred; _≤_; s≤s)
 open import Data.Nat.Properties using (≤-refl; m≤n⇒m≤1+n)
 open import Data.List using (List; []; _∷_; _++_; length)
 open import Data.Char using (Char)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong₂)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong₂; module ≡-Reasoning)
 
 variable
   ℓ       : Level
@@ -51,19 +51,19 @@ module MotherOfAllMonads where
   Nondet A = ∀ {ℓ} {R : Set ℓ} → ⦃ Monoid R ⦄ → (A → R) → R
 
   return : A → Nondet A
-  return x cont = cont x
+  return x k = k x
 
   _>>=_ : Nondet A → (A → Nondet B) → Nondet B
-  (mx >>= f) cont = mx (λ x → f x cont)
+  (mx >>= f) k = mx (λ x → f x k)
 
   fmap : (A → B) → Nondet A → Nondet B
   fmap f mx = mx >>= λ x → return (f x)
 
   mzero : Nondet A
-  mzero cont = ∅
+  mzero k = ∅
 
   mplus : Nondet A → Nondet A → Nondet A
-  mplus mx my cont = mx cont ⊕ my cont
+  mplus mx my k = mx k ⊕ my k
 
   drop : ℕ → List A → Nondet (List A)
   drop  zero   xs       = return xs
@@ -71,9 +71,9 @@ module MotherOfAllMonads where
   drop (suc n) (x ∷ xs) = mplus (drop n xs) (fmap (x ∷_) (drop (suc n) xs))
 
   -- drop : ℕ → List A → ∀ {ℓ} {R : Set ℓ} → ⦃ Monoid R ⦄ → (List A → R) → R
-  -- drop  zero   xs       cont = cont xs
-  -- drop (suc n) []       cont = ∅
-  -- drop (suc n) (x ∷ xs) cont = drop n xs cont ⊕ drop (suc n) xs (cont ∘ (x ∷_))
+  -- drop  zero   xs       k = k xs
+  -- drop (suc n) []       k = ∅
+  -- drop (suc n) (x ∷ xs) k = drop n xs k ⊕ drop (suc n) xs (k ∘ (x ∷_))
 
   dropF : ℕ → List A → List (List A)
   dropF n xs = drop n xs ⦃ monoid _++_ [] ⦄ (_∷ [])
@@ -116,25 +116,24 @@ map f (tip p)   = tip (f p)
 map f  nil      = nil
 map f (bin t u) = bin (map f t) (map f u)
 
-decompose : (l : ℕ) (xs : List A) → suc l ≡ length xs
-          → Drop 1 (λ ys → l ≡ length ys) xs
-decompose  zero   (_ ∷ []) eq = bin (tip refl) nil
-decompose (suc l) (_ ∷ xs) eq =
-  let eq' = cong pred eq in bin (tip eq') (map (cong suc) (decompose l xs eq'))
+subs : (l : ℕ) (xs : List A) → length xs ≡ suc l → Drop 1 (λ ys → length ys ≡ l) xs
+subs  zero   (_ ∷ []) eq = bin (tip refl) nil
+subs (suc l) (_ ∷ xs) eq = let eq' = cong pred eq
+                           in  bin (tip eq') (map (cong suc) (subs l xs eq'))
 
 module Compact-td where
 
   td : ImmediateSublistInduction
   td {A} P f xs = td' (length xs) xs refl
     where
-      td' : (l : ℕ) (xs : List A) → l ≡ length xs → P xs
+      td' : (l : ℕ) (xs : List A) → length xs ≡ l → P xs
       td'  zero   [] eq = f nil
-      td' (suc l) xs eq = f (map (td' l _) (decompose l xs eq))
+      td' (suc l) xs eq = f (map (td' l _) (subs l xs eq))
 
 td' : (∀ {ys} → Drop 1 P ys → P ys)
-    → (l : ℕ) (xs : List A) → l ≡ length xs → P xs
+    → (l : ℕ) (xs : List A) → length xs ≡ l → P xs
 td' f  zero   [] eq = f nil
-td' f (suc l) xs eq = f (map (td' f l _) (decompose l xs eq))
+td' f (suc l) xs eq = f (map (td' f l _) (subs l xs eq))
 
 td : ImmediateSublistInduction
 td {A} P f xs = td' f (length xs) xs refl
@@ -194,44 +193,80 @@ All Q (tip p)   = Q p
 All Q  nil      = ⊤
 All Q (bin t u) = All Q t × All Q u
 
-Parametricity : ImmediateSublistInduction → Set₁
-Parametricity ind =
+UnaryParametricity : ImmediateSublistInduction → Set₁
+UnaryParametricity ind =
   {A : Set} {P : List A → Set}                (Q : ∀ {ys} → P ys → Set)
-          → {f : ∀ {ys} → Drop 1 P ys → P ys} (g : ∀ {ys} {ps : Drop 1 P ys} → All Q ps → Q (f ps))
+          → {f : ∀ {ys} → Drop 1 P ys → P ys} (g : ∀ {ys} {ps : Drop 1 P ys}
+                                                 → All Q ps → Q (f ps))
           → {xs : List A} → Q (ind P f xs)
 
-uniqueness' : (ind : ImmediateSublistInduction) → Parametricity ind
-            → {A : Set} (P : List A → Set) (f : ∀ {ys} → Drop 1 P ys → P ys)
-            → (xs : List A) (n : ℕ) (eq : n ≡ length xs)
-            → ind P f xs ≡ td' f n xs eq
-uniqueness' ind param {A} P f xs = param Q (λ qs l eq → g l _ eq _ qs)
-  where
-    Q : ∀ {ys} → P ys → Set
-    Q {ys} p = (l : ℕ) (eq : l ≡ length ys) → p ≡ td' f l ys eq
+ComputationRule : (ind : ImmediateSublistInduction) → Set₁
+ComputationRule ind =
+  {A : Set} {P : List A → Set} {f : ∀ {ys} → Drop 1 P ys → P ys} {xs : List A}
+  {t : Drop 1 P xs} → All (λ {ys} → ind P f ys ≡_) t → ind P f xs ≡ f t
 
-    revcat : List A → List A → List A
-    revcat []       ys = ys
-    revcat (x ∷ xs) ys = revcat xs (x ∷ ys)
+revcat : List A → List A → List A
+revcat []       ys = ys
+revcat (x ∷ xs) ys = revcat xs (x ∷ ys)
 
-    h : {l : ℕ} {ys : List A} (zs : List A) (t : Drop 1 (P ∘ revcat zs) ys)
-      → (eqs : Drop 1 (λ ys' → l ≡ length (revcat zs ys')) ys)
-      → All Q t → t ≡ map (td' f l (revcat zs _)) eqs
-    h zs  nil             nil               _        = refl
-    h zs (bin (tip p) u) (bin (tip eq) eqs) (q , qs) =
-      cong₂ (bin ∘ tip) (q _ eq) (h (_ ∷ zs) u eqs qs)
+module StandardUniqueness where
 
-    g : (l : ℕ) (ys : List A) (eq : l ≡ length ys) (t : Drop 1 P ys)
-      → All Q t → f t ≡ td' f l ys eq
-    g  zero   [] eq nil qs = refl
-    g (suc l) ys eq t   qs = cong f (h [] t (decompose l ys eq) qs)
+  uniqueness-lemma :
+      (P : List A → Set) (f g : (xs : List A) → P xs) (zs : List A)
+    → Drop 1 (λ ys → f (revcat zs ys) ≡ g (revcat zs ys)) xs
+    → Σ[ t ∈ Drop 1 (P ∘ revcat zs) xs ] All (λ {ys} → f (revcat zs ys) ≡_) t
+                                       × All (λ {ys} → g (revcat zs ys) ≡_) t
+  uniqueness-lemma P f g zs  nil             = nil , tt , tt
+  uniqueness-lemma P f g zs (bin (tip eq) u) =
+    let (u' , all-f , all-g) = uniqueness-lemma P f g (_ ∷ zs) u
+    in  bin (tip (g (revcat zs _))) u' , (eq , all-f) , (refl , all-g)
 
-uniqueness : (ind : ImmediateSublistInduction) → Parametricity ind
+  uniqueness :
+      ((ind , _) (ind' , _) : Σ ImmediateSublistInduction ComputationRule)
+      {A : Set} (P : List A → Set) (f : ∀ {ys} → Drop 1 P ys → P ys) (xs : List A)
+    → ind P f xs ≡ ind' P f xs
+  uniqueness (ind , comp) (ind' , comp') P f =
+    ind (λ xs → ind P f xs ≡ ind' P f xs)
+        (λ {ys} ih →
+        let (t , all , all') = uniqueness-lemma P (ind P f) (ind' P f) [] ih
+        in  begin
+              ind P f ys
+                ≡⟨ comp all ⟩
+              f t
+                ≡⟨ comp' all' ⟨
+              ind' P f ys
+            ∎)
+    where open ≡-Reasoning
+
+uniqueness : (ind ind' : ImmediateSublistInduction)
+           → ComputationRule ind → UnaryParametricity ind'
            → {A : Set} (P : List A → Set) (f : ∀ {ys} → Drop 1 P ys → P ys)
-           → (xs : List A) → ind P f xs ≡ td P f xs
-uniqueness ind param P f xs = uniqueness' ind param P f xs (length xs) refl
+           → (xs : List A) → ind P f xs ≡ ind' P f xs
+uniqueness ind ind' comp param' P f xs = param' (λ {ys} p → ind P f ys ≡ p) comp
 
---------
--- Parametricity of bu
+-- td satisfies the computation rule
+
+td'-computation :
+    {A : Set} {P : List A → Set} {f : ∀ {ys} → Drop 1 P ys → P ys} {l : ℕ} {xs : List A}
+  → (zs : List A) → length (revcat zs xs) ≡ suc l
+  → (t : Drop 1 (P ∘ revcat zs) xs) → All (λ {ys} p → td P f (revcat zs ys) ≡ p) t
+  → (eqs : Drop 1 (λ ys → length (revcat zs ys) ≡ l) xs)
+  → map (td' f l _) eqs ≡ t
+td'-computation zs eq  nil             _             nil                 = refl
+td'-computation zs eq (bin (tip ._) u) (refl , all) (bin (tip refl) eqs) =
+  cong₂ (bin ∘ tip) refl (td'-computation (_ ∷ zs) eq u all eqs)
+
+td-computation' :
+    {A : Set} {P : List A → Set} {f : ∀ {ys} → Drop 1 P ys → P ys}
+    (l : ℕ) (xs : List A) (eq : length xs ≡ l) (t : Drop 1 P xs)
+  → All (λ {ys} p → td P f ys ≡ p) t → td' f l xs eq ≡ f t
+td-computation'  zero   [] refl nil _   = refl
+td-computation' (suc l) xs eq   t   all = cong _ (td'-computation [] eq t all (subs l xs eq))
+
+td-computation : ComputationRule td
+td-computation {t = t} = td-computation' _ _ refl t
+
+-- bu satisfies unary parametricity
 
 unTipᴾ : (Q : ∀ {ys} → P ys → Set) (t : Drop 0 P xs) → All Q t → Q (unTip t)
 unTipᴾ Q (tip p) q = q
@@ -277,12 +312,11 @@ blankᴾ : {P : List A → Set} (Q : ∀ {ys} → P ys → Set) (xs : List A)
        → All Q (blank {A} {P} xs)
 blankᴾ Q xs = blank'ᴾ Q xs ≤-refl
 
-buᴾ : Parametricity bu
+buᴾ : UnaryParametricity bu
 buᴾ {A} {P} Q {f} g {xs} = bu'ᴾ Q f g _ (blank xs) (blankᴾ Q xs)
 
---------
 -- Equality between the two algorithms
 
 equality : (P : List A → Set) (f : ∀ {ys} → Drop 1 P ys → P ys) (xs : List A)
-         → bu P f xs ≡ td P f xs
-equality = uniqueness bu buᴾ
+         → td P f xs ≡ bu P f xs
+equality = uniqueness td bu (λ {_} {P} → td-computation {_} {P}) buᴾ

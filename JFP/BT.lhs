@@ -33,7 +33,7 @@
 %format →' = "\kern-.345em\mathrlap{\to}"
 %format =' = "\unskip=\ignorenext"
 %format @ = "\unskip@\ignorenext"
-%format ≡_ = ≡ _
+%format _≡ = _ ≡
 %format _⊎_ = _ ⊎ _
 %format × = "{\times}"
 %format _×_ = _ × _
@@ -67,12 +67,13 @@
 
 %format A = "\Var A"
 %format B = "\Var B"
-%format cont = "\Var{cont}"
+%format comp = "\Var{comp}"
 %format eq = "\Var{eq}"
-%format eq' = "\Var{eq}^\prime"
+%format eq' = "\Var{eq^\prime}"
 %format f = "\Var f"
 %format g = "\Var g"
 %format ind = "\Var{ind}"
+%format ind' = "\Var{ind^\prime}"
 %format k = "\Var k"
 %format l = "\Var l"
 %format M = "\Var M"
@@ -80,6 +81,7 @@
 %format n = "\Var n"
 %format P = "\Var P"
 %format p = "\Var p"
+%format param' = "\Var{param^\prime}"
 %format ps = "\Var{ps}"
 %format Q = "\Var Q"
 %format t = "\Var t"
@@ -157,9 +159,9 @@ record Monoid (M : Set ℓ) : Set ℓ where
 
 \begin{code}
 drop : ℕ → List A → ⦃ Monoid B ⦄ → (List A → B) → B
-drop    zero    xs        cont = cont xs
-drop (  suc n)  []        cont = ∅
-drop (  suc n)  (x ∷ xs)  cont = drop n xs cont {-"\kern1.5pt"-} ⊕ {-"\kern1.5pt"-} drop (suc n) xs (cont ∘ (x ∷_))
+drop    zero    xs        k = k xs
+drop (  suc n)  []        k = ∅
+drop (  suc n)  (x ∷ xs)  k = drop n xs k {-"\kern1.5pt"-} ⊕ {-"\kern1.5pt"-} drop (suc n) xs (k ∘ (x ∷_))
 \end{code}
 
 \begin{code}
@@ -168,9 +170,8 @@ dropL n xs = drop n xs ⦃ monoid _++_ [] ⦄ (_∷ [])
 \end{code}
 
 \begin{code}
-DropR n xs ys {-"\kern2pt"-} ≅ {-"\kern2pt"-} drop n xs ⦃ monoid _⊎_ ⊥ ⦄ (ys ≡_)
+DropR n xs ys {-"\kern2pt"-} ≅ {-"\kern2pt"-} drop n xs ⦃ monoid _⊎_ ⊥ ⦄ (_≡ ys)
 \end{code}
-\todo{assuming Axiom~K}
 
 \begin{code}
 Drop n P xs {-"\kern2pt"-} ≅ {-"\kern2pt"-} drop n xs ⦃ monoid _×_ ⊤ ⦄ P
@@ -196,14 +197,14 @@ ImmediateSublistInduction  = {A : Set} (P : List A → Set)
 td : ImmediateSublistInduction
 td {A} P f xs = td' (length xs) xs refl
   where
-    td' : (l : ℕ) (xs : List A) → l ≡ length xs → P xs
+    td' : (l : ℕ) (xs : List A) → length xs ≡ l → P xs
     td'    zero    [] eq = f nil
-    td' (  suc l)  xs eq = f (map (td' l _) (decompose l xs eq))
+    td' (  suc l)  xs eq = f (map (td' l _) (subs l xs eq))
 \end{code}
 
 \begin{code}
-decompose  :   (l : ℕ) (xs : List A) → suc l ≡ length xs
-           →'  Drop 1 (λ ys → l ≡ length ys) xs
+subs  :   (l : ℕ) (xs : List A) → length xs ≡ suc l
+      →'  Drop 1 (λ ys → length ys ≡ l) xs
 \end{code}
 
 \begin{code}
@@ -248,8 +249,8 @@ ground {n =' suc _  } = nil
 \section{Equality between the two algorithms}
 
 \begin{code}
-Parametricity : ImmediateSublistInduction → Set₁
-Parametricity ind =
+UnaryParametricity : ImmediateSublistInduction → Set₁
+UnaryParametricity ind =
   {A : Set}  {P   : List A → Set}                 (Q  :   ∀ {ys} → P ys → Set) 
              {f   : ∀ {ys} → Drop 1 P ys → P ys}  (g  :   ∀ {ys} {ps : Drop 1 P ys}
                                                       →'  All Q ps → Q (f ps))
@@ -263,11 +264,22 @@ All Q    nil       = ⊤
 All Q (  bin t u)  = All Q t × All Q u
 \end{code}
 
+\todo[inline]{Parametricity replacing a set of computation rules in the uniqueness proof of an induction principle}
+
+\begin{code}
+ComputationRule : ImmediateSublistInduction → Set₁
+ComputationRule ind =
+  {A : Set} {P : List A → Set} {f : ∀ {ys} → Drop 1 P ys → P ys} {xs : List A}
+  {ps : Drop 1 P xs} → All (λ {ys} p → ind P f ys ≡ p) ps → ind P f xs ≡ f ps
+\end{code}
+
 \begin{code}
 uniqueness :
-     (ind : ImmediateSublistInduction) → Parametricity ind
+     (ind ind' : ImmediateSublistInduction)
+  →  ComputationRule ind → UnaryParametricity ind'
   →  {A : Set} (P : List A → Set) (f : ∀ {ys} → Drop 1 P ys → P ys) (xs : List A)
-  →  ind P f xs ≡ td P f xs
+  →  ind P f xs ≡ ind' P f xs
+uniqueness ind ind' comp param' P f xs = param' (λ {ys} p → ind P f ys ≡ p) comp
 \end{code}
 \todo{\varcitet{Bernardy-proofs-for-free}{'s} translation or internal parametricity~\citep{Van-Muylder-internal-parametricity}}
 
