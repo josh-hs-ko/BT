@@ -1,4 +1,10 @@
-\begin{thebibliography}{6}
+\begin{thebibliography}{10}
+
+\bibitem[{Altenkirch et~al.}(2010){Altenkirch, Chapman, \&
+  Uustalu}]{Altenkirch-relative-monads}
+{Altenkirch, T., Chapman, J. \& Uustalu, T.} (2010) Monads need not be
+  endofunctors. Foundations of Software Science and Computational Structures.
+  Springer. pp. 297--311.
 
 \bibitem[{Altenkirch et~al.}(2015){Altenkirch, Ghani, Hancock, McBride, \&
   Morris}]{Altenkirch-indexed-containers}
@@ -21,6 +27,15 @@
 {Filinski, A.} (1994) Representing monads. Symposium on Principles of
   Programming Languages (POPL). ACM. pp. 446--457.
 
+\bibitem[{Hinze}(2012)]{Hinze-Kan-extensions}
+{Hinze, R.} (2012) {Kan} extensions for program optimisation --- or: {Art} and
+  {Dan} explain an old trick. Mathematics of Program Construction. Springer.
+  pp. 324--362.
+
+\bibitem[{McBride}(2002)]{McBride-motive}
+{McBride, C.} (2002) Elimination with a motive. Types for Proofs and Programs.
+  Springer. pp. 197--216.
+
 \bibitem[{Mu}(2024)]{Mu-sublists}
 {Mu, S.-C.} (2024) Bottom-up computation using trees of sublists.
   \textit{Journal of Functional Programming}. {\bf 34}, e14:1--16.
@@ -30,5 +45,10 @@
 {Van~Muylder, A., Nuyts, A. \& Devriese, D.} (2024) Internal and observational
   parametricity for {Cubical Agda}. \textit{Proceedings of the ACM on
   Programming Languages}. {\bf 8}(POPL), 8:1--32.
+
+\bibitem[{Yang and Wu}(2022){Yang \& Wu}]{Yang-recursion-schemes}
+{Yang, Z. \& Wu, N.} (2022) Fantastic morphisms and where to find them: A guide
+  to recursion schemes. International Conference on Mathematics of Program
+  Construction (MPC). Springer. pp. 222--267.
 
 \end{thebibliography}
