@@ -126,12 +126,12 @@
 \section{The induction principle and its representations}
 
 In a dependently typed setting, recursion schemes\todo{\citet{Yang-recursion-schemes}} become \emph{induction principles}.
-For the recursive computation over immediate sublists, instead of ending its type with |List A → B|, we should aim for |(xs : List A) → P xs| and make it an induction principle, of which |P : List A → Set| is a motive~\citep{McBride-motive}.
+For the recursive computation over immediate sublists, instead of ending its type with |List A → B|, we should aim for |(xs : List A) → P xs| and make it an induction principle, of which |P : List A → Set| is the motive~\citep{McBride-motive}.
 Like all induction principles, the motive should be established and preserved in a way that follows the recursive structure of the computation: whenever |P|~holds for all the immediate sublists of a list |ys|, it should hold for |ys| as well.
 
 To define the induction principle formally, first we need to define immediate sublists --- in fact we will just give a more general definition of sublists since we will need to refer to all of them during the course of the computation.
 \citet{Bird-zippy-tabulations} and \citet{Mu-sublists} define an immediate sublist of |xs| as a list obtained by dropping one element from |xs|; more generally, a sublist can be obtained by dropping some number of elements.
-We can write this as an inductively defined relation:
+Element dropping can be written as an inductively defined relation:
 \begin{code}
 data DropR : ℕ → List A → List A → Set where
   idenR :                           DropR    zero    xs        xs
@@ -211,29 +211,42 @@ ImmediateSublistInduction  = {A : Set} (P : List A → Set)
                            → (∀ {ys} → Drop 1 P ys → P ys)
                            → (xs : List A) → P xs
 \end{code}
+\todo{Inhabitants of |Drop 1 P xs| are lists}
 
 \section{The top-down algorithm}
 
+The top-down algorithm computes the immediate sublists of an input list |xs|, recursively computes the sub-results, and combines those into the final result.
+A definition directly following this description would not pass Agda's termination check though, because the immediate sublists would not be recognised as structurally smaller than |xs|.
+One way to make termination evident is to make the length of |xs| explicit and perform induction on the length.
+The following function |td| does this by invoking |td'|, which takes as additional arguments a natural number~|l| and an equality proof stating that the length of |xs| is~|l|.
+The function |td'| then performs induction on~|l| and does the real work.
 \begin{code}
 td : ImmediateSublistInduction
 td {A} P f xs = td' (length xs) xs refl
   where
     td' : (l : ℕ) (xs : List A) → length xs ≡ l → P xs
     td'    zero    [] eq = f nil
-    td' (  suc l)  xs eq = f (map (td' l _) (subs l xs eq))
+    td' (  suc l)  xs eq = f (map (λ {ys} → td' l ys) (subs l xs eq))
 \end{code}
-
+In the first case of |td'|, the final result is simply |f nil|.
+In the second case of |td'|, where the length of |xs| is |suc l|, the function |subs| constructs equality proofs that all the immediate sublists of |xs| have length~|l|.
 \begin{code}
 subs  :   (l : ℕ) (xs : List A) → length xs ≡ suc l
       →'  Drop 1 (λ ys → length ys ≡ l) xs
 \end{code}
-
+With these equality proofs, we can then invoke |td'| inductively on every immediate sublist of |xs| with the help of the |map| function for |Drop|,
 \begin{code}
 map : (∀ {ys} → P ys → Q ys) → ∀ {xs} → Drop n P xs → Drop n Q xs
 \end{code}
+and again use~|f| to compute the final result.
 
 \section{The bottom-up algorithm}
 
+Given an input list |xs|, the bottom-up algorithm |bu| first creates a tree representing the level below the lattice,\todo{refer to the lattice figure}\ which contains results for those sublists obtained by dropping |suc (length xs)| from |xs|; there are no such sublists, so the tree contains no elements, although the tree itself still exists (corresponding to a vacuous universal quantification).
+\begin{code}
+blank : (xs : List A) → Drop (suc (length xs)) P xs
+\end{code}
+The algorithm then enters a loop |bu'| and constructs each level of the lattice from bottom up, that is, a tree of type |Drop n P xs| for each~|n|, with |n|~decreasing:
 \begin{code}
 bu : ImmediateSublistInduction
 bu P f = bu' _ ∘ blank
@@ -242,16 +255,12 @@ bu P f = bu' _ ∘ blank
     bu'    zero    = unTip
     bu' (  suc n)  = bu' n ∘ map f ∘ upgrade
 \end{code}
-
+When |n|~reaches |zero|, the tree contains exactly the result for |xs|, which we can extract using
 \begin{code}
-blank : (xs : List A) → Drop (suc (length xs)) P xs
-\end{code}
-
-\begin{code}
-unTip : Drop 0 P xs → P xs
+unTip : Drop zero P xs → P xs
 unTip (tip p) = p
 \end{code}
-
+Otherwise, we use the function |upgrade| to create a new tree that is one level higher than the current one,
 \begin{code}
 upgrade : Drop (suc n) P xs → Drop n (Drop 1 P) xs
 upgrade         nil                           = ground
@@ -260,12 +269,13 @@ upgrade      (  bin         nil       nil  )  = bin ground nil
 upgrade      (  bin t @  (  bin _ _)  u    )  = bin  (upgrade t)
                                                      (zipWith (bin ∘ tip) t (upgrade u))
 \end{code}
-
+where
 \begin{code}
 ground : Drop n (Drop 1 P) []
 ground {n =' zero   } = tip nil
 ground {n =' suc _  } = nil
 \end{code}
+after which we invoke |map f| to compute the results in the new level and enter the next iteration.
 
 \section{Equality between the two algorithms}
 
