@@ -242,7 +242,7 @@ and again use~|f| to compute the final result.
 
 \section{The bottom-up algorithm}
 
-Given an input list |xs|, the bottom-up algorithm |bu| first creates a tree representing the level below the lattice,\todo{refer to the lattice figure}\ which contains results for those sublists obtained by dropping |suc (length xs)| from |xs|; there are no such sublists, so the tree contains no elements, although the tree itself still exists (corresponding to a vacuous universal quantification).
+Given an input list |xs|, the bottom-up algorithm |bu| first creates a tree representing the level below the lattice,\todo{refer to the lattice figure}\ which contains results for those sublists obtained by dropping |suc (length xs)| from |xs|; there are no such sublists, so the tree contains no elements, although the tree itself still exists (representing a proof of a vacuous universal quantification).
 \begin{code}
 blank : (xs : List A) → Drop (suc (length xs)) P xs
 \end{code}
@@ -277,8 +277,18 @@ ground {n =' suc _  } = nil
 \end{code}
 after which we invoke |map f| to compute the results in the new level and enter the next iteration.
 
-\section{Equality between the two algorithms}
+\section{Extensional equality between the two algorithms}
+\label{sec:equality}
 
+We have two different implementations of |ImmediateSublistInduction|, namely |td| and |bu|.
+How do we prove that they compute the same results?
+
+Actually, is it possible to write programs of type |ImmediateSublistInduction| to compute different results in Agda?
+Since |ImmediateSublistInduction| is parametric in~|P|, intuitively a program of this type can only compute a result of type |P xs| using~|f|, and moreover, the index |xs| determines how |f|~needs to be applied to arrive at that result (to compute which |f|~needs to be applied to sub-results of type |P ys| for all the immediate sublists |ys| of |xs|, and all the sub-results can only be computed using~|f|, and so on).
+So |td| and |bu| have to compute the same results simply because they have the same (and special) type!
+
+To prove this formally, we use parametricity.
+The following is the unary parametricity statement of |ImmediateSublistInduction| with respect to~|P|, derived using \varcitet{Bernardy-proofs-for-free}{'s} translation.
 \begin{code}
 UnaryParametricity : ImmediateSublistInduction → Set₁
 UnaryParametricity ind =
@@ -287,7 +297,8 @@ UnaryParametricity ind =
                                                       →'  All Q ps → Q (f ps))
              {xs  : List A} → Q (ind P f xs)
 \end{code}
-
+Unary parametricity can be understood in terms of invariant preservation: state an invariant~|Q| on values of type of the form |P ys|, provide a proof~|g| that |Q|~is preserved by~|f|, and then the results computed by |ind P f| will satisfy~|Q|.
+In the type of~|g|, we need an auxiliary definition to formulate the premise that |Q|~is satisfied by all the elements in a |Drop| tree:
 \begin{code}
 All : (∀ {ys} → P ys → Set) → Drop n P xs → Set
 All Q (  tip p)    = Q p
@@ -295,15 +306,23 @@ All Q    nil       = ⊤
 All Q (  bin t u)  = All Q t × All Q u
 \end{code}
 
-\todo[inline]{Parametricity replacing a set of computation rules in the uniqueness proof of an induction principle}
+Now the equality between |td| and |bu| is fairly straightforward to prove: first we derive a proof of |UnaryParametricity bu| (also using \varcitet{Bernardy-proofs-for-free}{'s} translation); then, given |P|~and~|f|, invoke the parametricity proof with the invariant |λ {ys} p → td P f ys ≡ p| saying that any |p : P ys| can only be the result computed by |td P f ys| (corresponding to our intuition above); finally, we can construct the remaining argument~|g| and obtain a proof of |{xs : List A} → td P f xs ≡ bu P f xs|.
 
+We will see that we can refactor the proof above to have a bit more structure and generality if we look at the argument~|g| in more detail.
+The instantiated type of~|g| is
+\begin{code}
+∀ {ys} {ps : Drop 1 P ys} → All (λ {zs} p → td P f zs ≡ p) ps → td P f ys ≡ f ps
+\end{code}
+This says that computing |td P f ys| is the same as applying~|f| to |ps| where every~|p| in |ps| is already a result computed by |td P f| --- this is actually a formulation of the computation rule of |td|!
+In general, computation rules can indeed be formulated as a form of invariant preservation.
+Therefore we can formulate the computation rule for any implementation of |ImmediateSublistInduction|,
 \begin{code}
 ComputationRule : ImmediateSublistInduction → Set₁
 ComputationRule ind =
   {A : Set} {P : List A → Set} {f : ∀ {ys} → Drop 1 P ys → P ys} {xs : List A}
   {ps : Drop 1 P xs} → All (λ {ys} p → ind P f ys ≡ p) ps → ind P f xs ≡ f ps
 \end{code}
-
+restate and prove the equality as a slightly more general theorem,
 \begin{code}
 uniqueness :
      (ind ind' : ImmediateSublistInduction)
@@ -312,15 +331,27 @@ uniqueness :
   →  ind P f xs ≡ ind' P f xs
 uniqueness ind ind' comp param' P f xs = param' (λ {ys} p → ind P f ys ≡ p) comp
 \end{code}
-\todo{\varcitet{Bernardy-proofs-for-free}{'s} translation or internal parametricity~\citep{Van-Muylder-internal-parametricity}}
+and finally instantiate the theorem for |td| and |bu| by discharging the proof obligations |ComputationRule td| and |UnaryParametricity bu|.
 
-\section{Discussion}
+\section{Comparisons}
+
+Usually, we prove two implementations |ind| and |ind'| of an induction principle to be equal assuming that both |ind| and |ind'| satisfy the set of computation rules coming with the induction principle.
+For example, for |ImmediateSublistInduction| we can prove
+\begin{code}
+   (ind ind' : ImmediateSublistInduction)
+→  ComputationRule ind → ComputationRule ind'
+→  {A : Set} (P : List A → Set) (f : ∀ {ys} → Drop 1 P ys → P ys) (xs : List A)
+→  ind P f xs ≡ ind' P f xs
+\end{code}
+The development in \cref{sec:equality} shows that we can alternatively assume that one implementation, say |ind'|, satisfies unary parametricity instead, and we will still have a proof.
+This is useful when |ind| can be easily proved to satisfy the set of computation rules whereas |ind'| cannot.
+In this case, if we use the |uniqueness| theorem, a parametricity proof for |ind'| is always mechanical if not automatic to derive (for example using \varcitet{Bernardy-proofs-for-free}{'s} translation or internal parametricity~\citep{Van-Muylder-internal-parametricity}), and we get to avoid a potentially difficult proof that |ind'| satisfies the set of computation rules.
 
 \todo[inline]{Detailed but informal comparison with Shin's development; theory still missing for formally relating Shin's equational proof and correctness by type checking}
 
 \todo[inline]{Efficiency comparison between the inductive and functional/container~\citep{Altenkirch-indexed-containers} representations}
 
-\section*{Acknowledgement}
+\section*{Acknowledgements}
 
 \todo[inline]{Zhixuan Yang (mother of all monads, induction principles and parametricity), James McKinna (container representation)}
 
