@@ -120,12 +120,13 @@
 \maketitle[F]
 
 \section{Introduction}
+\label{sec:introduction}
 
 \todo[inline]{Positioned as a follow-up to Shin's~\citeyearpar{Mu-sublists} paper, but kept (almost) independent until the comparison near the end (but maybe mention the methodological difference in the beginning); just quote and reuse Shin's problem introduction text?}
 
 \section{The induction principle and its representations}
 
-In a dependently typed setting, recursion schemes\todo{\citet{Yang-recursion-schemes}} become \emph{induction principles}.
+In a dependently typed setting, recursion schemes\todo{\citet{Yang-recursion-schemes}} become \emph{elimination} or \emph{induction principles}.
 For the recursive computation over immediate sublists, instead of ending its type with |List A → B|, we should aim for |(xs : List A) → P xs| and make it an induction principle, of which |P : List A → Set| is the motive~\citep{McBride-motive}.
 Like all induction principles, the motive should be established and preserved in a way that follows the recursive structure of the computation: whenever |P|~holds for all the immediate sublists of a list |ys|, it should hold for |ys| as well.
 
@@ -173,7 +174,7 @@ record Monoid (M : Set ℓ) : Set ℓ where
     _⊕_  : M → M → M
     ∅    : M
 \end{code}
-(The monoid laws could be included but are not needed.)
+(The monoid laws could be included but are not needed in our development.)
 If we expand the definitions of |Nondet| and its operations, we get
 \begin{code}
 drop : ℕ → List A → ⦃ Monoid M ⦄ → (List A → M) → M
@@ -188,7 +189,7 @@ dropL : ℕ → List A → List (List A)
 dropL n xs = drop n xs ⦃ monoid _++_ [] ⦄ (_∷ [])
 \end{code}
 More interestingly, we can also specialise |drop| to compute types.
-For example, |DropR| can alternatively be defined by
+For example, |DropR| can alternatively be defined in continuation-passing style by
 \begin{code}
 DropR n xs ys {-"\kern2pt"-} ≅ {-"\kern2pt"-} drop n xs ⦃ monoid _⊎_ ⊥ ⦄ (_≡ ys)
 \end{code}
@@ -204,16 +205,21 @@ data Drop : ℕ → (List A → Set) → List A → Set where
   nil  :                                                 Drop (  suc n)  P []
   bin  :  Drop n P xs → Drop (suc n) (P ∘ (x ∷_)) xs  →  Drop (  suc n)  P (x ∷ xs)
 \end{code}
-which we will use to represent the induction hypotheses in the induction principle:
+which we will use to represent the induction hypotheses in the induction principle:\todo{Inhabitants of |Drop 1 P xs| are lists}
 \begin{code}
 ImmediateSublistInduction : Set₁
 ImmediateSublistInduction  = {A : Set} (P : List A → Set)
                            → (∀ {ys} → Drop 1 P ys → P ys)
                            → (xs : List A) → P xs
 \end{code}
-\todo{Inhabitants of |Drop 1 P xs| are lists}
+
+In the subsequent \cref{sec:td,sec:bu} we will implement the top-down and bottom-up algorithms as programs of type |ImmediateSublistInduction|.
+These are fairly standard exercises in dependently typed programming (except perhaps for the |upgrade| function used in the bottom-up algorithm),\todo{needs to be introduced in \cref{sec:introduction}} and our implementations are by no means the only solutions.
+The reader may want to try the exercises for themself, and is not obliged to go through the detail of our programs.
+We will prove that the two algorithms are extensionally equal in \cref{sec:equality}, to understand which it will not be necessary to know how the two algorithms are implemented.
 
 \section{The top-down algorithm}
+\label{sec:td}
 
 The top-down algorithm computes the immediate sublists of an input list |xs|, recursively computes the sub-results, and combines those into the final result.
 A definition directly following this description would not pass Agda's termination check though, because the immediate sublists would not be recognised as structurally smaller than |xs|.
@@ -228,7 +234,7 @@ td {A} P f xs = td' (length xs) xs refl
     td'    zero    [] eq = f nil
     td' (  suc l)  xs eq = f (map (λ {ys} → td' l ys) (subs l xs eq))
 \end{code}
-In the first case of |td'|, the final result is simply |f nil|.
+In the first case of |td'|, where |xs| is~|[]|, the final result is simply |f nil : P []|.
 In the second case of |td'|, where the length of |xs| is |suc l|, the function |subs| constructs equality proofs that all the immediate sublists of |xs| have length~|l|.
 \begin{code}
 subs  :   (l : ℕ) (xs : List A) → length xs ≡ suc l
@@ -241,8 +247,9 @@ map : (∀ {ys} → P ys → Q ys) → ∀ {xs} → Drop n P xs → Drop n Q xs
 and again use~|f| to compute the final result.
 
 \section{The bottom-up algorithm}
+\label{sec:bu}
 
-Given an input list |xs|, the bottom-up algorithm |bu| first creates a tree representing the level below the lattice,\todo{refer to the lattice figure}\ which contains results for those sublists obtained by dropping |suc (length xs)| from |xs|; there are no such sublists, so the tree contains no elements, although the tree itself still exists (representing a proof of a vacuous universal quantification).
+Given an input list |xs|, the bottom-up algorithm |bu| first creates a tree representing the level below the lattice,\todo{refer to the lattice figure}\ which contains results for those sublists obtained by dropping |suc (length xs)| elements from |xs|; there are no such sublists, so the tree contains no elements, although the tree itself still exists (representing a proof of a vacuous universal quantification).
 \begin{code}
 blank : (xs : List A) → Drop (suc (length xs)) P xs
 \end{code}
@@ -306,16 +313,16 @@ All Q    nil       = ⊤
 All Q (  bin t u)  = All Q t × All Q u
 \end{code}
 
-Now the equality between |td| and |bu| is fairly straightforward to prove: first we derive a proof of |UnaryParametricity bu| (also using \varcitet{Bernardy-proofs-for-free}{'s} translation); then, given |P|~and~|f|, invoke the parametricity proof with the invariant |λ {ys} p → td P f ys ≡ p| saying that any |p : P ys| can only be the result computed by |td P f ys| (corresponding to our intuition above); finally, we can construct the remaining argument~|g| and obtain a proof of |{xs : List A} → td P f xs ≡ bu P f xs|.
+Now the equality between |td| and |bu| is fairly straightforward to prove: first we derive a proof of |UnaryParametricity bu| (also using \citeauthor{Bernardy-proofs-for-free}'s translation); then, given |P|~and~|f|, we invoke the parametricity proof with the invariant |λ {ys} p → td P f ys ≡ p| saying that any |p : P ys| can only be the result computed by |td P f ys| (corresponding to our intuition above); finally, we can construct the remaining argument~|g| and arrive at a proof of |{xs : List A} → td P f xs ≡ bu P f xs|.
 
-We will see that we can refactor the proof above to have a bit more structure and generality if we look at the argument~|g| in more detail.
+We will see that we can refactor the proof above to gain a bit more structure and generality if we look at the argument~|g| in more detail.
 The instantiated type of~|g| is
 \begin{code}
 ∀ {ys} {ps : Drop 1 P ys} → All (λ {zs} p → td P f zs ≡ p) ps → td P f ys ≡ f ps
 \end{code}
-This says that computing |td P f ys| is the same as applying~|f| to |ps| where every~|p| in |ps| is already a result computed by |td P f| --- this is actually a formulation of the computation rule of |td|!
-In general, computation rules can indeed be formulated as a form of invariant preservation.
-Therefore we can formulate the computation rule for any implementation of |ImmediateSublistInduction|,
+This says that computing |td P f ys| is the same as applying~|f| to |ps| where every~|p| in |ps| is already a result computed by |td P f| --- this is a formulation of the \emph{computation rule} of |ImmediateSublistInduction|, satisfied by |td|!
+%That is, computation rules can be formulated as a form of invariant preservation.
+Therefore we can formulate the computation rule for any implementation |ind| of |ImmediateSublistInduction|,
 \begin{code}
 ComputationRule : ImmediateSublistInduction → Set₁
 ComputationRule ind =
@@ -331,7 +338,7 @@ uniqueness :
   →  ind P f xs ≡ ind' P f xs
 uniqueness ind ind' comp param' P f xs = param' (λ {ys} p → ind P f ys ≡ p) comp
 \end{code}
-and finally instantiate the theorem for |td| and |bu| by discharging the proof obligations |ComputationRule td| and |UnaryParametricity bu|.
+and finally instantiate the theorem for |td| and |bu| by discharging the proof obligations |ComputationRule td|\todo{|td| needs to satisfy Agda's termination checker and doesn't satisfy the computation rule directly} and |UnaryParametricity bu|.
 
 \section{Comparisons}
 
@@ -343,13 +350,14 @@ For example, for |ImmediateSublistInduction| we can prove
 →  {A : Set} (P : List A → Set) (f : ∀ {ys} → Drop 1 P ys → P ys) (xs : List A)
 →  ind P f xs ≡ ind' P f xs
 \end{code}
-The development in \cref{sec:equality} shows that we can alternatively assume that one implementation, say |ind'|, satisfies unary parametricity instead, and we will still have a proof.
+The |uniqueness| theorem in \cref{sec:equality} demonstrates (in terms of |ImmediateSublistInduction|) that we can alternatively assume that one implementation, say |ind'|, satisfies unary parametricity instead, and we will still have a proof.
 This is useful when |ind| can be easily proved to satisfy the set of computation rules whereas |ind'| cannot.
-In this case, if we use the |uniqueness| theorem, a parametricity proof for |ind'| is always mechanical if not automatic to derive (for example using \varcitet{Bernardy-proofs-for-free}{'s} translation or internal parametricity~\citep{Van-Muylder-internal-parametricity}), and we get to avoid a potentially difficult proof that |ind'| satisfies the set of computation rules.
-
-\todo[inline]{Detailed but informal comparison with Shin's development; theory still missing for formally relating Shin's equational proof and correctness by type checking}
+In this case, a parametricity proof for |ind'| is always mechanical ---if not automatic--- to derive, for example using \varcitet{Bernardy-proofs-for-free}{'s} translation or internal parametricity~\citep{Van-Muylder-internal-parametricity}, and we get to avoid a potentially difficult proof that |ind'| satisfies the set of computation rules.
+This trick may be useful for porting recursion schemes or inventing efficient implementations of induction principles in a dependently typed setting.
 
 \todo[inline]{Efficiency comparison between the inductive and functional/container~\citep{Altenkirch-indexed-containers} representations}
+
+\todo[inline]{Detailed but informal comparison with Shin's development: the dependently typed |upgrade| may look simpler but implicitly requires an extra argument during computation; \ldots}
 
 \section*{Acknowledgements}
 

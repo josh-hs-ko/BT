@@ -28,14 +28,14 @@ variable
 module ContainerRepresentation where
 
   data DropR : ℕ → List A → List A → Set where
-    idenR :                         DropR  zero   xs       xs
-    dropR : DropR       n   xs ys → DropR (suc n) (x ∷ xs) ys
-    keepR : DropR (suc  n)  xs ys → DropR (suc n) (x ∷ xs) (x ∷ ys)
+    idenR :                       DropR  zero   xs       xs
+    dropR : DropR      n  xs ys → DropR (suc n) (x ∷ xs) ys
+    keepR : DropR (suc n) xs ys → DropR (suc n) (x ∷ xs) (x ∷ ys)
 
   ImmediateSublistInduction : Set₁
   ImmediateSublistInduction = {A : Set} (P : List A → Set)
-                            →  (∀ {ys} → (∀ {zs} → DropR 1 ys zs → P zs) → P ys)
-                            →  (xs : List A) → P xs
+                            → (∀ {ys} → (∀ {zs} → DropR 1 ys zs → P zs) → P ys)
+                            → (xs : List A) → P xs
 
 module MotherOfAllMonads where
 
@@ -222,10 +222,11 @@ module StandardUniqueness where
     in  bin (tip (g (revcat zs _))) u' , (eq , all-f) , (refl , all-g)
 
   uniqueness :
-      ((ind , _) (ind' , _) : Σ ImmediateSublistInduction ComputationRule)
-      {A : Set} (P : List A → Set) (f : ∀ {ys} → Drop 1 P ys → P ys) (xs : List A)
+      (ind ind' : ImmediateSublistInduction)
+    → ComputationRule ind → ComputationRule ind'
+    → {A : Set} (P : List A → Set) (f : ∀ {ys} → Drop 1 P ys → P ys) (xs : List A)
     → ind P f xs ≡ ind' P f xs
-  uniqueness (ind , comp) (ind' , comp') P f =
+  uniqueness ind ind' comp comp' P f =
     ind (λ xs → ind P f xs ≡ ind' P f xs)
         (λ {ys} ih →
         let (t , all , all') = uniqueness-lemma P (ind P f) (ind' P f) [] ih
