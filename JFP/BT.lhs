@@ -1,5 +1,8 @@
 \documentclass[fleqn]{jfp}
 
+% Build using:
+%  lhs2Tex --agda BT.lhs | pdflatex --jobname=BT
+
 \DeclareMathAlphabet{\mathsf}{OT1}{cmss}{m}{n}
 \DeclareMathAlphabet{\mathsfb}{OT1}{cmss}{bx}{n}
 
@@ -121,6 +124,40 @@
 
 \section{Introduction}
 \label{sec:introduction}
+
+The \emph{immediate sublists} of a list |xs| are those lists obtained by removing exactly one element from |xs|.
+For example, the list |"abc"| has three immediate sublists: |"ab"|, |"ac"|, and |"bc"|.
+In this study of top-down and bottom-up algorithms.
+\citet{Bird-zippy-tabulations} considered such a problem: compute a function |h| that takes a list as input, where the value of |h xs| depends on values of |h| at all the immediate sublists of |xs|.
+One can compute |h| top-down, as shown in Figure~\ref{fig:td-call-tree}\todo{update both pictures}, with many values being re-computed: to compute |h "abc"| we make calls to |h "ab"|, |h "ac"|, and |h "bc"|; to compute |h "abd"|, we make a call to |h "ab"| as well.
+To avoid re-computataion, a bottom-up strategy is shown in Figure~\ref{fig:sublists-lattice}.
+Values of |h| on input of length |n| is stored in level |n| and can be re-used. Each level |n+1| is computed from level |n|, until we reach the top.
+
+One could come up with a naive implementation by representing each level using a list.
+Computing the indices needed to fetch the corresponding entries, however, would not be pretty.
+Instead, \citet{Bird-zippy-tabulations} represented each level using a ``binomial tree'', and presented a four-line algorithm that constructs level |n_1| from level |n|.
+Being the last example in the paper, Bird did not offer much explanation.
+The tree appears to obey some structural constraints that was not explicitly stated.
+The four-line algorithm is as concise as it is cryptic:
+it was hard to see what invariant of the tree the algorithm maintains, let alone why the algorithm works.
+
+Fascinated by the algorithm, \citet{Mu-sublists} offered a specification and a derivation in terms of traditional equational reasoning.
+In this paper, we...
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.95\textwidth]{pics/td-call-tree.pdf}
+\caption{Computing |h "abcd"| top-down.}
+\label{fig:td-call-tree}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{pics/sublists-lattice.pdf}
+\caption{Computing |h "abcd"| bottom-up.}
+\label{fig:sublists-lattice}
+\end{figure}
+
 
 \todo[inline]{Positioned as a follow-up to Shin's~\citeyearpar{Mu-sublists} paper, but kept (almost) independent until the comparison near the end (but maybe mention the methodological difference in the beginning); just quote and reuse Shin's problem introduction text?}
 
@@ -299,7 +336,7 @@ The following is the unary parametricity statement of |ImmediateSublistInduction
 \begin{code}
 UnaryParametricity : ImmediateSublistInduction → Set₁
 UnaryParametricity ind =
-  {A : Set}  {P   : List A → Set}                 (Q  :   ∀ {ys} → P ys → Set) 
+  {A : Set}  {P   : List A → Set}                 (Q  :   ∀ {ys} → P ys → Set)
              {f   : ∀ {ys} → Drop 1 P ys → P ys}  (g  :   ∀ {ys} {ps : Drop 1 P ys}
                                                       →'  All Q ps → Q (f ps))
              {xs  : List A} → Q (ind P f xs)
