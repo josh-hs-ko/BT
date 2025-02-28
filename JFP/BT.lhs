@@ -78,6 +78,7 @@
 %format eq' = "\Var{eq^\prime}"
 %format f = "\Var f"
 %format g = "\Var g"
+%format h = "\Var h"
 %format ind = "\Var{ind}"
 %format ind' = "\Var{ind^\prime}"
 %format k = "\Var k"
@@ -125,42 +126,66 @@
 \section{Introduction}
 \label{sec:introduction}
 
-The \emph{immediate sublists} of a list |xs| are those lists obtained by removing exactly one element from |xs|.
-For example, the list |"abc"| has three immediate sublists: |"ab"|, |"ac"|, and |"bc"|.
-In his study of top-down and bottom-up algorithms, \citet{Bird-zippy-tabulations} considered such a problem: compute a function |h| that takes a list as input, where the value of |h xs| depends on values of |h| at all the immediate sublists of |xs|.
-One can compute |h| top-down, as shown in Figure~\ref{fig:td-call-tree}\todo{update both pictures}.
-A problem would be that many values are re-computed: to compute |h "abc"| we make calls to |h "ab"|, |h "ac"|, and |h "bc"|; to compute |h "abd"|, we make a call to |h "ab"| as well.
+Given a list |xs|, its \emph{immediate sublists} are those lists obtained by removing exactly one if its elements.
+For example, the three immediate sublists of |"abc"| are |"ab"|, |"ac"|, and |"bc"|.
+In his study of top-down and bottom-up algorithms, \citet{Bird-zippy-tabulations} considered the problem of computing a function |h : List A -> B| with such a top-down specification:
+\begin{spec}
+h xs = f (map h (subs xs))
+\end{spec}
+where |subs : List A -> List (List A)| computes immediate sublists,
+and |f : List B -> B| collects the results of the recursive calls.
+In words, |h xs| depends on values of |h| at all the immediate sublists of |xs|.
+Naively executing the specification results call graphs like that in Figure~\ref{fig:td-call-tree}\todo{update both pictures}:
+to compute |h "abc"| we make calls to |h "ab"|, |h "ac"|, and |h "bc"|; to compute |h "abd"|, we make a call to |h "ab"| as well.
 To avoid re-computation, a bottom-up strategy is shown in Figure~\ref{fig:sublists-lattice}.
 Values of |h| on inputs of length |n| are stored in level |n| to be reused.
 Each level |n+1| is computed from level |n|, until we reach the top.
 
 One could come up with a naive implementation of the bottom-up strategy by representing each level using a list.
-Computing the indices needed to fetch the corresponding entries, however, is not be pretty.
-Instead, \citet{Bird-zippy-tabulations} represented each level using a ``binomial tree'', and presented a four-line algorithm that constructs level |n+1| from level |n|.
-Being the last example in the paper, Bird did not offer much explanation.
-The tree appears to obey some structural constraints that was not explicitly stated.
-The four-line algorithm is as concise as it is cryptic:
-it was hard to see what invariants of the tree the algorithm maintains, let alone why the algorithm works.
+Computing the indices needed to fetch the corresponding entries, however, is not pretty.
+Instead, \citet{Bird-zippy-tabulations} represented each level using a tip-valued binary tree:
+\begin{spec}
+data BT a = Tip a | Bin (BT a) (BT a)
+\end{spec}
+and presented the following four-line function |cd : ∀ {A} → BT A → BT (List A)|,
+which is a natural transformation:
+\begin{spec}
+cd (Bin (Tip a)  (Tip b)  ) = Tip [a, b]
+cd (Bin u        (Tip b)  ) = Bin (cd u)(mapB (:: [b]) u)
+cd (Bin (Tip a)  v        ) = Tip (a :: as) where Tip as = cd v
+cd (Bin u        v        ) = Bin (cd u) (zipBWith (::) u (cd v))
+\end{spec}
+and claims that |mapB f . cd : BT B -> BT B| builds level |n+1| from level |n|.
+Functions |mapB : (A → B) → BT A → BT B| and |zipBWith : (A → B → C) → | |BT A →| |BT B → BT C| are respectively the mapping and zipping functions for |BT|.
 
-Fascinated by the algorithm, \citet{Mu-sublists} offered a specification and a derivation in terms of traditional equational reasoning.
-In this paper, we ... (TO BE COMPLETED)
-
-\begin{figure}[h]
+\begin{figure}[t]
 \centering
 \includegraphics[width=0.95\textwidth]{pics/td-call-tree.pdf}
 \caption{Computing |h "abcd"| top-down.}
 \label{fig:td-call-tree}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[t]
 \centering
 \includegraphics[width=0.75\textwidth]{pics/sublists-lattice.pdf}
 \caption{Computing |h "abcd"| bottom-up.}
 \label{fig:sublists-lattice}
 \end{figure}
 
+If you feel puzzled by |cd|, so were we.
+Being the last example in the paper, Bird did not offer much explanation.
+The tree appears to obey some structural constraints that was not explicitly stated --- otherwise |cd| might not be even total.
+The function |cd| is as concise as it is cryptic:
+it was hard to see what invariants of the tree it maintains, let alone why it works.
 
-\todo[inline]{Positioned as a follow-up to Shin's~\citeyearpar{Mu-sublists} paper, but kept (almost) independent until the comparison near the end (but maybe mention the methodological difference in the beginning); just quote and reuse Shin's problem introduction text?}
+Fascinated by the algorithm, \citet{Mu-sublists} offered a specification of |cd| and a derivation in terms of traditional equational reasoning.
+In this paper, we try a different approach.
+Can we motivate the binary tree and its shape constraints by formalizing, in its type, what we intend to compute?
+Instead of going into the tedious details of |cd|,
+can we put enough information in type-level such that, by exploiting the fact the functions having the (more informative) type must be unique,
+the equivalence of the top-down specification and the bottom-up algorithm automatically follows?
+
+%\todo[inline]{Positioned as a follow-up to Shin's~\citeyearpar{Mu-sublists} paper, but kept (almost) independent until the comparison near the end (but maybe mention the methodological difference in the beginning); just quote and reuse Shin's problem introduction text?}
 
 \section{The induction principle and its representations}
 
