@@ -126,28 +126,28 @@
 \section{Introduction}
 \label{sec:introduction}
 
-Given a list |xs|, its \emph{immediate sublists} are those lists obtained by removing exactly one if its elements.
+Given a list |xs|, its \emph{immediate sublists} are those lists obtained by removing exactly one of its elements.
 For example, the three immediate sublists of |"abc"| are |"ab"|, |"ac"|, and |"bc"|.
-In his study of top-down and bottom-up algorithms, \citet{Bird-zippy-tabulations} considered the problem of computing a function |h : List A -> B| with such a top-down specification:
+In his study of top-down and bottom-up algorithms, \citet{Bird-zippy-tabulations}\todo{mainly \citet{Mu-sublists}}\ considered the problem of computing a function\todo{recursion scheme~\citep{Yang-recursion-schemes}}\ |h : List A -> B| with such a top-down specification:
 \begin{spec}
 h xs = f (map h (subs xs))
 \end{spec}
 where |subs : List A -> List (List A)| computes immediate sublists,
 and |f : List B -> B| collects the results of the recursive calls.
 In words, |h xs| depends on values of |h| at all the immediate sublists of |xs|.
-Naively executing the specification results call graphs like that in Figure~\ref{fig:td-call-tree}\todo{update both pictures}:
-to compute |h "abc"| we make calls to |h "ab"|, |h "ac"|, and |h "bc"|; to compute |h "abd"|, we make a call to |h "ab"| as well.
+Naively executing the specification results in call graphs like that in Figure~\ref{fig:td-call-tree}\todo{update both pictures}:
+to compute |h "abc"| we make calls to |h "ab"|, |h "ac"|, and |h "bc"|; to compute |h "abd"|, we make a call to |h "ab"| as well.\todo{|h "a"| for both |h "ab"| and |h "ac"|? (then bumping into the problem of different base cases)}
+
 To avoid re-computation, a bottom-up strategy is shown in Figure~\ref{fig:sublists-lattice}.
 Values of |h| on inputs of length |n| are stored in level |n| to be reused.
 Each level |n+1| is computed from level |n|, until we reach the top.
-
 One could come up with a naive implementation of the bottom-up strategy by representing each level using a list.
-Computing the indices needed to fetch the corresponding entries, however, is not pretty.
+Computing the indices needed to fetch the corresponding entries, however, is not pretty.\todo{Impossible?}
 Instead, \citet{Bird-zippy-tabulations} represented each level using a tip-valued binary tree:
 \begin{spec}
 data BT a = Tip a | Bin (BT a) (BT a)
 \end{spec}
-and presented the following four-line function |cd : ∀ {A} → BT A → BT (List A)|,
+and presented the following four-line function |cd : ∀ {A} → BT A → BT (List A)|,\todo{Use \varcitet{Mu-sublists}{'s} names (or variants that are close enough)}
 which is a natural transformation:
 \begin{spec}
 cd (Bin (Tip a)  (Tip b)  ) = Tip [a, b]
@@ -160,14 +160,14 @@ Functions |mapB : (A → B) → BT A → BT B| and |zipBWith : (A → B → C) �
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.95\textwidth]{pics/td-call-tree.pdf}
+%\includegraphics[width=0.95\textwidth]{pics/td-call-tree.pdf}
 \caption{Computing |h "abcd"| top-down.}
 \label{fig:td-call-tree}
 \end{figure}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.75\textwidth]{pics/sublists-lattice.pdf}
+%\includegraphics[width=0.75\textwidth]{pics/sublists-lattice.pdf}
 \caption{Computing |h "abcd"| bottom-up.}
 \label{fig:sublists-lattice}
 \end{figure}
@@ -179,23 +179,23 @@ The function |cd| is as concise as it is cryptic:
 it was hard to see what invariants of the tree it maintains, let alone why it works.
 
 Fascinated by the algorithm, \citet{Mu-sublists} offered a specification of |cd| and a derivation in terms of traditional equational reasoning.
-In this paper, we try a different approach.
+In this paper, we try a different approach.\todo{the road not taken, and how far it leads (more clearly positioned as a sequel)}
 Can we motivate the binary tree and its shape constraints by formalizing, in its type, what we intend to compute?
 Instead of going into the tedious details of |cd|,
-can we put enough information in type-level such that, by exploiting the fact the functions having the (more informative) type must be unique,
+can we put enough information in type-level such that, by exploiting the fact the functions having the (more informative) type must be unique,\todo{Spoiler!}
 the equivalence of the top-down specification and the bottom-up algorithm automatically follows?
 
 %\todo[inline]{Positioned as a follow-up to Shin's~\citeyearpar{Mu-sublists} paper, but kept (almost) independent until the comparison near the end (but maybe mention the methodological difference in the beginning); just quote and reuse Shin's problem introduction text?}
 
 \section{The induction principle and its representations}
 
-In a dependently typed setting, recursion schemes\todo{\citet{Yang-recursion-schemes}} become \emph{elimination} or \emph{induction principles}.
+In a dependently typed setting, recursion schemes become \emph{elimination} or \emph{induction principles}.
 For the recursive computation over immediate sublists, instead of ending its type with |List A → B|, we should aim for |(xs : List A) → P xs| and make it an induction principle, of which |P : List A → Set| is the motive~\citep{McBride-motive}.
 Like all induction principles, the motive should be established and preserved in a way that follows the recursive structure of the computation: whenever |P|~holds for all the immediate sublists of a list |ys|, it should hold for |ys| as well.
 
 To define the induction principle formally, first we need to define immediate sublists --- in fact we will just give a more general definition of sublists since we will need to refer to all of them during the course of the computation.
 \citet{Bird-zippy-tabulations} and \citet{Mu-sublists} define an immediate sublist of |xs| as a list obtained by dropping one element from |xs|; more generally, a sublist can be obtained by dropping some number of elements.
-Element dropping can be written as an inductively defined relation:
+Element dropping\todo{avoid?}\ can be written as an inductively defined relation:
 \begin{code}
 data DropR : ℕ → List A → List A → Set where
   idenR :                           DropR    zero    xs        xs
@@ -401,7 +401,7 @@ uniqueness :
   →  ind P f xs ≡ ind' P f xs
 uniqueness ind ind' comp param' P f xs = param' (λ {ys} p → ind P f ys ≡ p) comp
 \end{code}
-and finally instantiate the theorem for |td| and |bu| by discharging the proof obligations |ComputationRule td|\todo{|td| needs to satisfy Agda's termination checker and doesn't satisfy the computation rule directly} and |UnaryParametricity bu|.
+and finally instantiate the theorem for |td| and |bu| by discharging the proof obligations |ComputationRule td|\todo{|td| needs to satisfy Agda's termination checker and doesn't satisfy the computation rule directly} and |UnaryParametricity bu|.\todo{Explain how a parametricity proof is obtained}
 
 \section{Comparisons}
 
@@ -420,7 +420,7 @@ This trick may be useful for porting recursion schemes or inventing efficient im
 
 \todo[inline]{Efficiency comparison between the inductive and functional/container~\citep{Altenkirch-indexed-containers} representations}
 
-\todo[inline]{Detailed but informal comparison with Shin's development: the dependently typed |upgrade| may look simpler but implicitly requires an extra argument during computation; \ldots}
+\todo[inline]{Detailed but informal comparison with Shin's development: the dependently typed |upgrade| may look simpler but implicitly requires an extra argument during computation; (similarly) the base case of the induction principle starts from |[]| rather than singleton lists; contextual information is now at type level (cf \texttt{choose} in the derivation of \texttt{upgrade} and \texttt{td} in the equality proof)}
 
 \section*{Acknowledgements}
 
