@@ -60,7 +60,7 @@
 
 %format zero = "\Con{zero}"
 %format suc = "\Con{suc}"
-%format idenR = "\Con{iden}"
+%format returnR = "\Con{return}"
 %format keepR = "\Con{keep}"
 %format dropR = "\Con{drop}"
 %format monoid = "\Con{monoid}"
@@ -135,12 +135,12 @@ h xs = f (map h (subs xs))
 where |subs : List A -> List (List A)| computes immediate sublists,
 and |f : List B -> B| collects the results of the recursive calls.
 In words, |h xs| depends on values of |h| at all the immediate sublists of |xs|.
-Naively executing the specification results in call graphs like that in Figure~\ref{fig:td-call-tree}\todo{update both pictures}:
+Naively executing the specification results in call graphs like that in \cref{fig:td-call-tree}\todo{update both pictures}:
 to compute |h "abc"| we make calls to |h "ab"|, |h "ac"|, and |h "bc"|; to compute |h "abd"|, we make a call to |h "ab"| as well.\todo{|h "a"| for both |h "ab"| and |h "ac"|? (then bumping into the problem of different base cases)}
 
-To avoid re-computation, a bottom-up strategy is shown in Figure~\ref{fig:sublists-lattice}.
-Values of |h| on inputs of length |n| are stored in level |n| to be reused.
-Each level |n+1| is computed from level |n|, until we reach the top.
+To avoid re-computation, a bottom-up strategy is shown in \cref{fig:sublists-lattice}.
+Values of |h| on inputs of length~$n$ are stored in level~$n$ to be reused.
+Each level $n+1$ is computed from level~$n$, until we reach the top.
 One could come up with a naive implementation of the bottom-up strategy by representing each level using a list.
 Computing the indices needed to fetch the corresponding entries, however, is not pretty.\todo{Impossible?}
 Instead, \citet{Bird-zippy-tabulations} represented each level using a tip-valued binary tree:
@@ -155,7 +155,7 @@ cd (Bin u        (Tip b)  ) = Bin (cd u)(mapB (:: [b]) u)
 cd (Bin (Tip a)  v        ) = Tip (a :: as) where Tip as = cd v
 cd (Bin u        v        ) = Bin (cd u) (zipBWith (::) u (cd v))
 \end{spec}
-and claims that |mapB f . cd : BT B -> BT B| builds level |n+1| from level |n|.
+and claims that |mapB f . cd : BT B -> BT B| builds level $n+1$ from level~$n$.
 Functions |mapB : (A → B) → BT A → BT B| and |zipBWith : (A → B → C) → | |BT A →| |BT B → BT C| are respectively the mapping and zipping functions for |BT|.
 
 \begin{figure}[t]
@@ -198,9 +198,9 @@ To define the induction principle formally, first we need to define immediate su
 Element dropping\todo{avoid?}\ can be written as an inductively defined relation:
 \begin{code}
 data DropR : ℕ → List A → List A → Set where
-  idenR :                           DropR    zero    xs        xs
-  dropR : DropR       n   xs ys  →  DropR (  suc n)  (x ∷ xs)  ys
-  keepR : DropR (suc  n)  xs ys  →  DropR (  suc n)  (x ∷ xs)  (x ∷ ys)
+  returnR  :                           DropR    zero    xs        xs
+  dropR    : DropR       n   xs ys  →  DropR (  suc n)  (x ∷ xs)  ys
+  keepR    : DropR (suc  n)  xs ys  →  DropR (  suc n)  (x ∷ xs)  (x ∷ ys)
 \end{code}
 Then we can write down the induction principle:
 \begin{code}
@@ -216,7 +216,7 @@ Notice that the induction hypotheses are represented as a function of type
 making the type of the premise~|f| higher-order, whereas \citet{Bird-zippy-tabulations} and \citet{Mu-sublists} use a first-order data structure, namely the binomial trees.
 Below we derive an indexed data type |Drop n P xs| of binomial trees that represents universal quantification over sublists obtained by dropping |n|~elements from |xs|; in particular, |Drop 1 P ys| will be equivalent to the function type~\cref{eq:container-ih}.
 
-The derivation goes through the `mother of all monads' construction~\citep{Filinski-representing-monads, Hinze-Kan-extensions}.
+The derivation goes through the `mother of all monads' construction~\citep{Filinski-representing-monads, Piponi-mother-of-all-monads, Hinze-Kan-extensions}.
 First, we (re)define element dropping as a nondeterministic function
 \begin{code}
 drop : ℕ → List A → Nondet (List A)
@@ -312,7 +312,7 @@ and again use~|f| to compute the final result.
 \section{The bottom-up algorithm}
 \label{sec:bu}
 
-Given an input list |xs|, the bottom-up algorithm |bu| first creates a tree representing the level below the lattice,\todo{refer to the lattice figure}\ which contains results for those sublists obtained by dropping |suc (length xs)| elements from |xs|; there are no such sublists, so the tree contains no elements, although the tree itself still exists (representing a proof of a vacuous universal quantification).
+Given an input list |xs|, the bottom-up algorithm |bu| first creates a tree representing the level right below the lattice in \cref{fig:sublists-lattice}, which contains results for those sublists obtained by removing |suc (length xs)| elements from |xs|; there are no such sublists, so the tree contains no elements, although the tree itself still exists (representing a proof of a vacuous universal quantification).
 \begin{code}
 blank : (xs : List A) → Drop (suc (length xs)) P xs
 \end{code}
@@ -355,7 +355,7 @@ How do we prove that they compute the same results?
 
 Actually, is it possible to write programs of type |ImmediateSublistInduction| to compute different results in Agda?
 Since |ImmediateSublistInduction| is parametric in~|P|, intuitively a program of this type can only compute a result of type |P xs| using~|f|, and moreover, the index |xs| determines how |f|~needs to be applied to arrive at that result (to compute which |f|~needs to be applied to sub-results of type |P ys| for all the immediate sublists |ys| of |xs|, and all the sub-results can only be computed using~|f|, and so on).
-So |td| and |bu| have to compute the same results simply because they have the same (and special) type!
+So |td| and |bu| have to compute the same results simply because they have the same ---and special--- type!
 
 To prove this formally, we use parametricity.
 The following is the unary parametricity statement of |ImmediateSublistInduction| with respect to~|P|, derived using \varcitet{Bernardy-proofs-for-free}{'s} translation.
@@ -376,9 +376,9 @@ All Q    nil       = ⊤
 All Q (  bin t u)  = All Q t × All Q u
 \end{code}
 
-Now the equality between |td| and |bu| is fairly straightforward to prove: first we derive a proof of |UnaryParametricity bu| (also using \citeauthor{Bernardy-proofs-for-free}'s translation); then, given |P|~and~|f|, we invoke the parametricity proof with the invariant |λ {ys} p → td P f ys ≡ p| saying that any |p : P ys| can only be the result computed by |td P f ys| (corresponding to our intuition above); finally, we can construct the remaining argument~|g| and arrive at a proof of |{xs : List A} → td P f xs ≡ bu P f xs|.
+Now the equality between |td| and |bu| is fairly straightforward to prove: first we derive a proof of |UnaryParametricity bu| (for example using \citeauthor{Bernardy-proofs-for-free}'s translation again); then, given |P|~and~|f|, we invoke the parametricity proof with the invariant |λ {ys} p → td P f ys ≡ p| saying that any |p : P ys| can only be the result computed by |td P f ys| (corresponding to our intuition above); finally, we can construct the remaining argument~|g| and arrive at a proof of |{xs : List A} → td P f xs ≡ bu P f xs|.
 
-We will see that we can refactor the proof above to gain a bit more structure and generality if we look at the argument~|g| in more detail.
+If we look at the argument~|g| in more detail, we will see that we can refactor the proof to gain a bit more structure and generality.
 The instantiated type of~|g| is
 \begin{code}
 ∀ {ys} {ps : Drop 1 P ys} → All (λ {zs} p → td P f zs ≡ p) ps → td P f ys ≡ f ps
@@ -401,7 +401,9 @@ uniqueness :
   →  ind P f xs ≡ ind' P f xs
 uniqueness ind ind' comp param' P f xs = param' (λ {ys} p → ind P f ys ≡ p) comp
 \end{code}
-and finally instantiate the theorem for |td| and |bu| by discharging the proof obligations |ComputationRule td|\todo{|td| needs to satisfy Agda's termination checker and doesn't satisfy the computation rule directly} and |UnaryParametricity bu|.\todo{Explain how a parametricity proof is obtained}
+and finally instantiate the theorem for |td| and |bu| by discharging the proof obligations |ComputationRule td| and |UnaryParametricity bu|.
+(Our |td| in \cref{sec:td} does not satisfy the computation rule definitionally because it performs a different form of induction on the length of the input list, to make termination evident to Agda.
+A proof of |ComputationRule td| is therefore not immediate, but only takes a small amount of work.)
 
 \section{Comparisons}
 
