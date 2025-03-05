@@ -135,7 +135,7 @@ h xs = f (map h (subs xs))
 where |subs : List A -> List (List A)| computes immediate sublists,
 and |f : List B -> B| collects the results of the recursive calls.
 In words, |h xs| depends on values of |h| at all the immediate sublists of |xs|.
-Naively executing the specification results in call graphs like that in \cref{fig:td-call-tree}\todo{update both pictures}:
+Naively executing the specification results in call graphs like that in \cref{fig:td-call-tree}:
 to compute |h "abc"| we make calls to |h "ab"|, |h "ac"|, and |h "bc"|; to compute |h "abd"|, we make a call to |h "ab"| as well.\todo{|h "a"| for both |h "ab"| and |h "ac"|? (then bumping into the problem of different base cases)}
 
 To avoid re-computation, a bottom-up strategy is shown in \cref{fig:sublists-lattice}.
@@ -160,14 +160,14 @@ Functions |mapB : (A → B) → BT A → BT B| and |zipBWith : (A → B → C) �
 
 \begin{figure}[t]
 \centering
-%\includegraphics[width=0.95\textwidth]{pics/td-call-tree.pdf}
+\includegraphics[width=0.95\textwidth]{pics/td-call-tree.pdf}
 \caption{Computing |h "abcd"| top-down.}
 \label{fig:td-call-tree}
 \end{figure}
 
 \begin{figure}[t]
 \centering
-%\includegraphics[width=0.75\textwidth]{pics/sublists-lattice.pdf}
+\includegraphics[width=0.75\textwidth]{pics/sublists-lattice.pdf}
 \caption{Computing |h "abcd"| bottom-up.}
 \label{fig:sublists-lattice}
 \end{figure}
