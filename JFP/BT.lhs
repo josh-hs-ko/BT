@@ -94,6 +94,7 @@
 %format t = "\Var t"
 %format u = "\Var u"
 %format x = "\Var x"
+%format y = "\Var y"
 %format xs = "\Var{xs}"
 %format ys = "\Var{ys}"
 %format zs = "\Var{zs}"
@@ -127,36 +128,39 @@
 \label{sec:introduction}
 
 Given a list |xs|, its \emph{immediate sublists} are those lists obtained by removing exactly one of its elements.
-For example, the three immediate sublists of |"abc"| are |"ab"|, |"ac"|, and |"bc"|.
-In his study of top-down and bottom-up algorithms, \citet{Bird-zippy-tabulations}\todo{mainly \citet{Mu-sublists}}\ considered the problem of computing a function\todo{recursion scheme~\citep{Yang-recursion-schemes}}\ |h : List A -> B| with such a top-down specification:
+For example, the four immediate sublists of |"abcd"| are |"abc"|, |"abd"|, |"acd"| and |"bcd"|.
+\citet{Mu-sublists} considered the problem of computing a function\todo{recursion scheme~\citep{Yang-recursion-schemes}}\ |h : List A -> B| with such a top-down specification:
 \begin{spec}
 h xs = f (map h (subs xs))
 \end{spec}
-where |subs : List A -> List (List A)| computes immediate sublists,
+where |subs : List a -> List (List a)| computes immediate sublists,
 and |f : List B -> B| collects the results of the recursive calls.
 In words, |h xs| depends on values of |h| at all the immediate sublists of |xs|.
-Naively executing the specification results in call graphs like that in \cref{fig:td-call-tree}:
-to compute |h "abc"| we make calls to |h "ab"|, |h "ac"|, and |h "bc"|; to compute |h "abd"|, we make a call to |h "ab"| as well.\todo{|h "a"| for both |h "ab"| and |h "ac"|? (then bumping into the problem of different base cases)}
+Naively executing the specification results in lots of re-computation.
+See \cref{fig:td-call-tree}, for example:
+|h "ab"| is computed twice for |h "abc"| and |h "abd"|, and |h "ac"| twice for |h "abc"| and |h "acd"|.
+\todo{|h "a"| for both |h "ab"| and |h "ac"|? (then bumping into the problem of different base cases)}
 
-To avoid re-computation, a bottom-up strategy is shown in \cref{fig:sublists-lattice}.
+The problem is derived from \citet{Bird-zippy-tabulations}, a study of the relationship between top-down and bottom-up algorithms.
+A bottom-up strategy that avoids re-computation is shown in \cref{fig:sublists-lattice}.
 Values of |h| on inputs of length~$n$ are stored in level~$n$ to be reused.
 Each level $n+1$ is computed from level~$n$, until we reach the top.
-One could come up with a naive implementation of the bottom-up strategy by representing each level using a list.
-Computing the indices needed to fetch the corresponding entries, however, is not pretty.\todo{Impossible?}
+It may appear that this bottom-up strategy can be implemented by representing each level using a list.
+It will turn out that, however, computing the indices needed to fetch the corresponding entries is not pretty, and sometimes impossible without additional information.
 Instead, \citet{Bird-zippy-tabulations} represented each level using a tip-valued binary tree:
 \begin{spec}
 data BT a = Tip a | Bin (BT a) (BT a)
 \end{spec}
-and presented the following four-line function |cd : ∀ {A} → BT A → BT (List A)|,\todo{Use \varcitet{Mu-sublists}{'s} names (or variants that are close enough)}
-which is a natural transformation:
+with functions |mapB : (a → b) → BT a → BT b| and |zipBWith : (a → b → c) → | |BT a →| |BT b →| |BT c|, respectively the mapping and zipping functions for |BT|, having expected definitions.
+Let |t| be a tree representing level $n$.
+To compute level $n+1$, we need a function |upgrade : BT a → BT (List a)|, a natural transformation rearranging elements in |t|, such that |mapB f (upgrade t)| represents level $n+1$.
+\citet{Bird-zippy-tabulations} suggested the following definition of |upgrade|:
 \begin{spec}
-cd (Bin (Tip a)  (Tip b)  ) = Tip [a, b]
-cd (Bin u        (Tip b)  ) = Bin (cd u)(mapB (:: [b]) u)
-cd (Bin (Tip a)  v        ) = Tip (a :: as) where Tip as = cd v
-cd (Bin u        v        ) = Bin (cd u) (zipBWith (::) u (cd v))
+upgrade (Bin (Tip x)  (Tip y)  ) = Tip [ x , y ]
+upgrade (Bin t        (Tip y)  ) = Bin (upgrade t) (mapB (:: [ y ]) t)
+upgrade (Bin (Tip x)  u        ) = Tip (x :: xs) where Tip xs = upgrade u
+upgrade (Bin t        u        ) = Bin (upgrade t) (zipBWith (::) t (upgrade u))
 \end{spec}
-and claims that |mapB f . cd : BT B -> BT B| builds level $n+1$ from level~$n$.
-Functions |mapB : (A → B) → BT A → BT B| and |zipBWith : (A → B → C) → | |BT A →| |BT B → BT C| are respectively the mapping and zipping functions for |BT|.
 
 \begin{figure}[t]
 \centering
@@ -172,20 +176,22 @@ Functions |mapB : (A → B) → BT A → BT B| and |zipBWith : (A → B → C) �
 \label{fig:sublists-lattice}
 \end{figure}
 
-If you feel puzzled by |cd|, so were we.
+If you feel puzzled by |upgrade|, so were we.
 Being the last example in the paper, Bird did not offer much explanation.
-The tree appears to obey some structural constraints that was not explicitly stated --- otherwise |cd| might not be even total.
-The function |cd| is as concise as it is cryptic:
+The function |upgrade| is as concise as it is cryptic:
 it was hard to see what invariants of the tree it maintains, let alone why it works.
+The trees appear to obey some structural constraints that were not explicitly stated --- otherwise |upgrade| might not even be total.
 
-Fascinated by the algorithm, \citet{Mu-sublists} offered a specification of |cd| and a derivation in terms of traditional equational reasoning.
+Fascinated by the algorithm, \citet{Mu-sublists} offered a specification of |upgrade| and a derivation in terms of traditional equational reasoning.
 In this paper, we try a different approach.\todo{the road not taken, and how far it leads (more clearly positioned as a sequel)}
 Can we motivate the binary tree and its shape constraints by formalizing, in its type, what we intend to compute?
-Instead of going into the tedious details of |cd|,
+Instead of going into the tedious details of |upgrade|,
 can we put enough information in type-level such that, by exploiting the fact the functions having the (more informative) type must be unique,\todo{Spoiler!}
 the equivalence of the top-down specification and the bottom-up algorithm automatically follows?
 
 %\todo[inline]{Positioned as a follow-up to Shin's~\citeyearpar{Mu-sublists} paper, but kept (almost) independent until the comparison near the end (but maybe mention the methodological difference in the beginning); just quote and reuse Shin's problem introduction text?}
+
+\todo[inline]{SCM: regarding names and notations in this section. I am using |BT|, |Bin|, and |Tip| such that they relate to the sections later (in my paper they were |B|, |N|, and |T|). The same with |upgrade| (was |up| in my paper). Not sure whether it's necessary to some how make it known that the name |upgrade| is from me and not Richard... I am using Haskell convention that small-letter identifiers in types denote universally quantified types, but I think it's awkward reversing the roles of |(::)| and |(:)| in one paper so I stuck with Agda notation. However all this can be changed.}
 
 \section{The induction principle and its representations}
 
