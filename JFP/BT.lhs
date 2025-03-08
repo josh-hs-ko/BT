@@ -337,7 +337,7 @@ When |n|~reaches |zero|, the tree contains exactly the result for |xs|, which we
 unTip : Drop zero P xs → P xs
 unTip (tip p) = p
 \end{code}
-Otherwise, we use the function |upgrade| to create a new tree that is one level higher than the current one,
+Otherwise, we use the function |upgrade| to create a new tree that is one level higher than the current one,\todo{SCM: now that |upgrade| was given in Section 1, we can add some words here briefly comparing them and showing that this one is adapted from the earlier one, while also saying that its actual definition does not matter?}
 \begin{code}
 upgrade : Drop (suc n) P xs → Drop n (Drop 1 P) xs
 upgrade         nil                           = ground
