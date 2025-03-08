@@ -147,14 +147,16 @@ Values of |h| on inputs of length~$n$ are stored in level~$n$ to be reused.
 Each level $n+1$ is computed from level~$n$, until we reach the top.
 It may appear that this bottom-up strategy can be implemented by representing each level using a list.
 It will turn out that, however, computing the indices needed to fetch the corresponding entries is not pretty, and sometimes impossible without additional information.
-Instead, \citet{Bird-zippy-tabulations} represented each level using a tip-valued binary tree:
+Instead, \citet{Bird-zippy-tabulations} represents each level using a tip-valued binary tree:\footnote{In this section we use adopt some Haskell-style shorthands, such as the |data| definition, and that small-lettered variables in types are implicitly universally quantified.
+We switch to Agda notation for the rest of the paper.
+The name |upgrade| is adopted from \citet{Mu-sublists}, while the same function is called |cd| in \citet{Bird-zippy-tabulations}.}
 \begin{spec}
 data BT a = Tip a | Bin (BT a) (BT a)
 \end{spec}
 with functions |mapB : (a → b) → BT a → BT b| and |zipBWith : (a → b → c) → | |BT a →| |BT b →| |BT c|, respectively the mapping and zipping functions for |BT|, having expected definitions.
 Let |t| be a tree representing level $n$.
 To compute level $n+1$, we need a function |upgrade : BT a → BT (List a)|, a natural transformation rearranging elements in |t|, such that |mapB f (upgrade t)| represents level $n+1$.
-\citet{Bird-zippy-tabulations} suggested the following definition of |upgrade|:
+\citet{Bird-zippy-tabulations} suggests the following definition of |upgrade|:
 \begin{spec}
 upgrade (Bin (Tip x)  (Tip y)  ) = Tip [ x , y ]
 upgrade (Bin t        (Tip y)  ) = Bin (upgrade t) (mapB (:: [ y ]) t)
@@ -177,12 +179,11 @@ upgrade (Bin t        u        ) = Bin (upgrade t) (zipBWith (::) t (upgrade u))
 \end{figure}
 
 If you feel puzzled by |upgrade|, so were we.
-Being the last example in the paper, Bird did not offer much explanation.
-The function |upgrade| is as concise as it is cryptic:
-it was hard to see what invariants of the tree it maintains, let alone why it works.
-The trees appear to obey some structural constraints that were not explicitly stated --- otherwise |upgrade| might not even be total.
+Being the last example in the paper, Bird does not offer much explanation.
+The function |upgrade| is as concise as it is cryptic.
+The trees appear to obey some structural constraints --- Bird calls them \emph{binomial trees}, hence the name |BT|, but neither the constraints nor how |upgrade| maintains them is explicitly stated.
 
-Fascinated by the algorithm, \citet{Mu-sublists} offered a specification of |upgrade| and a derivation in terms of traditional equational reasoning.
+Fascinated by the algorithm, \citet{Mu-sublists} offers a specification of |upgrade| and a derivation in terms of traditional equational reasoning.
 In this paper, we try a different approach.\todo{the road not taken, and how far it leads (more clearly positioned as a sequel)}
 Can we motivate the binary tree and its shape constraints by formalizing, in its type, what we intend to compute?
 Instead of going into the tedious details of |upgrade|,
