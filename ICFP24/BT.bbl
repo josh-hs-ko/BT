@@ -152,16 +152,16 @@
 \showDOI{\tempurl}
 
 
-\bibitem[Mu(2023)]%
+\bibitem[Mu(2024)]%
         {Mu-sublists}
 \bibfield{author}{\bibinfo{person}{Shin-Cheng Mu}.}
-  \bibinfo{year}{2023}\natexlab{}.
-\newblock \bibinfo{title}{Bottom-Up Computation Using Trees of Sublists
-  (Functional Pearl)}.
-\newblock
+  \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{Bottom-Up Computation Using Trees of Sublists}.
+\newblock \bibinfo{journal}{\emph{Journal of Functional Programming}}
+  \bibinfo{volume}{34} (\bibinfo{year}{2024}), \bibinfo{pages}{e14:1--16}.
 \newblock
 \urldef\tempurl%
-\url{https://doi.org/10.48550/arXiv.2311.18528}
+\url{https://doi.org/10.1017/S0956796824000145}
 \showDOI{\tempurl}
 
 

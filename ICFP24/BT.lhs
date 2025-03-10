@@ -1,7 +1,8 @@
 %let anonymous = False
 %let draft = False
 %let mentionICFP = False
-%let jfp = True
+%let jfp = False
+%let arXivAncillary = True
 
 %if jfp
 \documentclass{jfp}
@@ -310,7 +311,7 @@ acmsmall,fleqn,screen,nonacm]{acmart}
 }
 
 \begin{abstract}
-We reconstruct some of the development in Richard Bird's~[2008] paper \textit{Zippy Tabulations of Recursive Functions}, using dependent types and string diagrams rather than mere simple types.
+We reconstruct some of the development in Richard Bird's~\citeyearpar{Bird-zippy-tabulations} paper \textit{Zippy Tabulations of Recursive Functions}, using dependent types and string diagrams rather than mere simple types.
 This paper serves as an intuitive introduction to and demonstration of these concepts for the curious functional programmer, who ideally already has some exposure to dependent types and category theory, is not put off by basic concepts like indexed types and functors, and wants to see a more practical example.
 
 The paper is presented in the form of a short story, narrated from the perspective of a functional programmer trying to follow the development in Bird's paper.
@@ -1727,7 +1728,13 @@ In fact, our telling largely follows our actual development (tracing what \lstin
 
 The format also works well with various decisions regarding what to include in the paper, and what to omit.
 We put emphasis on intuitive explanations, and give formal definitions, theorems, and proofs only when necessary: we usually rely on intuitive reasoning to tackle a problem at first, and do not hurry to write things down formally.
-The supplementary Agda code provides the omitted formal detail though.
+The
+%if arXivAncillary
+ancillary
+%else
+supplementary
+%endif
+Agda code provides the omitted formal detail though.
 We have striven to keep the paper fairly self-contained: the reader should be able to get a sense of the main ideas just from the intuitive explanations.
 But we do not intend this paper to be a tutorial on dependently typed programming in Agda or on category theory --- the paper is best thought of as a companion to such tutorials or textbooks, giving a larger but not overly complicated example, and applying the abstract tools to that example.
 To make the paper more accessible, we have also resisted the temptation to generalise or to answer every question:
