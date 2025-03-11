@@ -73,6 +73,7 @@
 
 %format A = "\Var A"
 %format B = "\Var B"
+%format C = "\Var C"
 %format comp = "\Var{comp}"
 %format eq = "\Var{eq}"
 %format eq' = "\Var{eq^\prime}"
@@ -133,7 +134,7 @@ For example, the four immediate sublists of |"abcd"| are |"abc"|, |"abd"|, |"acd
 \begin{spec}
 h xs = f (map h (subs xs))
 \end{spec}
-where |subs : List a -> List (List a)| computes immediate sublists,
+where |subs : {A : Set} → List A → List (List A)| computes immediate sublists,
 and |f : List B -> B| collects the results of the recursive calls.
 In words, |h xs| depends on values of |h| at all the immediate sublists of |xs|.
 Naively executing the specification results in lots of re-computation.
@@ -147,21 +148,25 @@ Values of |h| on inputs of length~$n$ are stored in level~$n$ to be reused.
 Each level $n+1$ is computed from level~$n$, until we reach the top.
 It may appear that this bottom-up strategy can be implemented by representing each level using a list.
 It will turn out that, however, computing the indices needed to fetch the corresponding entries is not pretty, and sometimes impossible without additional information.
-Instead, \citet{Bird-zippy-tabulations} represents each level using a tip-valued binary tree:\footnote{In this section we use adopt some Haskell-style shorthands, such as the |data| definition, and that small-lettered variables in types are implicitly universally quantified.
-We switch to Agda notation for the rest of the paper.
+Instead, \citet{Bird-zippy-tabulations} represents each level using a tip-valued binary tree:\footnote{While Haskell is used in both \citet{Bird-zippy-tabulations} and \citet{Mu-sublists}, in this paper we use Agda notation for consistency.
 The name |upgrade| is adopted from \citet{Mu-sublists}, while the same function is called |cd| in \citet{Bird-zippy-tabulations}.}
+%\begin{spec}
+%data BT a = Tip a | Bin (BT a) (BT a)
+%\end{spec}
 \begin{spec}
-data BT a = Tip a | Bin (BT a) (BT a)
+data BT (A : Set) : Set where
+  tip : A → BT A
+  bin : BT A → BT A → BT A
 \end{spec}
-with functions |mapB : (a → b) → BT a → BT b| and |zipBWith : (a → b → c) → | |BT a →| |BT b →| |BT c|, respectively the mapping and zipping functions for |BT|, having expected definitions.
+with functions |mapB : {A B : Set} → (A → B) → BT A → BT B| and |zipBWith : {A| |B C : Set} →| |(A → B → C) →| |BT A →| |BT B →| |BT C|, respectively the mapping and zipping functions for |BT|, having expected definitions.
 Let |t| be a tree representing level $n$.
-To compute level $n+1$, we need a function |upgrade : BT a → BT (List a)|, a natural transformation rearranging elements in |t|, such that |mapB f (upgrade t)| represents level $n+1$.
+To compute level $n+1$, we need a function |upgrade : {A : Set} → BT A → BT (List A)|, a natural transformation rearranging elements in |t|, such that |mapB f (upgrade t)| represents level $n+1$.
 \citet{Bird-zippy-tabulations} suggests the following definition of |upgrade|:
 \begin{spec}
-upgrade (Bin (Tip x)  (Tip y)  ) = Tip [ x , y ]
-upgrade (Bin t        (Tip y)  ) = Bin (upgrade t) (mapB (:: [ y ]) t)
-upgrade (Bin (Tip x)  u        ) = Tip (x :: xs) where Tip xs = upgrade u
-upgrade (Bin t        u        ) = Bin (upgrade t) (zipBWith (::) t (upgrade u))
+upgrade (bin (tip x)  (tip y)  ) = tip [ x , y ]
+upgrade (bin t        (tip y)  ) = bin (upgrade t) (mapB (:: [ y ]) t)
+upgrade (bin (tip x)  u        ) = tip (x :: xs) where tip xs = upgrade u
+upgrade (bin t        u        ) = bin (upgrade t) (zipBWith (::) t (upgrade u))
 \end{spec}
 
 \begin{figure}[t]
@@ -191,8 +196,6 @@ can we put enough information in type-level such that, by exploiting the fact th
 the equivalence of the top-down specification and the bottom-up algorithm automatically follows?
 
 %\todo[inline]{Positioned as a follow-up to Shin's~\citeyearpar{Mu-sublists} paper, but kept (almost) independent until the comparison near the end (but maybe mention the methodological difference in the beginning); just quote and reuse Shin's problem introduction text?}
-
-\todo[inline]{SCM: regarding names and notations in this section. I am using |BT|, |Bin|, and |Tip| such that they relate to the sections later (in my paper they were |B|, |N|, and |T|). The same with |upgrade| (was |up| in my paper). Not sure whether it's necessary to some how make it known that the name |upgrade| is from me and not Richard... I am using Haskell convention that small-letter identifiers in types denote universally quantified types, but I think it's awkward reversing the roles of |(::)| and |(:)| in one paper so I stuck with Agda notation. However all this can be changed.}
 
 \section{The induction principle and its representations}
 
