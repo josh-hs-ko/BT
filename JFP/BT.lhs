@@ -130,17 +130,18 @@
 
 Given a list |xs|, its \emph{immediate sublists} are those lists obtained by removing exactly one of its elements.
 For example, the four immediate sublists of |"abcd"| are |"abc"|, |"abd"|, |"acd"| and |"bcd"|.
-\citet{Mu-sublists} considered the problem of computing a function\todo{recursion scheme~\citep{Yang-recursion-schemes}}\ |h : List A -> B| with such a top-down specification:
+\citet{Mu-sublists} considered the problem of computing a function |h|,
+where |h xs| depends on values of |h| at all the immediate sublists of |xs|.
+More formally,
+given |f : List B -> B|, compute |h : List A -> B| with such a top-down specification:\todo{recursion scheme~\citep{Yang-recursion-schemes}}\
 \begin{spec}
 h xs = f (map h (subs xs))
 \end{spec}
-where |subs : {A : Set} → List A → List (List A)| computes immediate sublists,
-and |f : List B -> B| collects the results of the recursive calls.
-In words, |h xs| depends on values of |h| at all the immediate sublists of |xs|.
+where |subs : List A → List (List A)| computes immediate sublists.
 Naively executing the specification results in lots of re-computation.
 See \cref{fig:td-call-tree}, for example:
 |h "ab"| is computed twice for |h "abc"| and |h "abd"|, and |h "ac"| twice for |h "abc"| and |h "acd"|.
-\todo{|h "a"| for both |h "ab"| and |h "ac"|? (then bumping into the problem of different base cases)}
+%\todo{|h "a"| for both |h "ab"| and |h "ac"|? (then bumping into the problem of different base cases)}
 
 The problem is derived from \citet{Bird-zippy-tabulations}, a study of the relationship between top-down and bottom-up algorithms.
 A bottom-up strategy that avoids re-computation is shown in \cref{fig:sublists-lattice}.
@@ -150,23 +151,22 @@ It may appear that this bottom-up strategy can be implemented by representing ea
 It will turn out that, however, computing the indices needed to fetch the corresponding entries is not pretty, and sometimes impossible without additional information.
 Instead, \citet{Bird-zippy-tabulations} represents each level using a tip-valued binary tree:\footnote{While Haskell is used in both \citet{Bird-zippy-tabulations} and \citet{Mu-sublists}, in this paper we use Agda notation for consistency.
 The name |upgrade| is adopted from \citet{Mu-sublists}, while the same function is called |cd| in \citet{Bird-zippy-tabulations}.}
-%\begin{spec}
-%data BT a = Tip a | Bin (BT a) (BT a)
-%\end{spec}
 \begin{spec}
 data BT (A : Set) : Set where
   tip : A → BT A
   bin : BT A → BT A → BT A
 \end{spec}
-with functions |mapB : {A B : Set} → (A → B) → BT A → BT B| and |zipBWith : {A| |B C : Set} →| |(A → B → C) →| |BT A →| |BT B →| |BT C|, respectively the mapping and zipping functions for |BT|, having expected definitions.
+with functions |mapB : (A → B) → BT A → BT B| and |zipBWith : (A → B → C) →| |BT A →| |BT B →| |BT C|, respectively the mapping and zipping functions for |BT|, having expected definitions.
 Let |t| be a tree representing level $n$.
-To compute level $n+1$, we need a function |upgrade : {A : Set} → BT A → BT (List A)|, a natural transformation rearranging elements in |t|, such that |mapB f (upgrade t)| represents level $n+1$.
-\citet{Bird-zippy-tabulations} suggests the following definition of |upgrade|:
+To compute level $n+1$, we need a function |upgrade : BT A → BT (List A)|, a natural transformation rearranging elements in |t|, such that |mapB f (upgrade t)| represents level $n+1$.
+\citet{Bird-zippy-tabulations} suggests the following definition of |upgrade|
+(the code below, adapted from Bird, is a valid Haskell program but not a total Agda definition. We will fix it later):
+\todo{Or, "the code below, adapted from Bird, is not yet a total definition. We will fix it later." Which is preferred?}
 \begin{spec}
-upgrade (bin (tip x)  (tip y)  ) = tip [ x , y ]
-upgrade (bin t        (tip y)  ) = bin (upgrade t) (mapB (:: [ y ]) t)
+upgrade (bin (tip x)  (tip y)  ) = tip (x :: y :: [])
+upgrade (bin t        (tip y)  ) = bin (upgrade t) (mapB (_:: [ y ]) t)
 upgrade (bin (tip x)  u        ) = tip (x :: xs) where tip xs = upgrade u
-upgrade (bin t        u        ) = bin (upgrade t) (zipBWith (::) t (upgrade u))
+upgrade (bin t        u        ) = bin (upgrade t) (zipBWith _::_ t (upgrade u))
 \end{spec}
 
 \begin{figure}[t]
