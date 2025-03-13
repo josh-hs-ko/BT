@@ -16,6 +16,8 @@
 \setlength{\marginparwidth}{2.2cm}
 \usepackage[obeyFinal,color=yellow,textsize=footnotesize]{todonotes}
 
+\usepackage{lastpage}
+
 \let\Bbbk\relax
 %include agda.fmt
 
@@ -108,7 +110,7 @@
 \cpr{Cambridge University Press}
 \doival{10.1017/xxxxx}
 
-\totalpg{\pageref{lastpage01}}
+\totalpg{\pageref{LastPage}}
 \jnlDoiYr{2025}
 
 \lefttitle{H.-S. Ko and S.-C. Mu}
@@ -124,7 +126,7 @@
 \end{authgrp}
 
 \begin{abstract}
-\todo[inline]{\vspace{20ex}}
+\todo[inline]{Outline of the paper (so that we can omit an outline at the end of \cref{sec:introduction})\vspace{20ex}}
 \end{abstract}
 
 \maketitle[F]
@@ -133,7 +135,7 @@
 \label{sec:introduction}
 
 Given a list |xs|, its \emph{immediate sublists} are those lists obtained by removing exactly one of its elements.
-For example, the four immediate sublists of |"abcd"| are |"abc"|, |"abd"|, |"acd"| and |"bcd"|.
+For example, the four immediate sublists of |"abcd"| are |"abc"|, |"abd"|, |"acd"|, and |"bcd"|.
 \citet{Mu-sublists} considered the problem of computing a function~|h| such that |h xs| depends on values of~|h| at all the immediate sublists of |xs|.
 More formally,
 given |f : List B -> B|, compute |h : List A -> B| with such a top-down specification
@@ -151,10 +153,11 @@ The problem is derived from \varcitet{Bird-zippy-tabulations}{'s} study of the r
 A bottom-up strategy that avoids re-computation is shown in \cref{fig:sublists-lattice}.
 Values of |h| on inputs of length~$n$ are stored in level~$n$ to be reused.
 Each level $n+1$ is computed from level~$n$, until we reach the top.
-It may appear that this bottom-up strategy can be implemented by representing each level using a list.
-However, it turns out to be impossible to compute the indices needed to fetch the corresponding entries without additional information.
+It may appear that this bottom-up strategy can be implemented by representing each level using a list, but this turns out to be impossible.
+%It will turn out that, however, computing the indices needed to fetch the corresponding entries is not pretty, and sometimes impossible without additional information.
+%\todo{JK: seems simpler to just say a list-based implementation is impossible}
 Instead, Bird represents each level using a tip-valued binary tree:%
-\footnote{We use Agda in this paper, whereas both \citet{Bird-zippy-tabulations} and \citet{Mu-sublists} use Haskell; some of their definitions are quoted in this section but translated into Agda notation for consistency.}
+\footnote{We use Agda in this paper, while both \citet{Bird-zippy-tabulations} and \citet{Mu-sublists} use Haskell; some of their definitions are quoted in this section but translated into Agda notation for consistency.}
 \begin{spec}
 data BT (A : Set) : Set where
   tip  : A            → BT A
@@ -165,8 +168,8 @@ Let |t|~be a tree representing level $n$.
 To compute level $n+1$, we need a function |upgrade : BT A → BT (List A)|, a natural transformation rearranging elements in~|t|, such that |mapBT f (upgrade t)| represents level $n+1$.
 Bird suggests the following definition of |upgrade|
 (which is directly translated into Agda notation from Bird's Haskell program, and is not valid Agda --- we will fix it later):%
-\footnote{The name |upgrade| is given by \citet{Mu-sublists} (who abbreviates it as |up| in his paper), while the same function is called |cd| by \citet{Bird-zippy-tabulations}.}
-%\todo{Or, "the code below, adapted from Bird's, is not yet a total definition. We will fix it later." Which is preferred?}
+\footnote{The name |upgrade| is given by \citet{Mu-sublists} (who also abbreviates it as |up| in his paper), while the same function is called |cd| by \citet{Bird-zippy-tabulations}.}
+%\todo{SCM: Or, "the code below, adapted from Bird's, is not yet a total definition. We will fix it later." Which is preferred? JK: |let tip xs = ...| is also invalid, so let's just say the definition is not valid Agda\ldots}
 \begin{spec}
 upgrade (bin (tip x)  (tip y)  ) = tip (x ∷ y ∷ [])
 upgrade (bin t        (tip y)  ) = bin (upgrade t) (mapBT (_∷ [ y ]) t)
@@ -191,20 +194,23 @@ upgrade (bin t        u        ) = bin (upgrade t) (zipBTWith _∷_ t (upgrade u
 If you feel puzzled by |upgrade|, so were we.
 Being the last example in the paper, Bird does not offer much explanation.
 The function |upgrade| is as concise as it is cryptic.
-The trees appear to obey some structural constraints --- Bird calls them \emph{binomial trees}, hence the name |BT|, but neither the constraints nor how |upgrade| maintains them is explicitly stated.
+The trees appear to obey some shape constraints --- Bird calls them \emph{binomial trees}, hence the name |BT|, but neither the constraints nor how |upgrade| maintains them is explicitly stated.
 
-Fascinated by the algorithm, \citet{Mu-sublists} offers a specification of |upgrade| and a derivation in terms of traditional equational reasoning.
-In this paper, we try a different approach.\todo{the road not (thoroughly) taken, and how far it leads (more clearly positioned as a sequel)}
-Can we motivate the binary tree and its shape constraints by formalizing, in its type, what we intend to compute?
-Instead of going into the tedious details of |upgrade|,
-can we put enough information in type-level such that, by exploiting the fact the functions having the (more informative) type must be unique,\todo{Spoiler!}
-the equivalence of the top-down specification and the bottom-up algorithm automatically follows?
+Fascinated by the definition, \citet{Mu-sublists} offers a specification of |upgrade| and a derivation, and then proves that the bottom-up algorithm is extensionally equal to the top-down specification/algorithm, all using traditional equational reasoning.
+As an interlude, Mu also shows (in his Section~4.3) a dependently typed version of |upgrade|, which uses an indexed version of |BT| that encodes the shape constraint on binomial trees, although Mu does not explore the direction further.
+In this paper, we go down the road not (thoroughly) taken and see how far it leads.
+In a dependently typed setting, can we derive the binomial trees by formalising in their types what we intend to compute?
+How effectively can the type information help us to implement the top-down and bottom-up algorithms correctly?
+And does the type information help us to prove that the two algorithms are extensionally equal?
+%Instead of going into the tedious details of |upgrade|,
+%can we put enough information in type-level such that, by exploiting the fact the functions having the (more informative) type must be unique,\todo{Spoiler!}
+%the equivalence of the top-down specification and the bottom-up algorithm automatically follows?
 
 %\todo[inline]{Positioned as a follow-up to Shin's~\citeyearpar{Mu-sublists} paper, but kept (almost) independent until the comparison near the end (but maybe mention the methodological difference in the beginning); just quote and reuse Shin's problem introduction text?}
 
 \section{The induction principle and its representations}
 
-First, notice that we are looking at a \emph{recursion scheme}~\citep{Yang-recursion-schemes} of type
+First, notice that we are dealing with a \emph{recursion scheme}~\citep{Yang-recursion-schemes} of type
 \begin{equation}
 |(List B → B) → List A → B|
 \label{eq:non-dependently-typed-recursion-scheme}
@@ -233,10 +239,10 @@ Notice that the induction hypotheses are represented as a function of type
 \begin{equation}\label{eq:container-ih}
 |∀ {zs} → DropR 1 ys zs → P zs|
 \end{equation}
-making the type of the premise~|f| higher-order, whereas \citet{Bird-zippy-tabulations} and \citet{Mu-sublists} use a first-order data structure, namely lists.
+making the type of the premise~|f| higher-order, whereas the type~\cref{eq:non-dependently-typed-recursion-scheme} uses a first-order data structure, namely lists.
 Below we derive an indexed data type |Drop n P xs| that represents universal quantification over sublists obtained by dropping |n|~elements from |xs|; in particular, |Drop 1 P ys| will be equivalent to the function type~\cref{eq:container-ih}.
 
-First, we (re)define element dropping as a nondeterministic function:
+We start by (re)defining element dropping as a nondeterministic function:
 \begin{code}
 drop : ℕ → List A → Nondet (List A)
 drop    zero    xs        = return xs
@@ -270,6 +276,7 @@ For example, we can specialise |drop| to compute all the sublists of a particula
 dropL : ℕ → List A → List (List A)
 dropL n xs = drop n xs ⦃ monoid _++_ [] ⦄ (_∷ [])
 \end{code}
+
 More interestingly, we can also specialise |drop| to compute types.
 For example, |DropR| can alternatively be defined in continuation-passing style by
 \begin{code}
@@ -294,9 +301,10 @@ ImmediateSublistInduction =  {A : Set} (P : List A → Set)
                              (f : ∀ {ys} → Drop 1 P ys → P ys)
                              (xs : List A) → P xs
 \end{code}
-Note that |Drop| is an indexed version of |BT| (\cref{sec:introduction}), and has an additional |nil| constructor --- we will see in \cref{sec:bu} why it is beneficial to include |nil|.
+Note that |Drop| is an indexed version of |BT| (\cref{sec:introduction}) that has an additional |nil| constructor.
+(We will see in \cref{sec:bu} why it is beneficial to include |nil|.)
 Comparing the type~\cref{eq:non-dependently-typed-recursion-scheme} with |ImmediateSublistInduction|, a potentially drastic change is that the list of induction hypotheses is replaced with a tree of type |Drop 1 P ys| here.
-However, such a tree is actually list-shaped (constructed using |nil| and |bin ∘ tip|), so |ImmediateSublistInduction| is essentially just a much more informative version of the type~\cref{eq:non-dependently-typed-recursion-scheme}.
+However, such a tree is actually list-shaped (constructed using |nil| and |bin ∘ tip|), so |ImmediateSublistInduction| is really just a more informative version of the type~\cref{eq:non-dependently-typed-recursion-scheme}.
 
 In the subsequent \cref{sec:td,sec:bu} we will implement the top-down and bottom-up algorithms as programs of type |ImmediateSublistInduction|.
 These are fairly standard exercises in dependently typed programming (except perhaps for the |upgrade| function used in the bottom-up algorithm), and our implementations are by no means the only solutions.
@@ -333,15 +341,15 @@ and again use~|f| to compute the final result.
 \section{The bottom-up algorithm}
 \label{sec:bu}
 
-Given an input list |xs|, the bottom-up algorithm |bu| first creates a tree representing `level $-1$' below the lattice in \cref{fig:sublists-lattice}.
-This level contains results for those sublists obtained by removing |suc (length xs)| elements from |xs|; there are no such sublists, so the tree contains no elements, although the tree itself still exists (representing a proof of a vacuous universal quantification).
+Given an input list |xs|, the bottom-up algorithm |bu| first creates a tree representing `level~$-1$' below the lattice in \cref{fig:sublists-lattice}.
+This `underground' level contains results for those sublists obtained by removing |suc (length xs)| elements from |xs|; there are no such sublists, so the tree contains no elements, although the tree itself still exists (representing a proof of a vacuous universal quantification).
 \begin{code}
-blank : (xs : List A) → Drop (suc (length xs)) P xs
+basement : (xs : List A) → Drop (suc (length xs)) P xs
 \end{code}
 The algorithm then enters a loop |bu'| and constructs each level of the lattice from bottom up, that is, a tree of type |Drop n P xs| for each~|n|, with |n|~decreasing:
 \begin{code}
 bu : ImmediateSublistInduction
-bu P f = bu' _ ∘ blank
+bu P f = bu' _ ∘ basement
   where
     bu' : (n : ℕ) → Drop n P xs → P xs
     bu'    zero    = unTip
@@ -356,17 +364,17 @@ Otherwise, we use the function |upgrade| to create a new tree that is one level 
 \todo[inline]{SCM: now that |upgrade| was given in Section 1, we can add some words here briefly comparing them and showing that this one is adapted from the earlier one, while also saying that its actual definition does not matter? JK: Actually this may help to elide some explanation\ldots (It is a fruitful exercise to trace the properties now manifested as type information in the last case\ldots)}
 \begin{code}
 upgrade : Drop (suc n) P xs → Drop n (Drop 1 P) xs
-upgrade         nil                           = ground
+upgrade         nil                           = underground
 upgrade t @  (  bin      (  tip _)    _    )  = tip t
-upgrade      (  bin         nil       nil  )  = bin ground nil
+upgrade      (  bin         nil       nil  )  = bin underground nil
 upgrade      (  bin t @  (  bin _ _)  u    )  = bin  (upgrade t)
                                                      (zipWith (bin ∘ tip) t (upgrade u))
 \end{code}
 where
 \begin{code}
-ground : Drop n (Drop 1 P) []
-ground {n =' zero   } = tip nil
-ground {n =' suc _  } = nil
+underground : Drop n (Drop 1 P) []
+underground {n =' zero   } = tip nil
+underground {n =' suc _  } = nil
 \end{code}
 after which we invoke |map f| to compute the results in the new level and enter the next iteration.
 \todo[inline]{\citet{Mu-sublists} and \citet{Bird-zippy-tabulations} avoid including |nil| by imposing conditions throughout their developments; by including |nil| here we avoid those side conditions.

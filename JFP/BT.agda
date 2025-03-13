@@ -147,23 +147,23 @@ zipWith f (tip p)    (tip q)    = tip (f p q)
 zipWith f  nil        nil       = nil
 zipWith f (bin t t') (bin u u') = bin (zipWith f t u) (zipWith f t' u')
 
-ground : Drop n (Drop 1 P) []
-ground {n = zero } = tip nil
-ground {n = suc _} = nil
+underground : Drop n (Drop 1 P) []
+underground {n = zero } = tip nil
+underground {n = suc _} = nil
 
 upgrade : Drop (suc n) P xs → Drop n (Drop 1 P) xs
-upgrade    nil                = ground
+upgrade    nil                = underground
 upgrade t@(bin   (tip _)   _) = tip t
-upgrade   (bin    nil    nil) = bin ground nil
+upgrade   (bin    nil    nil) = bin underground nil
 upgrade   (bin t@(bin _ _) u) = bin (upgrade t)
                                     (zipWith (bin ∘ tip) t (upgrade u))
 
-blank' : (xs : List A) {r : ℕ} → length xs ≤ r → Drop (suc r) P xs
-blank' []       _       = nil
-blank' (x ∷ xs) (s≤s l) = bin (blank' xs l) (blank' xs (m≤n⇒m≤1+n l))
+basement' : (xs : List A) {r : ℕ} → length xs ≤ r → Drop (suc r) P xs
+basement' []       _       = nil
+basement' (x ∷ xs) (s≤s l) = bin (basement' xs l) (basement' xs (m≤n⇒m≤1+n l))
 
-blank : (xs : List A) → Drop (suc (length xs)) P xs
-blank xs = blank' xs ≤-refl
+basement : (xs : List A) → Drop (suc (length xs)) P xs
+basement xs = basement' xs ≤-refl
 
 unTip : Drop 0 P xs → P xs
 unTip (tip p) = p
@@ -171,7 +171,7 @@ unTip (tip p) = p
 module Compact-bu where
 
   bu : ImmediateSublistInduction
-  bu P f = bu' _ ∘ blank
+  bu P f = bu' _ ∘ basement
     where
       bu' : (n : ℕ) → Drop n P xs → P xs
       bu'  zero   = unTip
@@ -183,7 +183,7 @@ bu' f  zero   = unTip
 bu' f (suc n) = bu' f n ∘ map f ∘ upgrade
 
 bu : ImmediateSublistInduction
-bu P f = bu' f _ ∘ blank
+bu P f = bu' f _ ∘ basement
 
 --------
 -- Section 5
@@ -279,9 +279,9 @@ mapᴾ Q Q′ f fᴾ (tip p)   q         = fᴾ q
 mapᴾ Q Q′ f fᴾ  nil      _         = tt
 mapᴾ Q Q′ f fᴾ (bin t u) (tᴾ , uᴾ) = mapᴾ Q Q′ f fᴾ t tᴾ , mapᴾ Q Q′ f fᴾ u uᴾ
 
-groundᴾ : (Q : ∀ {ys} → P ys → Set) (n : ℕ) → All (All (λ {ys} → Q {ys})) (ground {n})
-groundᴾ Q  zero   = tt
-groundᴾ Q (suc _) = tt
+undergroundᴾ : (Q : ∀ {ys} → P ys → Set) (n : ℕ) → All (All (λ {ys} → Q {ys})) (underground {n})
+undergroundᴾ Q  zero   = tt
+undergroundᴾ Q (suc _) = tt
 
 zipWithᴾ : (Q : ∀ {ys} → P ys → Set) (Q′ : ∀ {ys} → P′ ys → Set) (Q″ : ∀ {ys} → P″ ys → Set)
            (f : ∀ {ys} → P ys → P′ ys → P″ ys) → (∀ {ys} {p : P ys} {p′ : P′ ys} → Q p → Q′ p′ → Q″ (f p p′))
@@ -292,9 +292,9 @@ zipWithᴾ Q Q′ Q″ f fᴾ (bin t t') (tᴾ , t'ᴾ) (bin u u') (uᴾ , u'ᴾ
                                                                     zipWithᴾ Q Q′ Q″ f fᴾ t' t'ᴾ u' u'ᴾ
 
 upgradeᴾ : (Q : ∀ {ys} → P ys → Set) (t : Drop (suc n) P xs) → All Q t → All (All Q) (upgrade t)
-upgradeᴾ {n = n}     Q    nil                 tᴾ       = groundᴾ Q n
+upgradeᴾ {n = n}     Q    nil                 tᴾ       = undergroundᴾ Q n
 upgradeᴾ             Q t@(bin   (tip _)   u)  tᴾ       = tᴾ
-upgradeᴾ {n = suc n} Q   (bin    nil    nil)  tᴾ       = groundᴾ Q n , tt
+upgradeᴾ {n = suc n} Q   (bin    nil    nil)  tᴾ       = undergroundᴾ Q n , tt
 upgradeᴾ             Q   (bin t@(bin _ _) u) (tᴾ , uᴾ) =
   upgradeᴾ Q t tᴾ , zipWithᴾ Q (All Q) (All (λ {ys} → Q {ys})) (bin ∘ tip) _,_ t tᴾ (upgrade u) (upgradeᴾ Q u uᴾ)
 
@@ -304,17 +304,17 @@ bu'ᴾ : (Q : ∀ {ys} → P ys → Set)
 bu'ᴾ Q f fᴾ  zero   t tᴾ = unTipᴾ Q t tᴾ
 bu'ᴾ Q f fᴾ (suc n) t tᴾ = bu'ᴾ Q f fᴾ n (map f (upgrade t)) (mapᴾ (All Q) Q f fᴾ (upgrade t) (upgradeᴾ Q t tᴾ))
 
-blank'ᴾ : {P : List A → Set} (Q : ∀ {ys} → P ys → Set) (xs : List A) {r : ℕ} (l : length xs ≤ r)
-        → All Q (blank' {A} {P} xs l)
-blank'ᴾ Q []       _       = tt
-blank'ᴾ Q (x ∷ xs) (s≤s l) = blank'ᴾ Q xs l , blank'ᴾ Q xs (m≤n⇒m≤1+n l)
+basement'ᴾ : {P : List A → Set} (Q : ∀ {ys} → P ys → Set) (xs : List A) {r : ℕ} (l : length xs ≤ r)
+           → All Q (basement' {A} {P} xs l)
+basement'ᴾ Q []       _       = tt
+basement'ᴾ Q (x ∷ xs) (s≤s l) = basement'ᴾ Q xs l , basement'ᴾ Q xs (m≤n⇒m≤1+n l)
 
-blankᴾ : {P : List A → Set} (Q : ∀ {ys} → P ys → Set) (xs : List A)
-       → All Q (blank {A} {P} xs)
-blankᴾ Q xs = blank'ᴾ Q xs ≤-refl
+basementᴾ : {P : List A → Set} (Q : ∀ {ys} → P ys → Set) (xs : List A)
+          → All Q (basement {A} {P} xs)
+basementᴾ Q xs = basement'ᴾ Q xs ≤-refl
 
 buᴾ : UnaryParametricity bu
-buᴾ {A} {P} Q {f} g {xs} = bu'ᴾ Q f g _ (blank xs) (blankᴾ Q xs)
+buᴾ {A} {P} Q {f} g {xs} = bu'ᴾ Q f g _ (basement xs) (basementᴾ Q xs)
 
 -- Equality between the two algorithms
 
