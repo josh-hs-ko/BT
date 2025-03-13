@@ -1,4 +1,4 @@
-\begin{thebibliography}{11}
+\begin{thebibliography}{10}
 
 \bibitem[{Altenkirch et~al.}(2010){Altenkirch, Chapman, \&
   Uustalu}]{Altenkirch-relative-monads}
@@ -39,9 +39,6 @@
 \bibitem[{Mu}(2024)]{Mu-sublists}
 {Mu, S.-C.} (2024) Bottom-up computation using trees of sublists.
   \textit{Journal of Functional Programming}. {\bf 34}, e14:1--16.
-
-\bibitem[{Piponi}(2008)]{Piponi-mother-of-all-monads}
-{Piponi, D.} (2008) The mother of all monads.
 
 \bibitem[{Van~Muylder et~al.}(2024){Van~Muylder, Nuyts, \&
   Devriese}]{Van-Muylder-internal-parametricity}
