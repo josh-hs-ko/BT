@@ -94,6 +94,7 @@
 %format param' = "\Var{param^\prime}"
 %format ps = "\Var{ps}"
 %format Q = "\Var Q"
+%format R = "\Var R"
 %format t = "\Var t"
 %format u = "\Var u"
 %format x = "\Var x"
@@ -168,9 +169,10 @@ Let |t|~be a tree representing level $n$.
 To compute level $n+1$, we need a function |upgrade : BT A → BT (List A)|, a natural transformation rearranging elements in~|t|, such that |mapBT f (upgrade t)| represents level $n+1$.
 Bird suggests the following definition of |upgrade|
 (which is directly translated into Agda notation from Bird's Haskell program, and is not valid Agda --- we will fix it later):%
-\footnote{The name |upgrade| is given by \citet{Mu-sublists} (who also abbreviates it as |up| in his paper), while the same function is called |cd| by \citet{Bird-zippy-tabulations}.}
+\footnote{The name |upgrade| is given by \citet{Mu-sublists}, while the same function is called |cd| by \citet{Bird-zippy-tabulations}.}
 %\todo{SCM: Or, "the code below, adapted from Bird's, is not yet a total definition. We will fix it later." Which is preferred? JK: |let tip xs = ...| is also invalid, so let's just say the definition is not valid Agda\ldots}
 \begin{spec}
+upgrade : BT A → BT (List A)
 upgrade (bin (tip x)  (tip y)  ) = tip (x ∷ y ∷ [])
 upgrade (bin t        (tip y)  ) = bin (upgrade t) (mapBT (_∷ [ y ]) t)
 upgrade (bin (tip x)  u        ) = let tip xs = upgrade u in tip (x ∷ xs)
@@ -209,6 +211,7 @@ And does the type information help us to prove that the two algorithms are exten
 %\todo[inline]{Positioned as a follow-up to Shin's~\citeyearpar{Mu-sublists} paper, but kept (almost) independent until the comparison near the end (but maybe mention the methodological difference in the beginning); just quote and reuse Shin's problem introduction text?}
 
 \section{The induction principle and its representations}
+\label{sec:induction-principle}
 
 First, notice that we are dealing with a \emph{recursion scheme}~\citep{Yang-recursion-schemes} of type
 \begin{equation}
@@ -239,8 +242,8 @@ Notice that the induction hypotheses are represented as a function of type
 \begin{equation}\label{eq:container-ih}
 |∀ {zs} → DropR 1 ys zs → P zs|
 \end{equation}
-making the type of the premise~|f| higher-order, whereas the type~\cref{eq:non-dependently-typed-recursion-scheme} uses a first-order data structure, namely lists.
-Below we derive an indexed data type |Drop n P xs| that represents universal quantification over sublists obtained by dropping |n|~elements from |xs|; in particular, |Drop 1 P ys| will be equivalent to the function type~\cref{eq:container-ih}.
+making the type of the premise~|f| higher-order, whereas the type~\cref{eq:non-dependently-typed-recursion-scheme} uses a list, a first-order data structure.
+Below we derive an indexed data type |Drop n P xs| that represents universal quantification over all the sublists obtained by dropping |n|~elements from |xs|; in particular, |Drop 1 P ys| will be equivalent to the function type~\cref{eq:container-ih}.
 
 We start by (re)defining element dropping as a nondeterministic function:
 \begin{code}
@@ -263,7 +266,7 @@ record Monoid (M : Set ℓ) : Set ℓ where
     ∅    : M
 \end{code}
 (The monoid laws could be included but are not needed in our development.)
-If we expand the definitions of |Nondet| and its operations, we get
+If we expand the definitions of |Nondet| and its operations in |drop|, we get
 \begin{code}
 drop : ℕ → List A → ⦃ Monoid M ⦄ → (List A → M) → M
 drop    zero    xs        k = k xs
@@ -307,7 +310,8 @@ Comparing the type~\cref{eq:non-dependently-typed-recursion-scheme} with |Immedi
 However, such a tree is actually list-shaped (constructed using |nil| and |bin ∘ tip|), so |ImmediateSublistInduction| is really just a more informative version of the type~\cref{eq:non-dependently-typed-recursion-scheme}.
 
 In the subsequent \cref{sec:td,sec:bu} we will implement the top-down and bottom-up algorithms as programs of type |ImmediateSublistInduction|.
-These are fairly standard exercises in dependently typed programming (except perhaps for the |upgrade| function used in the bottom-up algorithm), and our implementations are by no means the only solutions.
+These are fairly standard exercises in dependently typed programming (except perhaps for the |upgrade| function used in the bottom-up algorithm), and our implementations are by no means the only solutions.%
+\footnote{Even the induction principle has alternative formulations, one of which has been explored by \citet{Ko-BT}.}
 The reader may want to try the exercises for themself, and is not obliged to go through the detail of our programs.
 We will prove that the two algorithms are extensionally equal in \cref{sec:equality}, to understand which it will not be necessary to know how the two algorithms are implemented.
 
@@ -342,26 +346,37 @@ and again use~|f| to compute the final result.
 \label{sec:bu}
 
 Given an input list |xs|, the bottom-up algorithm |bu| first creates a tree representing `level~$-1$' below the lattice in \cref{fig:sublists-lattice}.
-This `underground' level contains results for those sublists obtained by removing |suc (length xs)| elements from |xs|; there are no such sublists, so the tree contains no elements, although the tree itself still exists (representing a proof of a vacuous universal quantification).
+This `underground' level contains results for those sublists obtained by removing |suc (length xs)| elements from |xs|; there are no such sublists, so the tree contains no elements, although the tree itself still exists (representing a proof of a vacuous universal quantification):
 \begin{code}
-basement : (xs : List A) → Drop (suc (length xs)) P xs
+base : (xs : List A) → Drop (suc (length xs)) P xs
 \end{code}
 The algorithm then enters a loop |bu'| and constructs each level of the lattice from bottom up, that is, a tree of type |Drop n P xs| for each~|n|, with |n|~decreasing:
 \begin{code}
 bu : ImmediateSublistInduction
-bu P f = bu' _ ∘ basement
+bu P f = bu' _ ∘ base
   where
     bu' : (n : ℕ) → Drop n P xs → P xs
     bu'    zero    = unTip
     bu' (  suc n)  = bu' n ∘ map f ∘ upgrade
 \end{code}
-When |n|~reaches |zero|, the tree contains exactly the result for |xs|, which we can extract using
+When the loop counter reaches |zero|, the tree contains exactly the result for |xs|, which we can extract using
 \begin{code}
 unTip : Drop zero P xs → P xs
 unTip (tip p) = p
 \end{code}
-Otherwise, we use the function |upgrade| to create a new tree that is one level higher than the current one,
-\todo[inline]{SCM: now that |upgrade| was given in Section 1, we can add some words here briefly comparing them and showing that this one is adapted from the earlier one, while also saying that its actual definition does not matter? JK: Actually this may help to elide some explanation\ldots (It is a fruitful exercise to trace the properties now manifested as type information in the last case\ldots)}
+If the loop counter is |suc n|, we create a new tree of type |Drop n P xs| that is one level higher than the current tree of type |Drop (suc n) P xs|.
+The type of this new tree says that it should contain results of type |P ys| for all the sublists |ys| at the higher level.
+The |upgrade| function does half of the work by constructing an intermediate tree representing the higher level from the elements of the current tree:
+\begin{code}
+upgrade : Drop (suc n) P xs → Drop n (Drop 1 P) xs
+\end{code}
+It assembles for each~|ys| the induction hypotheses needed for computing |P ys| using~|f| --- that is, each element of the intermediate tree is a tree of type |Drop 1 P ys|.
+Then |map f| does the rest of the work and produces the desired new tree of type |Drop n P xs|, and we enter the next iteration.
+
+%\todo[inline]{SCM: now that |upgrade| was given in Section 1, we can add some words here briefly comparing them and showing that this one is adapted from the earlier one, while also saying that its actual definition does not matter? JK: Actually this may help to elide some explanation\ldots}
+
+Previous work~\citep{Bird-zippy-tabulations, Mu-sublists, Ko-BT} has hinted or explained in detail how |upgrade| can be derived.
+Our version is
 \begin{code}
 upgrade : Drop (suc n) P xs → Drop n (Drop 1 P) xs
 upgrade         nil                           = underground
@@ -376,14 +391,25 @@ underground : Drop n (Drop 1 P) []
 underground {n =' zero   } = tip nil
 underground {n =' suc _  } = nil
 \end{code}
-after which we invoke |map f| to compute the results in the new level and enter the next iteration.
-\todo[inline]{\citet{Mu-sublists} and \citet{Bird-zippy-tabulations} avoid including |nil| by imposing conditions throughout their developments; by including |nil| here we avoid those side conditions.
-In particular, \varcitet{Mu-sublists}{'s} version of dependently typed |upgrade|\ldots}
+and |zipWith| has the usual definition:
+\begin{code}
+zipWith  :   (∀ {ys} → P ys → Q ys → R ys)
+         →'  Drop n P xs → Drop n Q xs → Drop n R xs
+\end{code}
+
+The last clause of |upgrade| is exactly the last clause of Bird's original program~(\cref{sec:introduction}) except that the list cons is replaced by the cons function |bin ∘ tip| for |Drop 1|--trees (which, as mentioned in \cref{sec:induction-principle}, are list-shaped).
+It is a fruitful exercise to trace the constraints assumed and established throughout the construction described by the clause, now manifested as type information --- see \varcitet{Ko-BT}{'s} Section~2.3 for a solution (where |upgrade| is named |retabulate|).
+\citeauthor{Ko-BT} also explain how the second clause of |upgrade| subsumes the first three clauses of the original program.
+
+The remaining first and third clauses of |upgrade| involve |nil|, and are not in Bird's original program.
+|Drop| trees containing |nil| correspond to empty levels below the lattice in \cref{fig:sublists-lattice} (which result from dropping too many elements from the input list).
+\citet{Mu-sublists} avoids dealing with such empty levels by imposing conditions throughout his development --- for example, see \citeauthor{Mu-sublists}'s Section 4.3 for a version of |upgrade| (which is abbreviated as |up| there) with conditions.
+We avoid those somewhat tedious conditions by including |nil| in |Drop| to represent the empty levels, and in exchange need to deal with these levels, but they are easy to deal with: just follow the types, and the clauses write themselves.
 
 \section{Extensional equality between the two algorithms}
 \label{sec:equality}
 
-We have two different implementations of |ImmediateSublistInduction|, namely |td| and |bu|.
+Now we have two different implementations of |ImmediateSublistInduction|, namely |td| and |bu|.
 How do we prove that they compute the same results?
 
 Actually, is it possible to write programs of type |ImmediateSublistInduction| to compute different results in Agda?
@@ -391,7 +417,7 @@ Since |ImmediateSublistInduction| is parametric in~|P|, intuitively a program of
 So |td| and |bu| have to compute the same results simply because they have the same ---and special--- type!
 
 To prove this formally, we use parametricity.
-The following is the unary parametricity statement of |ImmediateSublistInduction| with respect to~|P|, derived using \varcitet{Bernardy-proofs-for-free}{'s} translation.
+The following is the unary parametricity statement of |ImmediateSublistInduction| with respect to~|P| (whereas |A|~is treated merely as a fixed parameter), derived using \varcitet{Bernardy-proofs-for-free}{'s} translation:
 \begin{code}
 UnaryParametricity : ImmediateSublistInduction → Set₁
 UnaryParametricity ind =

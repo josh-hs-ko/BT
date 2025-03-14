@@ -158,12 +158,12 @@ upgrade   (bin    nil    nil) = bin underground nil
 upgrade   (bin t@(bin _ _) u) = bin (upgrade t)
                                     (zipWith (bin ∘ tip) t (upgrade u))
 
-basement' : (xs : List A) {r : ℕ} → length xs ≤ r → Drop (suc r) P xs
-basement' []       _       = nil
-basement' (x ∷ xs) (s≤s l) = bin (basement' xs l) (basement' xs (m≤n⇒m≤1+n l))
+base' : (xs : List A) {r : ℕ} → length xs ≤ r → Drop (suc r) P xs
+base' []       _       = nil
+base' (x ∷ xs) (s≤s l) = bin (base' xs l) (base' xs (m≤n⇒m≤1+n l))
 
-basement : (xs : List A) → Drop (suc (length xs)) P xs
-basement xs = basement' xs ≤-refl
+base : (xs : List A) → Drop (suc (length xs)) P xs
+base xs = base' xs ≤-refl
 
 unTip : Drop 0 P xs → P xs
 unTip (tip p) = p
@@ -171,7 +171,7 @@ unTip (tip p) = p
 module Compact-bu where
 
   bu : ImmediateSublistInduction
-  bu P f = bu' _ ∘ basement
+  bu P f = bu' _ ∘ base
     where
       bu' : (n : ℕ) → Drop n P xs → P xs
       bu'  zero   = unTip
@@ -183,7 +183,7 @@ bu' f  zero   = unTip
 bu' f (suc n) = bu' f n ∘ map f ∘ upgrade
 
 bu : ImmediateSublistInduction
-bu P f = bu' f _ ∘ basement
+bu P f = bu' f _ ∘ base
 
 --------
 -- Section 5
@@ -304,17 +304,17 @@ bu'ᴾ : (Q : ∀ {ys} → P ys → Set)
 bu'ᴾ Q f fᴾ  zero   t tᴾ = unTipᴾ Q t tᴾ
 bu'ᴾ Q f fᴾ (suc n) t tᴾ = bu'ᴾ Q f fᴾ n (map f (upgrade t)) (mapᴾ (All Q) Q f fᴾ (upgrade t) (upgradeᴾ Q t tᴾ))
 
-basement'ᴾ : {P : List A → Set} (Q : ∀ {ys} → P ys → Set) (xs : List A) {r : ℕ} (l : length xs ≤ r)
-           → All Q (basement' {A} {P} xs l)
-basement'ᴾ Q []       _       = tt
-basement'ᴾ Q (x ∷ xs) (s≤s l) = basement'ᴾ Q xs l , basement'ᴾ Q xs (m≤n⇒m≤1+n l)
+base'ᴾ : {P : List A → Set} (Q : ∀ {ys} → P ys → Set) (xs : List A) {r : ℕ} (l : length xs ≤ r)
+       → All Q (base' {A} {P} xs l)
+base'ᴾ Q []       _       = tt
+base'ᴾ Q (x ∷ xs) (s≤s l) = base'ᴾ Q xs l , base'ᴾ Q xs (m≤n⇒m≤1+n l)
 
-basementᴾ : {P : List A → Set} (Q : ∀ {ys} → P ys → Set) (xs : List A)
-          → All Q (basement {A} {P} xs)
-basementᴾ Q xs = basement'ᴾ Q xs ≤-refl
+baseᴾ : {P : List A → Set} (Q : ∀ {ys} → P ys → Set) (xs : List A)
+      → All Q (base {A} {P} xs)
+baseᴾ Q xs = base'ᴾ Q xs ≤-refl
 
 buᴾ : UnaryParametricity bu
-buᴾ {A} {P} Q {f} g {xs} = bu'ᴾ Q f g _ (basement xs) (basementᴾ Q xs)
+buᴾ {A} {P} Q {f} g {xs} = bu'ᴾ Q f g _ (base xs) (baseᴾ Q xs)
 
 -- Equality between the two algorithms
 

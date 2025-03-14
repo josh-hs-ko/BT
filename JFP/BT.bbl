@@ -1,10 +1,10 @@
-\begin{thebibliography}{10}
+\begin{thebibliography}{11}
 
 \bibitem[{Altenkirch et~al.}(2010){Altenkirch, Chapman, \&
   Uustalu}]{Altenkirch-relative-monads}
 {Altenkirch, T., Chapman, J. \& Uustalu, T.} (2010) Monads need not be
-  endofunctors. Foundations of Software Science and Computational Structures.
-  Springer. pp. 297--311.
+  endofunctors. International Conference on Foundations of Software Science and
+  Computational Structures (FoSSaCS). Springer. pp. 297--311.
 
 \bibitem[{Altenkirch et~al.}(2015){Altenkirch, Ghani, Hancock, McBride, \&
   Morris}]{Altenkirch-indexed-containers}
@@ -29,12 +29,16 @@
 
 \bibitem[{Hinze}(2012)]{Hinze-Kan-extensions}
 {Hinze, R.} (2012) {Kan} extensions for program optimisation --- or: {Art} and
-  {Dan} explain an old trick. Mathematics of Program Construction. Springer.
-  pp. 324--362.
+  {Dan} explain an old trick. International Conference on Mathematics of
+  Program Construction (MPC). Springer. pp. 324--362.
+
+\bibitem[{Ko et~al.}(2025){Ko, Mu, \& Gibbons}]{Ko-BT}
+{Ko, H.-S., Mu, S.-C. \& Gibbons, J.} (2025) Binomial tabulation: A short
+  story. arXiv:2503.04001.
 
 \bibitem[{McBride}(2002)]{McBride-motive}
-{McBride, C.} (2002) Elimination with a motive. Types for Proofs and Programs.
-  Springer. pp. 197--216.
+{McBride, C.} (2002) Elimination with a motive. International Workshop on Types
+  for Proofs and Programs (TYPES). Springer. pp. 197--216.
 
 \bibitem[{Mu}(2024)]{Mu-sublists}
 {Mu, S.-C.} (2024) Bottom-up computation using trees of sublists.
