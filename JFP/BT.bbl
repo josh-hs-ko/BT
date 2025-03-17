@@ -1,16 +1,10 @@
-\begin{thebibliography}{11}
+\begin{thebibliography}{10}
 
 \bibitem[{Altenkirch et~al.}(2010){Altenkirch, Chapman, \&
   Uustalu}]{Altenkirch-relative-monads}
 {Altenkirch, T., Chapman, J. \& Uustalu, T.} (2010) Monads need not be
   endofunctors. International Conference on Foundations of Software Science and
   Computational Structures (FoSSaCS). Springer. pp. 297--311.
-
-\bibitem[{Altenkirch et~al.}(2015){Altenkirch, Ghani, Hancock, McBride, \&
-  Morris}]{Altenkirch-indexed-containers}
-{Altenkirch, T., Ghani, N., Hancock, P., McBride, C. \& Morris, P.} (2015)
-  Indexed containers. \textit{Journal of Functional Programming}. {\bf 25},
-  e5:1--41.
 
 \bibitem[{Bernardy et~al.}(2012){Bernardy, Jansson, \&
   Paterson}]{Bernardy-proofs-for-free}

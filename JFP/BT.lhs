@@ -166,7 +166,7 @@ data BT (A : Set) : Set where
 \end{spec}
 with functions |mapBT : (A → B) → BT A → BT B| and |zipBTWith : (A → B → C) →| |BT A →| |BT B →| |BT C|, respectively the mapping and zipping functions for |BT|, having expected definitions.
 Let |t|~be a tree representing level $n$.
-To compute level $n+1$, we need a function |upgrade : BT A → BT (List A)|, a natural transformation rearranging elements in~|t|, such that |mapBT f (upgrade t)| represents level $n+1$.
+To compute level $n+1$, we need a function |upgrade : BT A → BT (List A)|, a natural transformation copying and rearranging elements in~|t|, such that |mapBT f (upgrade t)| represents level $n+1$.
 Bird suggests the following definition of |upgrade|
 (which is directly translated into Agda notation from Bird's Haskell program, and is not valid Agda --- we will fix it later):%
 \footnote{The name |upgrade| is given by \citet{Mu-sublists}, while the same function is called |cd| by \citet{Bird-zippy-tabulations}.}
@@ -311,7 +311,7 @@ However, such a tree is actually list-shaped (constructed using |nil| and |bin �
 
 In the subsequent \cref{sec:td,sec:bu} we will implement the top-down and bottom-up algorithms as programs of type |ImmediateSublistInduction|.
 These are fairly standard exercises in dependently typed programming (except perhaps for the |upgrade| function used in the bottom-up algorithm), and our implementations are by no means the only solutions.%
-\footnote{Even the induction principle has alternative formulations, one of which has been explored by \citet{Ko-BT}.}
+\footnote{Even the induction principle has alternative formulations, one of which is explored by \citet{Ko-BT}.}
 The reader may want to try the exercises for themself, and is not obliged to go through the detail of our programs.
 We will prove that the two algorithms are extensionally equal in \cref{sec:equality}, to understand which it will not be necessary to know how the two algorithms are implemented.
 
@@ -338,7 +338,7 @@ subs : (l : ℕ) (xs : List A) → length xs ≡ suc l → Drop 1 (λ ys → len
 \end{code}
 With these equality proofs, we can then invoke |td'| inductively on every immediate sublist of |xs| with the help of the |map| function for |Drop|,
 \begin{code}
-map : (∀ {ys} → P ys → Q ys) → ∀ {xs} → Drop n P xs → Drop n Q xs
+map : (∀ {ys} → P ys → Q ys) → Drop n P xs → Drop n Q xs
 \end{code}
 and again use~|f| to compute the final result.
 
@@ -366,7 +366,7 @@ unTip (tip p) = p
 \end{code}
 If the loop counter is |suc n|, we create a new tree of type |Drop n P xs| that is one level higher than the current tree of type |Drop (suc n) P xs|.
 The type of this new tree says that it should contain results of type |P ys| for all the sublists |ys| at the higher level.
-The |upgrade| function does half of the work by constructing an intermediate tree representing the higher level from the elements of the current tree:
+The |upgrade| function does half of the work by copying and rearranging the elements of the current tree to construct an intermediate tree representing the higher level:
 \begin{code}
 upgrade : Drop (suc n) P xs → Drop n (Drop 1 P) xs
 \end{code}
@@ -375,8 +375,7 @@ Then |map f| does the rest of the work and produces the desired new tree of type
 
 %\todo[inline]{SCM: now that |upgrade| was given in Section 1, we can add some words here briefly comparing them and showing that this one is adapted from the earlier one, while also saying that its actual definition does not matter? JK: Actually this may help to elide some explanation\ldots}
 
-Previous work~\citep{Bird-zippy-tabulations, Mu-sublists, Ko-BT} has hinted or explained in detail how |upgrade| can be derived.
-Our version is
+To implement |upgrade|, just follow the types, and most of the program writes itself.
 \begin{code}
 upgrade : Drop (suc n) P xs → Drop n (Drop 1 P) xs
 upgrade         nil                           = underground
@@ -396,15 +395,14 @@ and |zipWith| has the usual definition:
 zipWith  :   (∀ {ys} → P ys → Q ys → R ys)
          →'  Drop n P xs → Drop n Q xs → Drop n R xs
 \end{code}
-
-The last clause of |upgrade| is exactly the last clause of Bird's original program~(\cref{sec:introduction}) except that the list cons is replaced by the cons function |bin ∘ tip| for |Drop 1|--trees (which, as mentioned in \cref{sec:induction-principle}, are list-shaped).
+The last clause is the most difficult one to conceive, but can be copied exactly from the last clause of Bird's original program~(\cref{sec:introduction}) except that the list cons is replaced by the cons function |bin ∘ tip| for |Drop 1|--trees, which, as mentioned in \cref{sec:induction-principle}, are list-shaped.
 It is a fruitful exercise to trace the constraints assumed and established throughout the construction described by the clause, now manifested as type information --- see \varcitet{Ko-BT}{'s} Section~2.3 for a solution (where |upgrade| is named |retabulate|).
-\citeauthor{Ko-BT} also explain how the second clause of |upgrade| subsumes the first three clauses of the original program.
+%\citeauthor{Ko-BT} also explain how the second clause of |upgrade| subsumes the first and the third clauses of the original program.
 
-The remaining first and third clauses of |upgrade| involve |nil|, and are not in Bird's original program.
+The first and third clauses of |upgrade| involve |nil|, and are not in Bird's original program.
 |Drop| trees containing |nil| correspond to empty levels below the lattice in \cref{fig:sublists-lattice} (which result from dropping too many elements from the input list).
-\citet{Mu-sublists} avoids dealing with such empty levels by imposing conditions throughout his development --- for example, see \citeauthor{Mu-sublists}'s Section 4.3 for a version of |upgrade| (which is abbreviated as |up| there) with conditions.
-We avoid those somewhat tedious conditions by including |nil| in |Drop| to represent the empty levels, and in exchange need to deal with these levels, but they are easy to deal with: just follow the types, and the clauses write themselves.
+\citet{Mu-sublists} avoids dealing with such empty levels by imposing conditions throughout his development --- for example, see \citeauthor{Mu-sublists}'s Section~4.3 for a version of |upgrade| (which is abbreviated as |up| there) with conditions.
+We avoid those somewhat tedious conditions by including |nil| in |Drop| to represent the empty levels, and in exchange need to deal with these levels, which are easy to deal with though.
 
 \section{Extensional equality between the two algorithms}
 \label{sec:equality}
@@ -442,8 +440,7 @@ The instantiated type of~|g| is
 \begin{code}
 ∀ {ys} {ps : Drop 1 P ys} → All (λ {zs} p → td P f zs ≡ p) ps → td P f ys ≡ f ps
 \end{code}
-This says that computing |td P f ys| is the same as applying~|f| to |ps| where every~|p| in |ps| is already a result computed by |td P f| --- this is a formulation of the \emph{computation rule} of |ImmediateSublistInduction|, satisfied by |td|!%
-\todo{Refer to \cref{eq:spec}}
+This says that computing |td P f ys| is the same as applying~|f| to |ps| where every~|p| in |ps| is already a result computed by |td P f| --- this has the same computational content as the specification~\cref{eq:spec}, and is a formulation of the \emph{computation rule} of |ImmediateSublistInduction|, satisfied by |td|!
 %That is, computation rules can be formulated as a form of invariant preservation.
 Therefore we can formulate the computation rule for any implementation |ind| of |ImmediateSublistInduction|,
 \begin{code}
@@ -480,13 +477,20 @@ This is useful when |ind| can be easily proved to satisfy the set of computation
 In this case, a parametricity proof for |ind'| is always mechanical ---if not automatic--- to derive, for example using \varcitet{Bernardy-proofs-for-free}{'s} translation or internal parametricity~\citep{Van-Muylder-internal-parametricity}, and we get to avoid a potentially difficult proof that |ind'| satisfies the set of computation rules.
 This trick may be useful for porting recursion schemes or inventing efficient implementations of induction principles in a dependently typed setting.
 
-\todo[inline]{Efficiency comparison between the inductive and functional/container~\citep{Altenkirch-indexed-containers} representations}
-
 \todo[inline]{Detailed but informal comparison with Shin's development: the dependently typed |upgrade| may look simpler but implicitly requires an extra argument during computation; (similarly) the base case of the induction principle starts from |[]| rather than singleton lists; contextual information is now at type level (cf \texttt{choose} in the derivation of \texttt{upgrade} and \texttt{td} in the equality proof)}
+
+%\todo[inline]{Efficiency comparison between the inductive and functional/container~\citep{Altenkirch-indexed-containers} representations}
 
 \section*{Acknowledgements}
 
-\todo[inline]{Zhixuan Yang (mother of all monads, induction principles and parametricity), James McKinna (container representation)}
+Zhixuan Yang engaged in several discussions about induction principles, computation rules, and parametricity, leading to the current presentation of the parametricity-based proof; he also pointed out how |Nondet| is an instance of the codensity representation.
+At the IFIP WG~2.1 meeting in April 2024, James McKinna suggested implementing |upgrade| on the higher-order representation~\cref{eq:container-ih} instead.
+This definition of |upgrade| is extremely simple, but does not copy and reuse results on sublists, and therefore does not help to avoid re-computation.
+However, this perspective does make the relationship between binomial trees and proofs of universal quantification clear, and leads to the inclusion of the |nil| constructor in |Drop| (which helps to simplify our definition of |upgrade|).
+At the same meeting, Wouter Swierstra asked whether lists could be used instead of vectors in a previous definition of binomial trees~\citep{Ko-BT}.
+There the definition of immediate sublists depends on the length of the input list, so it is more convenient to use vectors.
+However, this question leads us to consider a definition of immediate sublists that does not depend on list length, and ultimately to the simpler and cleaner definition of |Drop|.
+We would like to thank all of them.
 
 \bibliographystyle{jfplike}
 \bibliography{../../bib/bib}
