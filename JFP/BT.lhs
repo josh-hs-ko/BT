@@ -127,7 +127,12 @@
 \end{authgrp}
 
 \begin{abstract}
-\todo[inline]{Outline of the paper (so that we can omit an outline at the end of \cref{sec:introduction})\vspace{20ex}}
+We revisit the problem about a recursion scheme over immediate sublists studied by \citet{Mu-sublists}, and provide a dependently typed solution in Agda.
+The recursion scheme can be implemented as either a top-down algorithm, which has a straightforward definition but results in lots of re-computation, or a bottom-up algorithm, which has a puzzling definition but avoids re-computation.
+We show that the types can be made precise to guide and understand the developments of the algorithms.
+In particular, the key data structure ---binomial trees--- used in the bottom-up algorithm can be derived from the problem specification.
+The precise types also allow us to prove that the two algorithms are extensionally equal using parametricity.
+Despite apparent dissimilarities, our parametricity-based proof turns out to be a more structured and economic version of \citeauthor{Mu-sublists}'s equational proof.
 \end{abstract}
 
 \maketitle[F]
@@ -483,13 +488,13 @@ This trick may be useful for porting recursion schemes or inventing efficient im
 
 \section*{Acknowledgements}
 
-Zhixuan Yang engaged in several discussions about induction principles, computation rules, and parametricity, leading to the current presentation of the parametricity-based proof; he also pointed out how |Nondet| is an instance of the codensity representation.
+Zhixuan Yang engaged in several discussions about induction principles, computation rules, and parametricity, leading to the current presentation of the parametricity-based proof; he also pointed out how |Nondet| is an instance of the codensity representation except that a dinaturality condition is omitted~\citep{Hinze-Kan-extensions}.
 At the IFIP WG~2.1 meeting in April 2024, James McKinna suggested implementing |upgrade| on the higher-order representation~\cref{eq:container-ih} instead.
 This definition of |upgrade| is extremely simple, but does not copy and reuse results on sublists, and therefore does not help to avoid re-computation.
 However, this perspective does make the relationship between binomial trees and proofs of universal quantification clear, and leads to the inclusion of the |nil| constructor in |Drop| (which helps to simplify our definition of |upgrade|).
 At the same meeting, Wouter Swierstra asked whether lists could be used instead of vectors in a previous definition of binomial trees~\citep{Ko-BT}.
 There the definition of immediate sublists depends on the length of the input list, so it is more convenient to use vectors.
-However, this question leads us to consider a definition of immediate sublists that does not depend on list length, and ultimately to the simpler and cleaner definition of |Drop|.
+However, this question leads us to consider a definition of immediate sublists that does not depend on list length, and ultimately to the simpler definition of |Drop| (which uses lists instead of vectors).
 We would like to thank all of them.
 
 \bibliographystyle{jfplike}
