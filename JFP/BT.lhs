@@ -487,19 +487,24 @@ This trick may be useful for porting recursion schemes or inventing efficient im
 %\todo[inline]{Efficiency comparison between the inductive and functional/container~\citep{Altenkirch-indexed-containers} representations}
 
 \citet{Mu-sublists} takes pains to prove that |td = bu|, while in this pearl the equivalence seems to follow almost for free from parametricity.
-\todo{Entire paragraph in progress. The types are not right! To be discussed.}
 The trick is that the necessary properties are either enforced by types or established by parametricity.
 The main property \citeauthor{Mu-sublists} needed is
 %format (repeat f (k)) = "{" f "}^{" k "}"
 \begin{equation}
-  |(repeat (map f . upgrade) k) (base xs) = map td (drop (suc n - k) xs)|
+  |(repeat (mapBT f . upgrade) k) (base xs) = map td (drop (suc n - k) xs)|
   \label{eq:muLemma1}
 \end{equation}
-It is claiming that |bu'| maintains an invariant: after |k| steps of |map f . upgrade| (the body of |bu'|), we always get a tree, having the right shape, whose values are |td| applied to all those sublists of |xs| having |k| elements.
-In this pearl, the shape of the trees are enforced by the type |Drop|,
-while the invariant that the trees built by |bu'| contain values of |td| is established using parametricity of |bu'| by letting |Q {ys} p = td P f ys ≡ p|.
-\citeauthor{Mu-sublists} proved \eqref{eq:muLemma1} by induction on |k|, which  coincides with the structure of |bu'|.
-While |UnaryParametricity| could in principle be proved mechanically once-for-all for all functions having the right type, if one had to prove |UnaryParametricity bu'|, the proof would also follow the structure of |bu'|.
+That is an old-school way of saying that |bu| maintains an invariant.
+Rather than enforcing shapes by types, the function |drop k xs| builds a tree of simple type |BT| whose shape is the same as our |Drop n P xs|.
+The lefthand side of \eqref{eq:muLemma1} is the value computed after |k| iterations in |bu|:
+|xs| is the initial input (having length |n|), |base| prepares an initial tree, and |mapBT f . upgrade|, the body of |bu|, is performed |k| times.
+The invariant is that the value must equal the righthand side:
+a tree having shape |Drop (suc n - k) P xs|, whose values are |td| applied to all those sublists of |xs| having |k| elements.
+In contrast, in this pearl the shape of the trees are enforced by the type |Drop|,
+while the invariant that the trees contain values of |td| is established using parametricity of |bu| by letting |Q {ys} p = td P f ys ≡ p|.
+
+\citeauthor{Mu-sublists} proved \eqref{eq:muLemma1} by induction on |k|, which  coincides with the structure of |bu|.
+While |UnaryParametricity| could in principle be proved mechanically once-for-all for all functions having the right type, if one had to prove |UnaryParametricity bu|, the proof would also follow the structure of |bu|.
 Therefore it is essentially the proof of \eqref{eq:muLemma1} generalized to all invariants.
 To prove \eqref{eq:muLemma1}, \citeauthor{Mu-sublists} relies on a property of |upgrade|, the proof of which being the main challenge in \cite{Mu-sublists}:
 \begin{equation*}
