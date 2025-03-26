@@ -489,7 +489,9 @@ This trick may be useful for porting recursion schemes or inventing efficient im
 \citet{Mu-sublists} takes pains to prove that |td = bu|, while in this pearl the equivalence seems to follow almost for free from parametricity.
 The trick is that the necessary properties are either enforced by types or established by parametricity.
 The main property \citeauthor{Mu-sublists} needed is%
-\footnote{Shown here are simple-typed version of the functions, used in \citet{Mu-sublists}, with some names changed to the counterparts in this pearl.
+\footnote{Shown here are functions used in \citet{Mu-sublists}, thus simple-typed, %
+%\todo{simple-typed? non-dependently typed?}
+with some names changed to their counterparts in this pearl.
 The types of these functions are:
 |base : List A -> BT B|, |upgrade : BT b -> BT (List b)|,
 |drop : Nat -> List a -> BT (List a)|,
@@ -504,7 +506,9 @@ The text explains the roles of each component, which I hope can be understood wh
   \label{eq:muLemma1}
 \end{equation}
 That is an old-school way of saying that |bu| maintains an invariant.
-Rather than enforcing shapes by types, the function |drop k xs| builds a tree of simple type |BT| whose shape is the same as our |Drop n P xs|.
+Rather than enforcing shapes by types, the function |drop k xs| builds a tree of simple type |BT|
+\todo{simple type? non-dependent type? There is also a "simple-typed" in the footnote.}
+whose shape is the same as our |Drop n P xs|.
 The lefthand side of \eqref{eq:muLemma1} is the value computed after |k| iterations in |bu|:
 |xs| is the initial input (having length |n|), |base| prepares an initial tree, on which |mapBT f . upgrade|, the body of |bu|, is performed |k| times.
 The invariant is that the value must equal the righthand side:
