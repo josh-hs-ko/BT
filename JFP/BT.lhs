@@ -488,18 +488,27 @@ This trick may be useful for porting recursion schemes or inventing efficient im
 
 \citet{Mu-sublists} takes pains to prove that |td = bu|, while in this pearl the equivalence seems to follow almost for free from parametricity.
 The trick is that the necessary properties are either enforced by types or established by parametricity.
-The main property \citeauthor{Mu-sublists} needed is
+The main property \citeauthor{Mu-sublists} needed is%
+\footnote{Shown here are simple-typed version of the functions, used in \citet{Mu-sublists}, with some names changed to the counterparts in this pearl.
+The types of these functions are:
+|base : List A -> BT B|, |upgrade : BT b -> BT (List b)|,
+|drop : Nat -> List a -> BT (List a)|,
+|f : List B -> B|, |td : List A -> B|, and
+|subs : List a -> List (List a)|.
+}
+\todo{I think it's better reusing the names in this paper, so the readers can quickly get an idea what these components are about (rather than having to learn a new name, say |ch| and remember that is a counterpart of |drop|).
+The text explains the roles of each component, which I hope can be understood while keeping the types vague. If the readers needs to know the type, they can refer to the footnote.}
 %format (repeat f (k)) = "{" f "}^{" k "}"
 \begin{equation}
-  |(repeat (mapBT f . upgrade) k) (base xs) = map td (drop (suc n - k) xs)|
+  |(repeat (mapBT f . upgrade) k) (base xs) = mapBT td (drop (suc n - k) xs)|
   \label{eq:muLemma1}
 \end{equation}
 That is an old-school way of saying that |bu| maintains an invariant.
 Rather than enforcing shapes by types, the function |drop k xs| builds a tree of simple type |BT| whose shape is the same as our |Drop n P xs|.
 The lefthand side of \eqref{eq:muLemma1} is the value computed after |k| iterations in |bu|:
-|xs| is the initial input (having length |n|), |base| prepares an initial tree, and |mapBT f . upgrade|, the body of |bu|, is performed |k| times.
+|xs| is the initial input (having length |n|), |base| prepares an initial tree, on which |mapBT f . upgrade|, the body of |bu|, is performed |k| times.
 The invariant is that the value must equal the righthand side:
-a tree having shape |Drop (suc n - k) P xs|, whose values are |td| applied to all those sublists of |xs| having |k| elements.
+a tree having shape |Drop (suc n - k) P xs|, whose values on tips are |td| applied to all those sublists of |xs| having |k| elements.
 In contrast, in this pearl the shape of the trees are enforced by the type |Drop|,
 while the invariant that the trees contain values of |td| is established using parametricity of |bu| by letting |Q {ys} p = td P f ys ≡ p|.
 
@@ -508,9 +517,9 @@ While |UnaryParametricity| could in principle be proved mechanically once-for-al
 Therefore it is essentially the proof of \eqref{eq:muLemma1} generalized to all invariants.
 To prove \eqref{eq:muLemma1}, \citeauthor{Mu-sublists} relies on a property of |upgrade|, the proof of which being the main challenge in \cite{Mu-sublists}:
 \begin{equation*}
-   |upgrade (drop (suc k) xs) = map subs (drop k xs)| \label{eq:muUpgrade}
+   |upgrade (drop (suc k) xs) = mapBT subs (drop k xs)| \label{eq:muUpgrade}
 \end{equation*}
-That is, given a tree having shape |Drop (suc n) P xs|, |upgrade| computes a tree having shape |Drop n _ xs|, with the elements being the immediate sublists of |xs| --- which is exactly the type of |upgrade| in this pearl.
+That is, given a tree having shape |Drop (suc k) P xs|, |upgrade| computes a tree having shape |Drop k _ xs|, with the elements being the immediate sublists of |xs| --- which is exactly what the type of |upgrade| in this pearl says.
 
 \section*{Acknowledgements}
 
