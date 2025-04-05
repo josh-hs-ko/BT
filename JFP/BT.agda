@@ -116,10 +116,10 @@ map f (tip p)   = tip (f p)
 map f  nil      = nil
 map f (bin t u) = bin (map f t) (map f u)
 
-subs : (l : ℕ) (xs : List A) → length xs ≡ suc l → Drop 1 (λ ys → length ys ≡ l) xs
-subs  zero   (_ ∷ []) eq = bin (tip refl) nil
-subs (suc l) (_ ∷ xs) eq = let eq' = cong pred eq
-                           in  bin (tip eq') (map (cong suc) (subs l xs eq'))
+lenSubs : (l : ℕ) (xs : List A) → length xs ≡ suc l → Drop 1 (λ ys → length ys ≡ l) xs
+lenSubs  zero   (_ ∷ []) eq = bin (tip refl) nil
+lenSubs (suc l) (_ ∷ xs) eq = let eq' = cong pred eq
+                              in  bin (tip eq') (map (cong suc) (lenSubs l xs eq'))
 
 module Compact-td where
 
@@ -128,12 +128,12 @@ module Compact-td where
     where
       td' : (l : ℕ) (xs : List A) → length xs ≡ l → P xs
       td'  zero   [] eq = f nil
-      td' (suc l) xs eq = f (map (td' l _) (subs l xs eq))
+      td' (suc l) xs eq = f (map (td' l _) (lenSubs l xs eq))
 
 td' : (∀ {ys} → Drop 1 P ys → P ys)
     → (l : ℕ) (xs : List A) → length xs ≡ l → P xs
 td' f  zero   [] eq = f nil
-td' f (suc l) xs eq = f (map (td' f l _) (subs l xs eq))
+td' f (suc l) xs eq = f (map (td' f l _) (lenSubs l xs eq))
 
 td : ImmediateSublistInduction
 td {A} P f xs = td' f (length xs) xs refl
@@ -151,19 +151,19 @@ underground : Drop n (Drop 1 P) []
 underground {n = zero } = tip nil
 underground {n = suc _} = nil
 
-upgrade : Drop (suc n) P xs → Drop n (Drop 1 P) xs
-upgrade    nil                = underground
-upgrade t@(bin   (tip _)   _) = tip t
-upgrade   (bin    nil    nil) = bin underground nil
-upgrade   (bin t@(bin _ _) u) = bin (upgrade t)
-                                    (zipWith (bin ∘ tip) t (upgrade u))
+retabulate : Drop (suc n) P xs → Drop n (Drop 1 P) xs
+retabulate    nil                = underground
+retabulate t@(bin   (tip _)   _) = tip t
+retabulate   (bin    nil    nil) = bin underground nil
+retabulate   (bin t@(bin _ _) u) = bin (retabulate t)
+                                       (zipWith (bin ∘ tip) t (retabulate u))
 
-base' : (xs : List A) {r : ℕ} → length xs ≤ r → Drop (suc r) P xs
-base' []       _       = nil
-base' (x ∷ xs) (s≤s l) = bin (base' xs l) (base' xs (m≤n⇒m≤1+n l))
+base-worker : (xs : List A) {r : ℕ} → length xs ≤ r → Drop (suc r) P xs
+base-worker []       _       = nil
+base-worker (x ∷ xs) (s≤s l) = bin (base-worker xs l) (base-worker xs (m≤n⇒m≤1+n l))
 
 base : (xs : List A) → Drop (suc (length xs)) P xs
-base xs = base' xs ≤-refl
+base xs = base-worker xs ≤-refl
 
 unTip : Drop 0 P xs → P xs
 unTip (tip p) = p
@@ -175,12 +175,12 @@ module Compact-bu where
     where
       bu' : (n : ℕ) → Drop n P xs → P xs
       bu'  zero   = unTip
-      bu' (suc n) = bu' n ∘ map f ∘ upgrade
+      bu' (suc n) = bu' n ∘ map f ∘ retabulate
 
 bu' : (∀ {ys} → Drop 1 P ys → P ys)
     → (n : ℕ) → Drop n P xs → P xs
 bu' f  zero   = unTip
-bu' f (suc n) = bu' f n ∘ map f ∘ upgrade
+bu' f (suc n) = bu' f n ∘ map f ∘ retabulate
 
 bu : ImmediateSublistInduction
 bu P f = bu' f _ ∘ base
@@ -200,10 +200,10 @@ UnaryParametricity ind =
                                                  → All Q ps → Q (f ps))
           → {xs : List A} → Q (ind P f xs)
 
-ComputationRule : (ind : ImmediateSublistInduction) → Set₁
+ComputationRule : ImmediateSublistInduction → Set₁
 ComputationRule ind =
   {A : Set} {P : List A → Set} {f : ∀ {ys} → Drop 1 P ys → P ys} {xs : List A}
-  {t : Drop 1 P xs} → All (λ {ys} → ind P f ys ≡_) t → ind P f xs ≡ f t
+  {t : Drop 1 P xs} → All (λ {ys} p → ind P f ys ≡ p) t → ind P f xs ≡ f t
 
 revcat : List A → List A → List A
 revcat []       ys = ys
@@ -214,8 +214,8 @@ module StandardUniqueness where
   uniqueness-lemma :
       (P : List A → Set) (f g : (xs : List A) → P xs) (zs : List A)
     → Drop 1 (λ ys → f (revcat zs ys) ≡ g (revcat zs ys)) xs
-    → Σ[ t ∈ Drop 1 (P ∘ revcat zs) xs ] All (λ {ys} → f (revcat zs ys) ≡_) t
-                                       × All (λ {ys} → g (revcat zs ys) ≡_) t
+    → Σ[ t ∈ Drop 1 (P ∘ revcat zs) xs ] All (λ {ys} p → f (revcat zs ys) ≡ p) t
+                                       × All (λ {ys} p → g (revcat zs ys) ≡ p) t
   uniqueness-lemma P f g zs  nil             = nil , tt , tt
   uniqueness-lemma P f g zs (bin (tip eq) u) =
     let (u' , all-f , all-g) = uniqueness-lemma P f g (_ ∷ zs) u
@@ -247,25 +247,25 @@ uniqueness ind ind' comp param' P f xs = param' (λ {ys} p → ind P f ys ≡ p)
 
 -- td satisfies the computation rule
 
-td'-computation :
+td'Comp :
     {A : Set} {P : List A → Set} {f : ∀ {ys} → Drop 1 P ys → P ys} {l : ℕ} {xs : List A}
   → (zs : List A) → length (revcat zs xs) ≡ suc l
   → (t : Drop 1 (P ∘ revcat zs) xs) → All (λ {ys} p → td P f (revcat zs ys) ≡ p) t
   → (eqs : Drop 1 (λ ys → length (revcat zs ys) ≡ l) xs)
   → map (td' f l _) eqs ≡ t
-td'-computation zs eq  nil             _             nil                 = refl
-td'-computation zs eq (bin (tip ._) u) (refl , all) (bin (tip refl) eqs) =
-  cong₂ (bin ∘ tip) refl (td'-computation (_ ∷ zs) eq u all eqs)
+td'Comp zs eq  nil             _             nil                 = refl
+td'Comp zs eq (bin (tip ._) u) (refl , all) (bin (tip refl) eqs) =
+  cong₂ (bin ∘ tip) refl (td'Comp (_ ∷ zs) eq u all eqs)
 
-td-computation' :
+tdComp' :
     {A : Set} {P : List A → Set} {f : ∀ {ys} → Drop 1 P ys → P ys}
     (l : ℕ) (xs : List A) (eq : length xs ≡ l) (t : Drop 1 P xs)
   → All (λ {ys} p → td P f ys ≡ p) t → td' f l xs eq ≡ f t
-td-computation'  zero   [] refl nil _   = refl
-td-computation' (suc l) xs eq   t   all = cong _ (td'-computation [] eq t all (subs l xs eq))
+tdComp'  zero   [] refl nil _   = refl
+tdComp' (suc l) xs eq   t   all = cong _ (td'Comp [] eq t all (lenSubs l xs eq))
 
-td-computation : ComputationRule td
-td-computation {t = t} = td-computation' _ _ refl t
+tdComp : ComputationRule td
+tdComp {t = t} = tdComp' _ _ refl t
 
 -- bu satisfies unary parametricity
 
@@ -291,33 +291,33 @@ zipWithᴾ Q Q′ Q″ f fᴾ  nil       _           nil       _          = tt
 zipWithᴾ Q Q′ Q″ f fᴾ (bin t t') (tᴾ , t'ᴾ) (bin u u') (uᴾ , u'ᴾ) = zipWithᴾ Q Q′ Q″ f fᴾ t  tᴾ  u  uᴾ ,
                                                                     zipWithᴾ Q Q′ Q″ f fᴾ t' t'ᴾ u' u'ᴾ
 
-upgradeᴾ : (Q : ∀ {ys} → P ys → Set) (t : Drop (suc n) P xs) → All Q t → All (All Q) (upgrade t)
-upgradeᴾ {n = n}     Q    nil                 tᴾ       = undergroundᴾ Q n
-upgradeᴾ             Q t@(bin   (tip _)   u)  tᴾ       = tᴾ
-upgradeᴾ {n = suc n} Q   (bin    nil    nil)  tᴾ       = undergroundᴾ Q n , tt
-upgradeᴾ             Q   (bin t@(bin _ _) u) (tᴾ , uᴾ) =
-  upgradeᴾ Q t tᴾ , zipWithᴾ Q (All Q) (All (λ {ys} → Q {ys})) (bin ∘ tip) _,_ t tᴾ (upgrade u) (upgradeᴾ Q u uᴾ)
+retabulateᴾ : (Q : ∀ {ys} → P ys → Set) (t : Drop (suc n) P xs) → All Q t → All (All Q) (retabulate t)
+retabulateᴾ {n = n}     Q    nil                 tᴾ       = undergroundᴾ Q n
+retabulateᴾ             Q t@(bin   (tip _)   u)  tᴾ       = tᴾ
+retabulateᴾ {n = suc n} Q   (bin    nil    nil)  tᴾ       = undergroundᴾ Q n , tt
+retabulateᴾ             Q   (bin t@(bin _ _) u) (tᴾ , uᴾ) =
+  retabulateᴾ Q t tᴾ , zipWithᴾ Q (All Q) (All (λ {ys} → Q {ys})) (bin ∘ tip) _,_ t tᴾ (retabulate u) (retabulateᴾ Q u uᴾ)
 
 bu'ᴾ : (Q : ∀ {ys} → P ys → Set)
        (f : ∀ {ys} → Drop 1 P ys → P ys) → (∀ {ys} {ps : Drop 1 P ys} → All Q ps → Q (f ps))
      → (n : ℕ) (t : Drop n P xs) → All Q t → Q (bu' f n t)
 bu'ᴾ Q f fᴾ  zero   t tᴾ = unTipᴾ Q t tᴾ
-bu'ᴾ Q f fᴾ (suc n) t tᴾ = bu'ᴾ Q f fᴾ n (map f (upgrade t)) (mapᴾ (All Q) Q f fᴾ (upgrade t) (upgradeᴾ Q t tᴾ))
+bu'ᴾ Q f fᴾ (suc n) t tᴾ = bu'ᴾ Q f fᴾ n (map f (retabulate t)) (mapᴾ (All Q) Q f fᴾ (retabulate t) (retabulateᴾ Q t tᴾ))
 
-base'ᴾ : {P : List A → Set} (Q : ∀ {ys} → P ys → Set) (xs : List A) {r : ℕ} (l : length xs ≤ r)
-       → All Q (base' {A} {P} xs l)
-base'ᴾ Q []       _       = tt
-base'ᴾ Q (x ∷ xs) (s≤s l) = base'ᴾ Q xs l , base'ᴾ Q xs (m≤n⇒m≤1+n l)
+base-workerᴾ : {P : List A → Set} (Q : ∀ {ys} → P ys → Set) (xs : List A) {r : ℕ} (l : length xs ≤ r)
+             → All Q (base-worker {A} {P} xs l)
+base-workerᴾ Q []       _       = tt
+base-workerᴾ Q (x ∷ xs) (s≤s l) = base-workerᴾ Q xs l , base-workerᴾ Q xs (m≤n⇒m≤1+n l)
 
 baseᴾ : {P : List A → Set} (Q : ∀ {ys} → P ys → Set) (xs : List A)
       → All Q (base {A} {P} xs)
-baseᴾ Q xs = base'ᴾ Q xs ≤-refl
+baseᴾ Q xs = base-workerᴾ Q xs ≤-refl
 
-buᴾ : UnaryParametricity bu
-buᴾ {A} {P} Q {f} g {xs} = bu'ᴾ Q f g _ (base xs) (baseᴾ Q xs)
+buParam : UnaryParametricity bu
+buParam {A} {P} Q {f} g {xs} = bu'ᴾ Q f g _ (base xs) (baseᴾ Q xs)
 
 -- Equality between the two algorithms
 
 equality : (P : List A → Set) (f : ∀ {ys} → Drop 1 P ys → P ys) (xs : List A)
          → td P f xs ≡ bu P f xs
-equality = uniqueness td bu (λ {_} {P} → td-computation {_} {P}) buᴾ
+equality = uniqueness td bu (λ {A} {P} → tdComp {A} {P}) buParam
