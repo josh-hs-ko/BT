@@ -127,10 +127,10 @@
 \end{authgrp}
 
 \begin{abstract}
-We revisit the problem about a recursion scheme over immediate sublists studied by \citet{Mu-sublists}, and provide a dependently typed solution in Agda.
+We revisit the problem of implementing a recursion scheme over immediate sublists studied by \citet{Mu-sublists}, and provide a dependently typed solution in Agda.
 The recursion scheme can be implemented as either a top-down algorithm, which has a straightforward definition but results in lots of re-computation, or a bottom-up algorithm, which has a puzzling definition but avoids re-computation.
 We show that the types can be made precise to guide and understand the developments of the algorithms.
-In particular, the key data structure ---binomial trees--- used in the bottom-up algorithm can be derived from the problem specification.
+In particular, the key data structure ---binomial trees--- can be derived from the problem specification.
 The precise types also allow us to prove that the two algorithms are extensionally equal using parametricity.
 Despite apparent dissimilarities, our proof can be compared to \citeauthor{Mu-sublists}'s equational proof, and be understood as a more economical version of the latter.
 \end{abstract}
@@ -167,7 +167,7 @@ It may appear that this bottom-up strategy can be implemented by representing ea
 %It will turn out that, however, computing the indices needed to fetch the corresponding entries is not pretty, and sometimes impossible without additional information.
 %\todo{JK: seems simpler to just say a list-based implementation is impossible}
 Instead, Bird represented each level using a tip-valued binary tree defined by%
-\footnote{We use Agda in this paper, while both \citet{Bird-zippy-tabulations} and \citet{Mu-sublists} use Haskell; some of their definitions are quoted in this section but translated into Agda notation for consistency.}
+\footnote{We use Agda in this pearl, while both \citet{Bird-zippy-tabulations} and \citet{Mu-sublists} used Haskell; some of their definitions are quoted in this section but translated into Agda notation for consistency.}
 \begin{spec}
 data BT (A : Set) : Set where
   tip  : A            → BT A
@@ -177,7 +177,7 @@ equipped with (overloaded) functions |map : (A → B) → BT A → BT B| and |zi
 Let |t|~be a tree representing level~$n$.
 To compute level $n+1$, we need a function |upgrade : BT A → BT (List A)|, a natural transformation copying and rearranging elements in~|t|, such that |map f (upgrade t)| represents level $n+1$.
 Bird suggested the following definition of |upgrade| (which is directly translated into Agda notation from Bird's Haskell program, and is not valid Agda):%
-\footnote{The name |upgrade| is given by \citet{Mu-sublists}, while the same function is called |cd| by \citet{Bird-zippy-tabulations}.}
+\footnote{The name |upgrade| was given by \citet{Mu-sublists}, while the same function was called |cd| by \citet{Bird-zippy-tabulations}.}
 %\todo{SCM: Or, "the code below, adapted from Bird's, is not yet a total definition. We will fix it later." Which is preferred? JK: |let tip xs = ...| is also invalid, so let's just say the definition is not valid Agda\ldots}
 \begin{spec}
 upgrade : BT A → BT (List A)
@@ -206,9 +206,9 @@ Being the last example in the paper, Bird did not offer much explanation.
 The function |upgrade| is as concise as it is cryptic.
 The trees appear to obey some shape constraints --- Bird called them \emph{binomial trees}, hence the name |BT|, but neither the constraints nor how |upgrade| maintains them was explicitly stated.
 
-Fascinated by the definition, \citet{Mu-sublists} offered a specification of |upgrade| and a derivation, and then proved that the bottom-up algorithm is extensionally equal to the top-down specification/algorithm, all using traditional equational reasoning.
+Fascinated by the definition, \citet{Mu-sublists} offered a specification of |upgrade| and a derivation of the definition, and then proved that the bottom-up algorithm is extensionally equal to the top-down specification/algorithm, all using traditional equational reasoning.
 As an interlude, Mu also showed (in his Section~4.3) a dependently typed version of |upgrade|, which used an indexed version of |BT| that encoded the shape constraint on binomial trees, although Mu did not explore the direction further.
-In this paper, we go down the road not (thoroughly) taken and see how far it leads.
+In this pearl, we go down the road not (thoroughly) taken and see how far it leads.
 In a dependently typed setting, can we derive the binomial trees by formalising in their types what we intend to compute?
 How effectively can the type information help us to implement the top-down and bottom-up algorithms correctly?
 And does the type information help us to prove that the two algorithms are extensionally equal?
@@ -227,7 +227,7 @@ Since we are computing a recursive function |h : List A → B| given |f : List B
 \label{eq:non-dependently-typed-recursion-scheme}
 \end{equation}
 In a dependently typed setting, recursion schemes become \emph{elimination} or \emph{induction principles}.
-Instead of ending the type~\cref{eq:non-dependently-typed-recursion-scheme} with |List A → B|, we should aim for |(xs : List A) → P xs| and make it an induction principle, of which |P : List A → Set| is the motive~\citep{McBride-motive}.
+Instead of ending type~\cref{eq:non-dependently-typed-recursion-scheme} with |List A → B|, we should aim for |(xs : List A) → P xs| and make it an induction principle, of which |P : List A → Set| is the motive~\citep{McBride-motive}.
 Like all induction principles, the motive should be established and preserved in a way that follows the recursive structure of the computation: whenever |P|~holds for all the immediate sublists of a list |ys|, it should hold for |ys| as well.
 
 To define the induction principle formally, first we need to define immediate sublists --- in fact we will just give a more general definition of sublists since we will need to refer to all of them during the course of the computation.
@@ -250,8 +250,8 @@ Notice that the induction hypotheses are represented as a function of type
 \begin{equation}\label{eq:container-ih}
 |∀ {zs} → DropR 1 ys zs → P zs|
 \end{equation}
-making the type of the premise~|f| higher-order, whereas the type~\cref{eq:non-dependently-typed-recursion-scheme} uses a list, a first-order data structure.
-Below we derive an indexed data type |Drop n P xs| that represents universal quantification over all the sublists obtained by dropping |n|~elements from |xs|; in particular, |Drop 1 P ys| will be equivalent to the function type~\cref{eq:container-ih}.
+making the type of the premise~|f| higher-order, whereas type~\cref{eq:non-dependently-typed-recursion-scheme} uses a list, a first-order data structure.
+Below we derive an indexed data type |Drop n P xs| that represents universal quantification over all the sublists obtained by dropping |n|~elements from |xs|; in particular, |Drop 1 P ys| will be equivalent to type~\cref{eq:container-ih}.
 
 We start by (re)defining element dropping as a nondeterministic function:
 \begin{code}
@@ -315,11 +315,11 @@ ImmediateSublistInduction =  {A : Set} (P : List A → Set)
 
 Note that |Drop| is an indexed version of |BT| (\cref{sec:introduction}) that has an additional |nil| constructor.
 (We will see in \cref{sec:bu} why it is beneficial to include |nil|.)
-Comparing the type~\cref{eq:non-dependently-typed-recursion-scheme} with |ImmediateSublistInduction|, a potentially drastic change is that the list of induction hypotheses is replaced with a tree of type |Drop 1 P ys| here.
-However, such a tree is actually list-shaped (constructed using |nil| and |bin ∘ tip|), so |ImmediateSublistInduction| is really just a more informative version of the type~\cref{eq:non-dependently-typed-recursion-scheme}.
+Comparing type~\cref{eq:non-dependently-typed-recursion-scheme} with |ImmediateSublistInduction|, a potentially drastic change is that the list of induction hypotheses is replaced with a tree of type |Drop 1 P ys| here.
+However, such a tree is actually list-shaped (constructed using |nil| and |bin ∘ tip|), so |ImmediateSublistInduction| is really just a more informative version of type~\cref{eq:non-dependently-typed-recursion-scheme}.
 
 In the subsequent \cref{sec:td,sec:bu} we will implement the top-down and bottom-up algorithms as programs of type |ImmediateSublistInduction|.
-These are fairly standard exercises in dependently typed programming (except perhaps for the |upgrade| function used in the bottom-up algorithm), and our implementations are by no means the only solutions.%
+These are fairly standard exercises in dependently typed programming (except perhaps for the |upgrade|/|retabulate| function used in the bottom-up algorithm), and our implementations are by no means the only solutions.%
 \footnote{Even the induction principle has alternative formulations, one of which was explored by \citet{Ko-BT}.}
 The reader may want to try the exercises for themself, and is not obliged to go through the detail of our programs.
 We will prove that the two algorithms are extensionally equal in \cref{sec:equality}, to understand which it will not be necessary to know how the two algorithms are implemented.
@@ -327,7 +327,7 @@ We will prove that the two algorithms are extensionally equal in \cref{sec:equal
 \section{The top-down algorithm}
 \label{sec:td}
 
-The specification~\cref{eq:spec} is essentially an executable definition of the top-down algorithm.
+Equation~\cref{eq:spec} is essentially an executable definition of the top-down algorithm.
 This definition would not pass Agda's termination check though, because the immediate sublists in |subs xs| would not be recognised as structurally smaller than |xs|.
 One way to make termination evident is to make the length of |xs| explicit and perform induction on the length.
 The following function |td| does this by invoking |td'|, which takes as additional arguments a natural number~|l| and an equality proof stating that the length of |xs| is~|l|.
@@ -394,7 +394,7 @@ retabulate      (  bin         nil       nil  )  = bin underground nil
 retabulate      (  bin t @  (  bin _ _)  u    )  = bin  (retabulate t)
                                                         (zipWith (bin ∘ tip) t (retabulate u))
 \end{code}
-where
+where |underground| is defined by
 \begin{code}
 underground : Drop n (Drop 1 P) []
 underground {n =' zero   } = tip nil
@@ -454,13 +454,13 @@ Given |P|~and~|f|, we invoke the parametricity proof with the invariant |λ {ys}
 \label{eq:td-equals-bu}
 \end{equation}
 
-We have got the equality~\cref{eq:td-equals-bu} we want.
+We have got the equality we want.
 But if we look at the argument |tdComp| in more detail, we will see that we can refactor the proof to gain a bit more structure and generality.
 The instantiated type of~|tdComp| is
 \begin{code}
 ∀ {ys} {ps : Drop 1 P ys} → All (λ {zs} p → td P f zs ≡ p) ps → td P f ys ≡ f ps
 \end{code}
-This says that computing |td P f ys| is the same as applying~|f| to |ps| where every~|p| in |ps| is already a result computed by |td P f| --- this has the same computational content as the specification~\cref{eq:spec}, and is a formulation of the \emph{computation rule} of |ImmediateSublistInduction|, satisfied by |td|!
+This says that computing |td P f ys| is the same as applying~|f| to |ps| where every~|p| in |ps| is already a result computed by |td P f| --- this has the same computational content as equation~\cref{eq:spec}, and is a formulation of the \emph{computation rule} of |ImmediateSublistInduction|, satisfied by |td|!
 (That is, computation rules can be formulated as a form of invariant preservation.)
 Therefore we can formulate the computation rule for any implementation |ind| of |ImmediateSublistInduction|,
 \begin{code}
@@ -469,7 +469,7 @@ ComputationRule ind =
   {A : Set} {P : List A → Set} {f : ∀ {ys} → Drop 1 P ys → P ys} {xs : List A}
   {ps : Drop 1 P xs} → All (λ {ys} p → ind P f ys ≡ p) ps → ind P f xs ≡ f ps
 \end{code}
-and then generalise the equality~\cref{eq:td-equals-bu} to a theorem that equates the extensional behaviour of any two implementations of the induction principle, where one implementation satisfies the computation rule and the other satisfies parametricity:
+and then generalise equality~\cref{eq:td-equals-bu} to a theorem that equates the extensional behaviour of any two implementations of the induction principle, where one implementation satisfies the computation rule and the other satisfies parametricity:
 \begin{code}
 uniqueness :
      (ind ind' : ImmediateSublistInduction)
@@ -538,24 +538,24 @@ By contrast, this pearl uses (i)~the indexed data type |Drop| to enforce the tre
 
 Using indexed data types to enforce shape constraints is a well known technique, which in particular was briefly employed by \citet[Section~4.3]{Mu-sublists}.
 But program specifications are often not just about shapes.
-For example, to prove~\cref{eq:muLemma1}, Mu gave a specification of |upgrade|, from which the derivation of |upgrade|'s definition was the main challenge for Mu:
+For example, to prove equation~\cref{eq:muLemma1}, Mu gave a specification of |upgrade|, from which the derivation of |upgrade|'s definition was the main challenge for Mu:
 \begin{equation*}
    |upgrade (dropBT (suc k) xs) = map subs (dropBT k xs)| \label{eq:muUpgrade}
 \end{equation*}
-Shape-wise, this specification says that given a tree having the shape computed by |dropBT (suc k) xs|, |upgrade| produces a tree having the shape computed by |dropBT k xs|.
-But the specification also says how the natural transformation should rearrange the tree elements by specifying what it should do in particular to the trees of sublists computed by |dropBT (suc k) xs|.
-This pearl demonstrates that it is possible to go beyond shapes and encode the full specification in the type of |retabulate|~(\cref{sec:bu}) using the indexed data type |Drop|.
+Shape-wise, this equation says that given a tree having the shape computed by |dropBT (suc k) xs|, |upgrade| produces a tree having the shape computed by |dropBT k xs|.
+But the equation also specifies how the natural transformation should rearrange the tree elements by saying what it should do in particular to the trees of sublists computed by |dropBT (suc k) xs|.
+This pearl demonstrates that it is possible to go beyond shapes and encode the full specification in the type of |retabulate|~(\cref{sec:bu}) using the indexed data type |Drop|; the key is that the element types in |Drop|-trees are indexed by sublists and therefore distinct, so the elements need to be placed at the right positions to be type-correct.
 Subsequently, the definition of |retabulate| can be developed in a type-driven manner, which is more economical than Mu's equational derivation.
 
 %\todo{SCM: simple type? non-dependent type? There is also a "simple-typed" in the footnote.
 %JK: Let's use `non-dependently typed', since you pointed out that Haskell doesn't use merely simple types (in the sense of STLC) when we wrote the short story.}
 
-The property~\cref{eq:muLemma1} also says that each iteration of the bottom-up algorithm produces the same results as those computed by~|h|, and \citet{Mu-sublists} proved~\cref{eq:muLemma1} by induction on~|k|.
+Equation~\cref{eq:muLemma1} also says that each iteration of the bottom-up algorithm produces the same results as those computed by~|h|, and \citet{Mu-sublists} proved equation~\cref{eq:muLemma1} by induction on~|k|.
 What is the relationship between Mu's inductive proof and ours based on |UnaryParametricity bu|~(\cref{sec:equality})?
 Mu's induction on~|k| coincides with the looping structure of the bottom-up algorithm.
 On the other hand, while |UnaryParametricity| could in principle be proved mechanically once-and-for-all for all functions having the right type, if one had to prove |UnaryParametricity bu| manually, the proof would also follow the structure of |bu|.
-Therefore the proof of |bu|'s parametricity would essentially be the proof of~\cref{eq:muLemma1} generalised to all invariants.
-Finally, note that this opportunity to use parametricity emerges because we switch to dependent types and reformulate the recursion scheme as an induction principle: knowing that a result~|p| has the indexed type |P ys| allows us to state the invariant |Q {ys} p = td P f ys ≡ p|, whereas the non-indexed result type~|B| in~\cref{eq:non-dependently-typed-recursion-scheme} does not provide enough information for stating that.
+Therefore the proof of |bu|'s parametricity would essentially be the proof of equation~\cref{eq:muLemma1} generalised to all invariants.
+Finally, note that this opportunity to use parametricity emerges because we switch to dependent types and reformulate the recursion scheme as an induction principle: knowing that a result~|p| has the indexed type |P ys| allows us to state the invariant |Q {ys} p = td P f ys ≡ p|, whereas the non-indexed result type~|B| in type~\cref{eq:non-dependently-typed-recursion-scheme} does not provide enough information for stating that.
 
 \section*{Acknowledgements}
 
