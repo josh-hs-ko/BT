@@ -244,7 +244,9 @@ With the help of |DropR| we can quantify over sublists; in particular, we can st
 \begin{equation}\label{eq:container-ih}
 |∀ {zs} → DropR 1 ys zs → P zs|
 \end{equation}
-If this implies that |P|~holds for |ys| for any |ys| (as stated in the type of~|f| below), then the induction principle concludes that |P|~holds for all lists:
+If this implies that |P|~holds for any |ys|
+\todo{SCM: was "|P|~holds for |ys| for any |ys|". Is it correct to remove "for |ys|"?}
+(as stated in the type of~|f| below), then the induction principle concludes that |P|~holds for all lists:
 \begin{code}
 {A : Set} (P : List A → Set)
 (f : ∀ {ys} → (∀ {zs} → DropR 1 ys zs → P zs) → P ys)
@@ -323,7 +325,9 @@ In the subsequent \cref{sec:td,sec:bu} we will implement the top-down and bottom
 These are fairly standard exercises in dependently typed programming (except perhaps for the |upgrade| function used in the bottom-up algorithm), and our implementations are by no means the only solutions.%
 \footnote{Even the induction principle has alternative formulations, one of which was explored by \citet{Ko-BT}.}
 The reader may want to try the exercises for themself, and is not obliged to go through the detail of our programs.
-We will prove that the two algorithms are extensionally equal in \cref{sec:equality}, to understand which it will not be necessary to know how the two algorithms are implemented.
+We will prove that the two algorithms are extensionally equal in \cref{sec:equality}, to understand which it will \emph{not}
+\todo{SCM: added emphasis.}
+be necessary to know how the two algorithms are implemented.
 
 \section{The top-down algorithm}
 \label{sec:td}
