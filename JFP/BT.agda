@@ -28,9 +28,9 @@ variable
 module ContainerRepresentation where
 
   data DropR : ℕ → List A → List A → Set where
-    idenR :                       DropR  zero   xs       xs
-    dropR : DropR      n  xs ys → DropR (suc n) (x ∷ xs) ys
-    keepR : DropR (suc n) xs ys → DropR (suc n) (x ∷ xs) (x ∷ ys)
+    returnR :                       DropR  zero   xs       xs
+    dropR   : DropR      n  xs ys → DropR (suc n) (x ∷ xs) ys
+    keepR   : DropR (suc n) xs ys → DropR (suc n) (x ∷ xs) (x ∷ ys)
 
   ImmediateSublistInduction : Set₁
   ImmediateSublistInduction = {A : Set} (P : List A → Set)

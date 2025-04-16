@@ -245,7 +245,7 @@ With the help of |DropR| we can quantify over sublists; in particular, we can st
 |∀ {zs} → DropR 1 ys zs → P zs|
 \end{equation}
 If this implies that |P|~holds for any |ys|
-\todo{SCM: was "|P|~holds for |ys| for any |ys|". Is it correct to remove "for |ys|"?}
+%\todo{SCM: was "|P|~holds for |ys| for any |ys|". Is it correct to remove "for |ys|"?}
 (as stated in the type of~|f| below), then the induction principle concludes that |P|~holds for all lists:
 \begin{code}
 {A : Set} (P : List A → Set)
@@ -326,7 +326,7 @@ These are fairly standard exercises in dependently typed programming (except per
 \footnote{Even the induction principle has alternative formulations, one of which was explored by \citet{Ko-BT}.}
 The reader may want to try the exercises for themself, and is not obliged to go through the detail of our programs.
 We will prove that the two algorithms are extensionally equal in \cref{sec:equality}, to understand which it will \emph{not}
-\todo{SCM: added emphasis.}
+%\todo{SCM: added emphasis.}
 be necessary to know how the two algorithms are implemented.
 
 \section{The top-down algorithm}
@@ -575,6 +575,8 @@ There the definition of immediate sublists depends on the length of the input li
 However, this question leads us to consider a definition of immediate sublists that does not depend on list length, and ultimately to the simpler definition of |Drop| (which uses lists instead of vectors).%
 Yen-Hao Liu previewed and provided feedback on a draft.
 We would like to thank all of them.
+
+The two authors are supported by the National Science and Technology Council of Taiwan under grant numbers NSTC 112-2221-E-001-003-MY3 and NSTC 113-2221-E-001-020-MY2 respectively.
 
 \bibliographystyle{jfplike}
 \bibliography{../../bib/bib}
