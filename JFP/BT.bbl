@@ -1,52 +1,204 @@
-\begin{thebibliography}{10}
+%%% -*-BibTeX-*-
+%%% Do NOT edit. File created by BibTeX with style
+%%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\bibitem[{Altenkirch et~al.}(2010){Altenkirch, Chapman, \&
-  Uustalu}]{Altenkirch-relative-monads}
-{Altenkirch, T., Chapman, J. \& Uustalu, T.} (2010) Monads need not be
-  endofunctors. International Conference on Foundations of Software Science and
-  Computational Structures (FoSSaCS). Springer. pp. 297--311.
+\begin{thebibliography}{11}
 
-\bibitem[{Bernardy et~al.}(2012){Bernardy, Jansson, \&
-  Paterson}]{Bernardy-proofs-for-free}
-{Bernardy, J.-P., Jansson, P. \& Paterson, R.} (2012) Proofs for free:
-  Parametricity for dependent types. \textit{Journal of Functional
-  Programming}. {\bf 22}(2), 107--152.
+%%% ====================================================================
+%%% NOTE TO THE USER: you can override these defaults by providing
+%%% customized versions of any of these macros before the \bibliography
+%%% command.  Each of them MUST provide its own final punctuation,
+%%% except for \shownote{}, \showDOI{}, and \showURL{}.  The latter two
+%%% do not use final punctuation, in order to avoid confusing it with
+%%% the Web address.
+%%%
+%%% To suppress output of a particular field, define its macro to expand
+%%% to an empty string, or better, \unskip, like this:
+%%%
+%%% \newcommand{\showDOI}[1]{\unskip}   % LaTeX syntax
+%%%
+%%% \def \showDOI #1{\unskip}           % plain TeX syntax
+%%%
+%%% ====================================================================
 
-\bibitem[{Bird}(2008)]{Bird-zippy-tabulations}
-{Bird, R.~S.} (2008) Zippy tabulations of recursive functions. International
-  Conference on Mathematics of Program Construction (MPC). Springer. pp.
-  92--109.
+\ifx \showCODEN    \undefined \def \showCODEN     #1{\unskip}     \fi
+\ifx \showDOI      \undefined \def \showDOI       #1{#1}\fi
+\ifx \showISBNx    \undefined \def \showISBNx     #1{\unskip}     \fi
+\ifx \showISBNxiii \undefined \def \showISBNxiii  #1{\unskip}     \fi
+\ifx \showISSN     \undefined \def \showISSN      #1{\unskip}     \fi
+\ifx \showLCCN     \undefined \def \showLCCN      #1{\unskip}     \fi
+\ifx \shownote     \undefined \def \shownote      #1{#1}          \fi
+\ifx \showarticletitle \undefined \def \showarticletitle #1{#1}   \fi
+\ifx \showURL      \undefined \def \showURL       {\relax}        \fi
+% The following commands are used for tagged output and should be
+% invisible to TeX
+\providecommand\bibfield[2]{#2}
+\providecommand\bibinfo[2]{#2}
+\providecommand\natexlab[1]{#1}
+\providecommand\showeprint[2][]{arXiv:#2}
 
-\bibitem[{Filinski}(1994)]{Filinski-representing-monads}
-{Filinski, A.} (1994) Representing monads. Symposium on Principles of
-  Programming Languages (POPL). ACM. pp. 446--457.
+\bibitem[Altenkirch et~al\mbox{.}(2010)]%
+        {Altenkirch-relative-monads}
+\bibfield{author}{\bibinfo{person}{Thorsten Altenkirch}, \bibinfo{person}{James
+  Chapman}, {and} \bibinfo{person}{Tarmo Uustalu}.}
+  \bibinfo{year}{2010}\natexlab{}.
+\newblock \showarticletitle{Monads Need Not Be Endofunctors}. In
+  \bibinfo{booktitle}{\emph{International Conference on Foundations of Software
+  Science and Computational Structures (FoSSaCS)}}
+  \emph{(\bibinfo{series}{Lecture Notes in Computer Science},
+  Vol.~\bibinfo{volume}{6014})}. \bibinfo{publisher}{Springer},
+  \bibinfo{pages}{297--311}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1007/978-3-642-12032-9_21}
+\showDOI{\tempurl}
 
-\bibitem[{Hinze}(2012)]{Hinze-Kan-extensions}
-{Hinze, R.} (2012) {Kan} extensions for program optimisation --- or: {Art} and
-  {Dan} explain an old trick. International Conference on Mathematics of
-  Program Construction (MPC). Springer. pp. 324--362.
 
-\bibitem[{Ko et~al.}(2025){Ko, Mu, \& Gibbons}]{Ko-BT}
-{Ko, H.-S., Mu, S.-C. \& Gibbons, J.} (2025) Binomial tabulation: A short
-  story. arXiv:2503.04001.
+\bibitem[Bernardy et~al\mbox{.}(2012)]%
+        {Bernardy-proofs-for-free}
+\bibfield{author}{\bibinfo{person}{Jean-Philippe Bernardy},
+  \bibinfo{person}{Patrik Jansson}, {and} \bibinfo{person}{Ross Paterson}.}
+  \bibinfo{year}{2012}\natexlab{}.
+\newblock \showarticletitle{Proofs for Free: Parametricity for Dependent
+  Types}.
+\newblock \bibinfo{journal}{\emph{Journal of Functional Programming}}
+  \bibinfo{volume}{22}, \bibinfo{number}{2} (\bibinfo{year}{2012}),
+  \bibinfo{pages}{107--152}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1017/S0956796812000056}
+\showDOI{\tempurl}
 
-\bibitem[{McBride}(2002)]{McBride-motive}
-{McBride, C.} (2002) Elimination with a motive. International Workshop on Types
-  for Proofs and Programs (TYPES). Springer. pp. 197--216.
 
-\bibitem[{Mu}(2024)]{Mu-sublists}
-{Mu, S.-C.} (2024) Bottom-up computation using trees of sublists.
-  \textit{Journal of Functional Programming}. {\bf 34}, e14:1--16.
+\bibitem[Bird(2008)]%
+        {Bird-zippy-tabulations}
+\bibfield{author}{\bibinfo{person}{Richard~S. Bird}.}
+  \bibinfo{year}{2008}\natexlab{}.
+\newblock \showarticletitle{Zippy Tabulations of Recursive Functions}. In
+  \bibinfo{booktitle}{\emph{International Conference on Mathematics of Program
+  Construction (MPC)}} \emph{(\bibinfo{series}{Lecture Notes in Computer
+  Science}, Vol.~\bibinfo{volume}{5133})}. \bibinfo{publisher}{Springer},
+  \bibinfo{pages}{92--109}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1007/978-3-540-70594-9_7}
+\showDOI{\tempurl}
 
-\bibitem[{Van~Muylder et~al.}(2024){Van~Muylder, Nuyts, \&
-  Devriese}]{Van-Muylder-internal-parametricity}
-{Van~Muylder, A., Nuyts, A. \& Devriese, D.} (2024) Internal and observational
-  parametricity for {Cubical Agda}. \textit{Proceedings of the ACM on
-  Programming Languages}. {\bf 8}(POPL), 8:1--32.
 
-\bibitem[{Yang and Wu}(2022){Yang \& Wu}]{Yang-recursion-schemes}
-{Yang, Z. \& Wu, N.} (2022) Fantastic morphisms and where to find them: A guide
-  to recursion schemes. International Conference on Mathematics of Program
-  Construction (MPC). Springer. pp. 222--267.
+\bibitem[Devriese and Piessens(2011)]%
+        {Devriese-instance-arguments}
+\bibfield{author}{\bibinfo{person}{Dominique Devriese} {and}
+  \bibinfo{person}{Frank Piessens}.} \bibinfo{year}{2011}\natexlab{}.
+\newblock \showarticletitle{On the Bright Side of Type Classes: Instance
+  Arguments in {A}gda}. In \bibinfo{booktitle}{\emph{International Conference
+  on Functional Programming (ICFP)}}. \bibinfo{publisher}{ACM},
+  \bibinfo{pages}{143--155}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1145/2034773.2034796}
+\showDOI{\tempurl}
+
+
+\bibitem[Filinski(1994)]%
+        {Filinski-representing-monads}
+\bibfield{author}{\bibinfo{person}{Andrzej Filinski}.}
+  \bibinfo{year}{1994}\natexlab{}.
+\newblock \showarticletitle{Representing Monads}. In
+  \bibinfo{booktitle}{\emph{Symposium on Principles of Programming Languages
+  (POPL)}}. \bibinfo{publisher}{ACM}, \bibinfo{pages}{446--457}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1145/174675.178047}
+\showDOI{\tempurl}
+
+
+\bibitem[Hinze(2012)]%
+        {Hinze-Kan-extensions}
+\bibfield{author}{\bibinfo{person}{Ralf Hinze}.}
+  \bibinfo{year}{2012}\natexlab{}.
+\newblock \showarticletitle{{Kan} Extensions for Program Optimisation --- Or:
+  {Art} and {Dan} Explain an Old Trick}. In
+  \bibinfo{booktitle}{\emph{International Conference on Mathematics of Program
+  Construction (MPC)}} \emph{(\bibinfo{series}{Lecture Notes in Computer
+  Science}, \bibinfo{number}{7342})}. \bibinfo{publisher}{Springer},
+  \bibinfo{pages}{324--362}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1007/978-3-642-31113-0_16}
+\showDOI{\tempurl}
+
+
+\bibitem[Ko et~al\mbox{.}(2025)]%
+        {Ko-BT}
+\bibfield{author}{\bibinfo{person}{Hsiang-Shang Ko},
+  \bibinfo{person}{Shin-Cheng Mu}, {and} \bibinfo{person}{Jeremy Gibbons}.}
+  \bibinfo{year}{2025}\natexlab{}.
+\newblock \bibinfo{title}{Binomial Tabulation: A Short Story}.
+\newblock \bibinfo{howpublished}{arXiv:2503.04001}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.48550/arXiv.2503.04001}
+\showDOI{\tempurl}
+
+
+\bibitem[McBride(2002)]%
+        {McBride-motive}
+\bibfield{author}{\bibinfo{person}{Conor McBride}.}
+  \bibinfo{year}{2002}\natexlab{}.
+\newblock \showarticletitle{Elimination with a Motive}. In
+  \bibinfo{booktitle}{\emph{International Workshop on Types for Proofs and
+  Programs (TYPES)}} \emph{(\bibinfo{series}{Lecture Notes in Computer
+  Science}, Vol.~\bibinfo{volume}{2277})}. \bibinfo{publisher}{Springer},
+  \bibinfo{pages}{197--216}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1007/3-540-45842-5_13}
+\showDOI{\tempurl}
+
+
+\bibitem[Mu(2024)]%
+        {Mu-sublists}
+\bibfield{author}{\bibinfo{person}{Shin-Cheng Mu}.}
+  \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{Bottom-Up Computation Using Trees of Sublists}.
+\newblock \bibinfo{journal}{\emph{Journal of Functional Programming}}
+  \bibinfo{volume}{34} (\bibinfo{year}{2024}), \bibinfo{pages}{e14:1--16}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1017/S0956796824000145}
+\showDOI{\tempurl}
+
+
+\bibitem[Van~Muylder et~al\mbox{.}(2024)]%
+        {Van-Muylder-internal-parametricity}
+\bibfield{author}{\bibinfo{person}{Antoine Van~Muylder},
+  \bibinfo{person}{Andreas Nuyts}, {and} \bibinfo{person}{Dominique Devriese}.}
+  \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{Internal and Observational Parametricity for
+  {Cubical Agda}}.
+\newblock \bibinfo{journal}{\emph{Proceedings of the ACM on Programming
+  Languages}} \bibinfo{volume}{8}, \bibinfo{number}{POPL}
+  (\bibinfo{year}{2024}), \bibinfo{pages}{8:1--32}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1145/3632850}
+\showDOI{\tempurl}
+
+
+\bibitem[Yang and Wu(2022)]%
+        {Yang-recursion-schemes}
+\bibfield{author}{\bibinfo{person}{Zhixuan Yang} {and} \bibinfo{person}{Nicolas
+  Wu}.} \bibinfo{year}{2022}\natexlab{}.
+\newblock \showarticletitle{Fantastic Morphisms and Where to Find Them: A Guide
+  to Recursion Schemes}. In \bibinfo{booktitle}{\emph{International Conference
+  on Mathematics of Program Construction (MPC)}}
+  \emph{(\bibinfo{series}{Lecture Notes in Computer Science},
+  Vol.~\bibinfo{volume}{13544})}. \bibinfo{publisher}{Springer},
+  \bibinfo{pages}{222--267}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1007/978-3-031-16912-0_9}
+\showDOI{\tempurl}
+
 
 \end{thebibliography}

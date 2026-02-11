@@ -1,13 +1,16 @@
-\documentclass[fleqn]{jfp}
+\documentclass[acmsmall,nonacm,fleqn,review]{acmart}
 
 % Build using:
 %  lhs2Tex --agda BT.lhs | pdflatex --jobname=BT
 
-\DeclareMathAlphabet{\mathsf}{OT1}{cmss}{m}{n}
-\DeclareMathAlphabet{\mathsfb}{OT1}{cmss}{bx}{n}
+\acmConference{}{}
+
+\citestyle{acmauthoryear}
+\setcitestyle{nosort}
 
 \usepackage{mathtools}
 
+\usepackage[capitalise, noabbrev]{cleveref}
 \crefformat{equation}{(#2#1#3)}
 
 \usepackage{xifthen}
@@ -15,8 +18,6 @@
 
 \setlength{\marginparwidth}{2.2cm}
 \usepackage[obeyFinal,color=yellow,textsize=footnotesize]{todonotes}
-
-\usepackage{lastpage}
 
 \let\Bbbk\relax
 %include agda.fmt
@@ -29,7 +30,6 @@
 \DeclareUnicodeCharacter{2983}{\{\kern-2.5pt\{\kern-1.5pt}
 \DeclareUnicodeCharacter{2984}{\kern-1.5pt\}\kern-2.5pt\}}
 
-\renewcommand{\Keyword}{\mathbf}
 \renewcommand{\Varid}{\mathsf}
 \renewcommand{\Conid}{\mathsf}
 
@@ -41,24 +41,26 @@
 %format =' = "\unskip=\ignorenext"
 %format @ = "\unskip@\ignorenext"
 %format Setω = Set "_{" ω "}"
-%format _≡ = _ ≡
-%format _⊎_ = _ ⊎ _
+%format _≡ = _ "\kern.25pt" ≡
+%format _⊎_ = _ "\kern.25pt" ⊎ "\kern-.5pt" _
 %format × = "{\times}"
-%format _×_ = _ × _
+%format _×_ = _ "\kern.25pt" × "\kern-.5pt" _
 %format ∘ = "\unskip\mathrel\circ\ignorenext"
-%format _∷_ = _ "\kern.5pt" ∷ _
-%format _∷ = _ ∷
-%format ∷_ = ∷ _
+%format _∷_ = _ "\kern.25pt" ∷ "\kern-.5pt" _
+%format _∷ = _ "\kern.25pt" ∷
+%format ∷_ = ∷ "\kern-.5pt" _
 %format ++ = + "\kern-3.5pt" +
-%format _++_ = _ ++ _
-%format _⊕_ = _ ⊕ _
+%format _++_ = _ "\kern.25pt" ++ "\kern-.5pt" _
+%format _⊕_ = _ "\kern.25pt" ⊕ "\kern-.5pt" _
+%format >>= = "\mathop{>\kern-3.5pt>\kern-3.5pt=}"
+%format _>>=_ = _ "\kern.25pt{" >>= "}\kern-.5pt" _
 %format DropR = Drop "^{\Varid R}"
 %format dropL = drop "^{\Varid L}"
 %format dropBT = drop "^{" BT "}"
 %format 0 = "\mathrm 0"
 %format 1 = "\mathrm 1"
 
-\newcommand{\Con}{\mathsfb}
+\newcommand{\Con}{\mathbf}
 
 %format zero = "\Con{zero}"
 %format suc = "\Con{suc}"
@@ -88,12 +90,18 @@
 %format l = "\Var l"
 %format M = "\Var M"
 %format m = "\Var m"
+%format mx = "\Var{mx}"
+%format my = "\Var{my}"
 %format n = "\Var n"
 %format P = "\Var P"
 %format p = "\Var p"
+%format param = "\Var{param}"
 %format param' = "\Var{param^\prime}"
 %format ps = "\Var{ps}"
+%format pz = "\Var{pz}"
 %format Q = "\Var Q"
+%format qs = "\Var{qs}"
+%format qz = "\Var{qz}"
 %format R = "\Var R"
 %format t = "\Var t"
 %format u = "\Var u"
@@ -107,24 +115,25 @@
 
 \setlength{\mathindent}{2\parindent}
 
-\journaltitle{JFP}
-\cpr{Cambridge University Press}
-\doival{10.1017/xxxxx}
+\title[Bottom-up computation using trees of sublists: A dependently typed approach]{Bottom-up computation using trees of sublists:\\ A dependently typed approach}
 
-\totalpg{\pageref{LastPage}}
-\jnlDoiYr{2025}
-
-\lefttitle{H.-S. Ko and S.-C. Mu}
-\righttitle{Bottom-up computation using trees of sublists: A dependently typed approach}
-
-\title{Bottom-up computation using trees of sublists:\\ A dependently typed approach}
-
-\begin{authgrp}
 \author{Hsiang-Shang Ko}
-\affiliation{Institute of Information Science, Academia Sinica, Taipei, Taiwan\\(\email{joshko@@iis.sinica.edu.tw})}
+\orcid{0000-0002-2439-1048}
+\affiliation{
+  \institution{Institute of Information Science, Academia Sinica}
+  \city{Taipei}
+  \country{Taiwan}
+}
+\email{joshko@@iis.sinica.edu.tw}
+
 \author{Shin-Cheng Mu}
-\affiliation{Institute of Information Science, Academia Sinica, Taipei, Taiwan\\(\email{scm@@iis.sinica.edu.tw})}
-\end{authgrp}
+\orcid{0000-0002-4755-601X}
+\affiliation{
+  \institution{Institute of Information Science, Academia Sinica}
+  \city{Taipei}
+  \country{Taiwan}
+}
+\email{scm@@iis.sinica.edu.tw}
 
 \begin{abstract}
 We revisit the problem of implementing a recursion scheme over immediate sublists studied by \citet{Mu-sublists}, and provide a dependently typed solution in Agda.
@@ -132,58 +141,64 @@ The recursion scheme can be implemented as either a top-down algorithm, which ha
 We show that the types can be made precise to guide and understand the developments of the algorithms.
 In particular, a precisely typed version of the key data structure (binomial trees) can be derived from the problem specification.
 The precise types also allow us to prove that the two algorithms are extensionally equal using parametricity.
-Despite apparent dissimilarities, our proof can be compared to \citeauthor{Mu-sublists}'s equational proof, and be understood as a more economical version of the latter.
+Despite apparent dissimilarities, our proof can be compared to \citeauthor{Mu-sublists}'s equational proof, and be understood as a more economical version of \citeauthor{Mu-sublists}'s proof.
 \end{abstract}
 
-\maketitle[F]
+\maketitle
 
 \section{Introduction}
 \label{sec:introduction}
 
 The \emph{immediate sublists} of a list |xs| are those lists obtained by removing exactly one element from |xs|.
 For example, the four immediate sublists of |"abcd"| are |"abc"|, |"abd"|, |"acd"|, and |"bcd"|.
-\citet{Mu-sublists} considered the problem of computing a function~|h| such that |h xs| depends on values of~|h| at all the immediate sublists of |xs|.
-More formally,
-given |f : List B -> B|, compute |h : List A -> B| with such a top-down specification
+\citet{Mu-sublists} considered the problem of computing a function |h : List A → B| such that |h xs| depends on values of~|h| at all the immediate sublists of |xs|.%
+\footnote{This form of recursive computation arises when, for example, solving an optimisation problem over the permutations of a list and decomposing the problem recursively by considering which element should be the first one in the output permutation.
+\citet{Mu-sublists} mentioned some more examples near the end of his Section~1.}
+More formally, assuming that the function
+\begin{code}
+subs : List A → List (List A)
+\end{code}
+computes the immediate sublists of a list, to compute |h xs| we can decompose |xs| into |subs xs : List (List A)|, then apply |map h : List (List A) → List B| recursively to get a list of sub-results for the immediate sublists of |xs|, and finally invoke a given function |f : List B -> B| to combine the sub-results into a result for |xs|.
+That is, |h|~is specified by the equation
 \begin{equation}
 |h xs = f (map h (subs xs))|
 \label{eq:spec}
 \end{equation}
-where
-\begin{code}
-subs : List A → List (List A)
-\end{code}
-computes the immediate sublists of a list.
-Naively executing the specification results in lots of re-computation.
-See \cref{fig:td-call-tree}, for example:
-|h "ab"| is computed twice for |h "abc"| and |h "abd"|, and |h "ac"| twice for |h "abc"| and |h "acd"|.
-%\todo{|h "a"| for both |h "ab"| and |h "ac"|? (then bumping into the problem of different base cases)}
 
 The problem is derived from \varcitet{Bird-zippy-tabulations}{'s} study of the relationship between top-down and bottom-up algorithms.
+Equation~\cref{eq:spec} expresses a top-down strategy, which, if executed directly, results in lots of re-computation.
+See \cref{fig:td-call-tree}, for example:
+|h "ab"| is computed twice for |h "abc"| and |h "abd"|, and |h "ac"| twice for |h "abc"| and |h "acd"|.
 A bottom-up strategy that avoids re-computation is shown in \cref{fig:sublists-lattice}.
-Values of |h| on inputs of length~$n$ are stored in level~$n$ to be reused.
+Values of~|h| on inputs of length~$n$ are stored in level~$n$ to be reused.
 Each level $n+1$ is computed from level~$n$, until we reach the top.
-It may appear that this bottom-up strategy can be implemented by representing each level as a list, but this turns out to be impossible.
+%It may appear that this bottom-up strategy can be implemented by representing each level as a list, but this turns out to be impossible.
 %It will turn out that, however, computing the indices needed to fetch the corresponding entries is not pretty, and sometimes impossible without additional information.
 %\todo{JK: seems simpler to just say a list-based implementation is impossible}
-Instead, Bird represented each level using a tip-valued binary tree defined by%
+Bird represented each level using a tip-valued binary tree defined by%
 \footnote{We use Agda in this pearl, while both \citet{Bird-zippy-tabulations} and \citet{Mu-sublists} used Haskell; some of their definitions are quoted in this section but translated into Agda notation for consistency.}
 \begin{spec}
 data BT (A : Set) : Set where
   tip  : A            → BT A
   bin  : BT A → BT A  → BT A
 \end{spec}
-equipped with (overloaded) functions |map : (A → B) → BT A → BT B| and |zipWith : (A → B → C) → BT A → BT B → BT C|, respectively the mapping and zipping functions of |BT|, having expected definitions.
+equipped with (overloaded) functions
+\begin{spec}
+map      : (A → B) → BT A → BT B
+zipWith  : (A → B → C) → BT A → BT B → BT C
+\end{spec}
+respectively the mapping and zipping functions of |BT| that one would expect.
 Let |t|~be a tree representing level~$n$.
 To compute level $n+1$, we need a function |upgrade : BT A → BT (List A)|, a natural transformation copying and rearranging elements in~|t|, such that |map f (upgrade t)| represents level $n+1$.
-Bird suggested the following definition of |upgrade| (which is directly translated into Agda notation from Bird's Haskell program, and is not valid Agda):%
-\footnote{The name |upgrade| was given by \citet{Mu-sublists}, while the same function was called |cd| by \citet{Bird-zippy-tabulations}.}
+Bird suggested the following definition of |upgrade|:%
+\footnote{This definition of |upgrade| is translated into Agda notation from Bird's Haskell program; the name |upgrade| was given by \citet{Mu-sublists}, while the same function was called |cd| by \citet{Bird-zippy-tabulations}.
+To be clear, the definition is not valid Agda: the two sets of patterns at the top level and in the |let|-expression fail the coverage check; moreover, Agda does not actually allow pattern matching with data constructors in |let|-expressions.}
 %\todo{SCM: Or, "the code below, adapted from Bird's, is not yet a total definition. We will fix it later." Which is preferred? JK: |let tip xs = ...| is also invalid, so let's just say the definition is not valid Agda\ldots}
 \begin{spec}
 upgrade : BT A → BT (List A)
 upgrade (bin (tip x)  (tip y)  ) = tip (x ∷ y ∷ [])
 upgrade (bin t        (tip y)  ) = bin (upgrade t) (map (_∷ [ y ]) t)
-upgrade (bin (tip x)  u        ) = let tip xs = upgrade u in tip (x ∷ xs)
+upgrade (bin (tip x)  u        ) = let tip xs =' upgrade u in tip (x ∷ xs)
 upgrade (bin t        u        ) = bin (upgrade t) (zipWith _∷_ t (upgrade u))
 \end{spec}
 
@@ -226,11 +241,11 @@ Since we are computing a recursive function |h : List A → B| given |f : List B
 |(List B → B) → List A → B|
 \label{eq:non-dependently-typed-recursion-scheme}
 \end{equation}
-In a dependently typed setting, recursion schemes become \emph{elimination} or \emph{induction principles}.
-Instead of ending type~\cref{eq:non-dependently-typed-recursion-scheme} with |List A → B|, we should aim for |(xs : List A) → P xs| and make it an induction principle, of which |P : List A → Set| is the motive~\citep{McBride-motive}.
-Like all induction principles, the motive should be established and preserved in a way that follows the recursive structure of the computation: whenever |P|~holds for all the immediate sublists of a list |ys|, it should hold for |ys| as well.
+In a dependently typed setting, recursion schemes become \emph{elimination} or \emph{induction principles}, and we will refine type~\cref{eq:non-dependently-typed-recursion-scheme} to an induction principle.
+The first step is refining |List A → B| to |(xs : List A) → P xs| where |P : List A → Set| is the induction \emph{motive}~\citep{McBride-motive}.
+And then we should refine the premise |List B → B| to an induction \emph{method}, whose type states that the motive should be established and preserved in a way that follows the recursive structure of the computation --- or more specifically, whenever |P|~holds for all the immediate sublists of a list |ys|, |P|~should hold for |ys| as well.
 
-To define the induction principle formally, first we need to define immediate sublists --- in fact we will just give a more general definition of sublists since we will need to refer to all of them during the course of the computation.
+To write down the induction principle formally (in particular the type of the induction method), first we need to define immediate sublists --- in fact we will give a more general definition of sublists, following \varcitet{Mu-sublists}{'s} insight that we will need to refer to all of the sublists during the course of the computation.
 Recall that an immediate sublist of |xs| is a list obtained by dropping one element from |xs|; more generally, a sublist can be obtained by dropping some number of elements.
 Element dropping can be written as an inductively defined relation:
 \begin{code}
@@ -239,35 +254,50 @@ data DropR : ℕ → List A → List A → Set where
   dropR    : DropR       n   xs ys  →  DropR (  suc n)  (x ∷ xs)  ys
   keepR    : DropR (suc  n)  xs ys  →  DropR (  suc n)  (x ∷ xs)  (x ∷ ys)
 \end{code}
-Dropping |zero| elements from any list |xs| is just returning |xs| itself; when dropping |suc n| elements, the relation is defined only for non-empty lists |x ∷ xs|, and we may choose to drop~|x| and continue to drop |n|~elements from |xs|, or to keep~|x| and continue to drop |suc n| elements from |xs|.
+Dropping |zero| elements from any list |xs| is just returning |xs| itself; when dropping |suc n| elements, the relation is defined only for nonempty lists |x ∷ xs|, and we may choose to drop~|x| and continue to drop |n|~elements from |xs|, or to keep~|x| and continue to drop |suc n| elements from |xs|.
 With the help of |DropR| we can quantify over sublists; in particular, we can state that a motive~|P| holds for all the immediate sublists |zs| of a list |ys|:
 \begin{equation}\label{eq:container-ih}
 |∀ {zs} → DropR 1 ys zs → P zs|
 \end{equation}
-If this implies that |P|~holds for any |ys|
-%\todo{SCM: was "|P|~holds for |ys| for any |ys|". Is it correct to remove "for |ys|"?}
-(as stated in the type of~|f| below), then the induction principle concludes that |P|~holds for all lists:
+If this implies that |P|~holds for any |ys| (as stated in the type of~|f| below), then the induction principle concludes that |P|~holds for all lists:
 \begin{code}
 {A : Set} (P : List A → Set)
 (f : ∀ {ys} → (∀ {zs} → DropR 1 ys zs → P zs) → P ys)
 (xs : List A) → P xs
 \end{code}
-Notice that the induction hypotheses are represented as a function of type~\cref{eq:container-ih}, making the type of~|f| higher-order, whereas type~\cref{eq:non-dependently-typed-recursion-scheme} uses a list, a first-order data structure.
+This is one possible refinement of type~\cref{eq:non-dependently-typed-recursion-scheme}.
+But notice that the induction hypotheses are represented as a function of type~\cref{eq:container-ih}, whereas type~\cref{eq:non-dependently-typed-recursion-scheme} uses |List B|, a first-order data structure.
 Below we derive an indexed data type |Drop n P xs| that represents universal quantification over all the sublists obtained by dropping |n|~elements from |xs|; in particular, |Drop 1 P ys| will be equivalent to type~\cref{eq:container-ih}.
 
-We start by (re)defining element dropping as a nondeterministic function:
+We start by (re)defining element dropping as a familiar nondeterministic function.
+Suppose that |Nondet| is a nondeterminism monad equipped with a fail operation |mzero| and nondeterministic choice |mplus|:
+\begin{code}
+mzero  : Nondet A
+mplus  : Nondet A → Nondet A → Nondet A
+\end{code}
+Then element dropping can be defined monadically by
 \begin{code}
 drop : ℕ → List A → Nondet (List A)
 drop    zero    xs        = return xs
 drop (  suc n)  []        = mzero
-drop (  suc n)  (x ∷ xs)  = mplus (drop n xs) (fmap (x ∷_) (drop (suc n) xs))
+drop (  suc n)  (x ∷ xs)  = mplus (drop n xs) (drop (suc n) xs >>= λ ys → return (x ∷ ys))
 \end{code}
-|Nondet| is a (relative) monad~\citep{Altenkirch-relative-monads} equipped with a fail operation (|mzero : Nondet A|) and nondeterministic choice (|mplus : Nondet A → Nondet A → Nondet A|), and we choose the codensity representation~\citep{Filinski-representing-monads, Hinze-Kan-extensions}
+To instantiate |Nondet| so that |drop| can compute types (and allow us to derive the indexed data type |Drop| eventually), one way is to instantiate |Nondet| to a continuation monad,%
+\footnote{Technically, |Nondet| is not an endofunctor and thus not a monad, but it is a relative monad~\citep{Altenkirch-relative-monads}, for which return and bind still make sense.}
 \begin{code}
 Nondet : Set → Setω
 Nondet A = ∀ {ℓ} {M : Set ℓ} → ⦃ Monoid M ⦄ → (A → M) → M
 \end{code}
-where the result type~|M| should be a monoid, defined as usual:
+with the standard definitions of return and bind:
+\begin{code}
+return : A → Nondet A
+return x = λ k → k x
+
+_>>=_ : Nondet A → (A → Nondet B) → Nondet B
+mx >>= f = λ k → mx (λ x → f x k)
+\end{code}
+In the definition of |Nondet|, there is an additional |⦃ Monoid M ⦄| argument (wrapped in double brackets); this is an instance argument~\citep{Devriese-instance-arguments}, which is comparable to type classes in Haskell.
+In effect, the result type~|M| is required to support the usual monoid operations:
 \begin{code}
 record Monoid (M : Set ℓ) : Set ℓ where
   constructor monoid
@@ -275,29 +305,39 @@ record Monoid (M : Set ℓ) : Set ℓ where
     _⊕_  : M → M → M
     ∅    : M
 \end{code}
-(The monoid laws could be included but are not needed in our development.)
-If we expand the definitions of |Nondet| and its operations in |drop|, we get
+With these operations on~|M|, we can implement |mzero| by ignoring the current continuation and returning~|∅|,
+\begin{code}
+mzero : Nondet A
+mzero = λ k → ∅
+\end{code}
+and implement |mplus| by running its two branches (both with the current continuation) and merging the results using the |_⊕_| operation:
+\begin{code}
+mplus : Nondet A → Nondet A → Nondet A
+mplus mx my = λ k → mx k ⊕ my k
+\end{code}
+(Some readers have probably recognised that this is essentially the technique of representing monads in continuation-passing style~\citep{Filinski-representing-monads, Hinze-Kan-extensions}.)
+If we expand these definitions in |drop|, we get
 \begin{code}
 drop : ℕ → List A → ⦃ Monoid M ⦄ → (List A → M) → M
 drop    zero    xs        k = k xs
 drop (  suc n)  []        k = ∅
 drop (  suc n)  (x ∷ xs)  k = drop n xs k {-"\kern1.5pt"-} ⊕ {-"\kern1.5pt"-} drop (suc n) xs (k ∘ (x ∷_))
 \end{code}
-which we can specialise to various forms.
-For example, we can specialise |drop| to compute all the sublists of a particular length using the list monad:
+which we can instantiate to various forms.
+For example, we can instantiate |drop| to compute all the sublists of a particular length, supplying the list monoid as the result type:
 \begin{code}
 dropL : ℕ → List A → List (List A)
 dropL n xs = drop n xs ⦃ monoid _++_ [] ⦄ (_∷ [])
 \end{code}
 In particular, |subs = dropL 1| computes immediate sublists.
 
-More interestingly, we can also specialise |drop| to compute types.
+More importantly, we want to instantiate |drop| to compute types.
 For example, |DropR| can alternatively be defined in continuation-passing style by
 \begin{code}
 DropR n xs ys {-"\kern2pt"-} ≅ {-"\kern2pt"-} drop n xs ⦃ monoid _⊎_ ⊥ ⦄ (_≡ ys)
 \end{code}
-where |drop n xs ⦃ monoid _⊎_ ⊥ ⦄| amounts to existential quantification over sublists.
-To obtain universal quantification, we supply the dual monoid:
+where |drop n xs ⦃ monoid _⊎_ ⊥ ⦄ : (List A → Set) → Set| amounts to existential quantification over sublists: an input predicate |P : List A → Set| is only required to hold in one of the branches at every nondeterministic choice (since we instantiate the monoid operation~|_⊕_| to disjunction~|_⊎_|), so eventually |P|~is only required to hold for one sublist.
+To obtain universal quantification, we supply the conjunction |monoid _×_ ⊤|, requiring |P|~to hold for all the branches and thus all the sublists:
 \begin{code}
 Drop n P xs {-"\kern2pt"-} ≅ {-"\kern2pt"-} drop n xs ⦃ monoid _×_ ⊤ ⦄ P
 \end{code}
@@ -315,19 +355,16 @@ ImmediateSublistInduction =  {A : Set} (P : List A → Set)
                              (f : ∀ {ys} → Drop 1 P ys → P ys)
                              (xs : List A) → P xs
 \end{code}
+Comparing |ImmediateSublistInduction| with type~\cref{eq:non-dependently-typed-recursion-scheme}, a potentially drastic change is that the \emph{list} of induction hypotheses is replaced with a \emph{tree} of type |Drop 1 P ys| here.
+However, such a tree is actually list-shaped (constructed using |nil| and |bin ∘ tip|), so |ImmediateSublistInduction| is a faithful refinement of type~\cref{eq:non-dependently-typed-recursion-scheme}.
+Moreover, we will see that |Drop| is a more informative version of |BT| (\cref{sec:introduction}) with an additional |nil| constructor --- we will reimplement the |upgrade| function used in the bottom-up algorithm to operate on |Drop| trees, and the same computation patterns will emerge.
+This give us a better idea of why \citet{Bird-zippy-tabulations} needed to use |BT|: paths in |BT|/|Drop| trees correspond to computation of sublists of a particular length, so working with |BT|/|Drop| trees allows us to figure out which sublist each element in the trees is associated with; the associations are only implicitly assumed in |BT|, whereas in |Drop| they are explicitly recorded in the element types of the form |P xs|.
 
-Note that |Drop| is an indexed version of |BT| (\cref{sec:introduction}) that has an additional |nil| constructor.
-(We will see in \cref{sec:bu} why it is beneficial to include |nil|.)
-Comparing type~\cref{eq:non-dependently-typed-recursion-scheme} with |ImmediateSublistInduction|, a potentially drastic change is that the list of induction hypotheses is replaced with a tree of type |Drop 1 P ys| here.
-However, such a tree is actually list-shaped (constructed using |nil| and |bin ∘ tip|), so |ImmediateSublistInduction| is really just a more informative version of type~\cref{eq:non-dependently-typed-recursion-scheme}.
-
-In the subsequent \cref{sec:td,sec:bu} we will implement the top-down and bottom-up algorithms as programs of type |ImmediateSublistInduction|.
-These are fairly standard exercises in dependently typed programming (except perhaps for the |upgrade| function used in the bottom-up algorithm), and our implementations are by no means the only solutions.%
+In \cref{sec:td,sec:bu} we will implement the top-down and bottom-up algorithms as programs of type |ImmediateSublistInduction|.
+These are fairly standard exercises in dependently typed programming (except perhaps for |upgrade|), and our implementations are by no means the only solutions.%
 \footnote{Even the induction principle has alternative formulations, one of which was explored by \citet{Ko-BT}.}
-The reader may want to try the exercises for themself, and is not obliged to go through the detail of our programs.
-We will prove that the two algorithms are extensionally equal in \cref{sec:equality}, to understand which it will \emph{not}
-%\todo{SCM: added emphasis.}
-be necessary to know how the two algorithms are implemented.
+The reader may want to try the exercises for themself, and is not obliged to go through the details of our programs.
+We will prove that the two algorithms are extensionally equal in \cref{sec:equality}; the proof will not depend on the implementation details of the two algorithms, but only on their shared dependent type.
 
 \section{The top-down algorithm}
 \label{sec:td}
@@ -340,7 +377,7 @@ The function |td'| then performs induction on~|l| and does the real work.
 \begin{code}
 td : ImmediateSublistInduction
 td {A} P f xs = td' (length xs) xs refl
-  where
+  where  -- |lenSubs| to be defined later
     td' : (l : ℕ) (xs : List A) → length xs ≡ l → P xs
     td'    zero    [] eq = f nil
     td' (  suc l)  xs eq = f (map (λ {ys} → td' l ys) (lenSubs l xs eq))
@@ -361,7 +398,7 @@ and again use~|f| to compute the final result.
 \label{sec:bu}
 
 Given an input list |xs|, the bottom-up algorithm |bu| first creates a tree representing `level~$-1$' below the lattice in \cref{fig:sublists-lattice}.
-This `basement' level contains results for those sublists obtained by removing |suc (length xs)| elements from |xs|; there are no such sublists, so the tree contains no elements, although the tree itself still exists (representing a proof of a vacuous universal quantification):
+This `basement' level contains results for those sublists obtained by removing |suc (length xs)| elements from |xs|; there are no such sublists, so the tree contains no elements, although the tree itself still exists (representing a proof of a vacuous universal quantification, or more specifically, a proof that all the branches in the nondeterministic computation of |drop| end with failure):
 \begin{code}
 base : (xs : List A) → Drop (suc (length xs)) P xs
 \end{code}
@@ -369,7 +406,7 @@ The algorithm then enters a loop |bu'| and constructs each level of the lattice 
 \begin{code}
 bu : ImmediateSublistInduction
 bu P f = bu' _ ∘ base
-  where
+  where -- |unTip| and |retabulate| to be defined later
     bu' : (n : ℕ) → Drop n P xs → P xs
     bu'    zero    = unTip
     bu' (  suc n)  = bu' n ∘ map f ∘ retabulate
@@ -390,8 +427,8 @@ Then |map f| does the rest of the work and produces the desired new tree of type
 
 %\todo[inline]{SCM: now that |upgrade| was given in Section 1, we can add some words here briefly comparing them and showing that this one is adapted from the earlier one, while also saying that its actual definition does not matter? JK: Actually this may help to elide some explanation\ldots}
 
-To implement |retabulate|, just follow the types, and most of the program writes itself.
-(It is not particularly important to understand the program --- in fact, any program works as long as it is type-correct.)
+To implement |retabulate|, follow the types, and most of the program writes itself.
+We will not go through the construction of the program in detail because we only aim to show the correctness of |bu|, which depends only on the type of |retabulate|.
 \begin{code}
 retabulate : Drop (suc n) P xs → Drop n (Drop 1 P) xs
 retabulate         nil                           = underground
@@ -407,7 +444,7 @@ underground {n =' zero   } = tip nil
 underground {n =' suc _  } = nil
 \end{code}
 (It analyses the implicit argument~|n|, which therefore needs to be present at runtime, so |retabulate| actually requires more information than the input tree to execute, unlike |upgrade|.)
-The last clause of |retabulate| is the most difficult one to conceive, but can be copied exactly from the last clause of |upgrade| except that the list cons is replaced by the cons function |bin ∘ tip| for |Drop 1| trees (which, as mentioned in \cref{sec:induction-principle}, are list-shaped), and the type of |zipWith| needs to be updated:
+The last clause of |retabulate| is the most difficult one to conceive, but can be copied exactly from the last clause of |upgrade| except that the list cons is replaced by the cons function |bin ∘ tip| for |Drop 1| trees (which, as mentioned near the end of \cref{sec:induction-principle}, are list-shaped), and the type of |zipWith| needs to be updated:
 \begin{code}
 zipWith  :   (∀ {ys} → P ys → Q ys → R ys)
          →'  Drop n P xs → Drop n Q xs → Drop n R xs
@@ -418,7 +455,7 @@ It is a fruitful exercise to trace the constraints assumed and established throu
 The first and third clauses of |retabulate| involve |nil|, and have no counterparts in |upgrade|.
 |Drop| trees containing |nil| correspond to empty levels below the lattice in \cref{fig:sublists-lattice} (which result from dropping too many elements from the input list).
 \citet{Mu-sublists} avoided dealing with such empty levels by imposing conditions throughout his development --- for example, see \citeauthor{Mu-sublists}'s Section~4.3 and Appendix~B for a version of the program (which is named |up| there) with conditions.
-We avoid those somewhat tedious conditions by including |nil| in |Drop| to represent the empty levels, and in exchange need to deal with these levels, which are easy to deal with though.
+We avoid those somewhat tedious conditions by including |nil| in |Drop| to represent the empty levels, and in exchange need to deal with these levels, which are easier to deal with than the conditions though.
 
 \section{Extensional equality between the two algorithms}
 \label{sec:equality}
@@ -427,20 +464,61 @@ Now we have two different implementations of |ImmediateSublistInduction|, namely
 How do we prove that they compute the same results?
 
 Actually, is it possible to write programs of type |ImmediateSublistInduction| to compute different results in Agda?
-Since |ImmediateSublistInduction| is parametric in~|P|, intuitively a program of this type can only compute a result of type |P xs| using~|f|, and moreover, the index |xs| determines how |f|~needs to be applied to arrive at that result (to compute which |f|~needs to be applied to sub-results of type |P ys| for all the immediate sublists |ys| of |xs|, and all the sub-results can only be computed using~|f|, and so on).
-So |td| and |bu| have to compute the same results simply because they have the same ---and special--- type!
+It may help to consider a simpler example: induction on natural numbers,
+\begin{code}
+ℕInduction : Set₁
+ℕInduction =  (P : ℕ → Set)
+              (pz : P zero) (ps : ∀ {n} → P n → P (suc n))
+              (n : ℕ) → P n
+\end{code}
+which has a standard implementation:
+\begin{code}
+indℕ : ℕInduction
+indℕ P pz ps    zero    = pz
+indℕ P pz ps (  suc n)  = ps (indℕ P pz ps n)
+\end{code}
+There are other implementations of |ℕInduction| (a tail-recursive one, for example).
+But since |ℕInduction| is parametric in~|P|, on which the only given operations are |pz| and |ps|, any implementation can only compute a result of type |P n| using |pz| and |ps|; moreover, the index~|n| determines that result --- it has to be |n|~applications of |ps| to |pz|.
+For |ImmediateSublistInduction| we can reason similarly, and conclude that |td| and |bu| have to compute the same results simply because they have the same ---and special--- type!
 
-To prove this formally, we use parametricity.
-The following is the unary parametricity statement of |ImmediateSublistInduction| with respect to~|P| (whereas |A|~is treated merely as a fixed parameter), derived using \varcitet{Bernardy-proofs-for-free}{'s} translation:
+To prove this formally, we use parametricity, first for the simpler |ℕInduction|.
+The following is the unary parametricity statement of |ℕInduction| derived using \varcitet{Bernardy-proofs-for-free}{'s} translation, which becomes a predicate on programs of type |ℕInduction|:
+\begin{code}
+ℕInductionUnaryParametricity : ℕInduction → Set₁
+ℕInductionUnaryParametricity ind =
+  {P   : ℕ → Set}                  (  Q   :   ∀ {n} → P n → Set)
+  {pz  : P zero}                   (  qz  :   Q pz)
+  {ps  : ∀ {n} → P n → P (suc n)}  (  qs  : ∀ {n} {p : P n} → Q p → Q (ps p))
+  {n   : ℕ}                           {-"\mathllap{\to{}}"-} Q (ind P pz ps n)
+\end{code}
+(The typesetting helps to distinguish the original arguments in |ℕInduction| on the left column from the entities added by the parametricity translation on the right.)
+Unary parametricity can be understood in terms of invariant preservation: state an invariant~|Q| on values of type of the form |P n|, prove (by supplying |qz| and |qs|) that |Q|~is satisfied by |pz| and preserved by |ps|, and then the results computed by |ind P pz ps| will satisfy~|Q| (intuitively because |ind| can only construct its result using |pz| and |ps|).
+Given a program |ind : ℕInduction|, we can obtain a proof of its unary parametricity for free,
+\begin{code}
+param : ℕInductionUnaryParametricity ind
+\end{code}
+for example using \citeauthor{Bernardy-proofs-for-free}'s translation again or internal parametricity~\citep{Van-Muylder-internal-parametricity}.
+For any |P|, |pz|, and |ps|, we invoke the parametricity proof with the invariant 
+\begin{code}
+λ {n} p → p ≡ indℕ P pz ps n : ∀ {n} → P n → Set
+\end{code}
+saying that any |p : P n| can only be the result computed by |indℕ P pz ps n| (that is, |n|~applications of |ps| to |pz|).
+This invariant can be easily proved to hold for |pz| and be preserved by |ps|, so we get a proof that |ind| has to be extensionally equal to |indℕ|:
+\begin{code}
+param (λ {n} p → p ≡ indℕ P pz ps n) refl (λ { refl → refl })
+  : {n : ℕ} → ind P pz ps n ≡ indℕ P pz ps n
+\end{code}
+
+The proof can be readily adapted for |ImmediateSublistInduction|.
+The unary parametricity statement with respect to~|P| (whereas |A|~is treated merely as a fixed parameter) is
 \begin{code}
 UnaryParametricity : ImmediateSublistInduction → Set₁
 UnaryParametricity ind =
-  {A : Set}  {P   : List A → Set}                 (Q  :   ∀ {ys} → P ys → Set)
-             {f   : ∀ {ys} → Drop 1 P ys → P ys}  (g  :   ∀ {ys} {ps : Drop 1 P ys}
-                                                      →'  All Q ps → Q (f ps))
-             {xs  : List A} → Q (ind P f xs)
+  {A : Set}  {P   : List A → Set}                 (  Q  :   ∀ {ys} → P ys → Set)
+             {f   : ∀ {ys} → Drop 1 P ys → P ys}  (  g  :   ∀ {ys} {ps : Drop 1 P ys}
+                                                        →'  All Q ps → Q (f ps))
+             {xs  : List A}                          {-"\mathllap{\to{}}"-} Q (ind P f xs)
 \end{code}
-Unary parametricity can be understood in terms of invariant preservation: state an invariant~|Q| on values of type of the form |P ys|, provide a proof~|g| that |Q|~is preserved by~|f|, and then the results computed by |ind P f| will satisfy~|Q|.
 In the type of~|g|, we need an auxiliary definition to formulate the premise that |Q|~is satisfied by all the elements in a |Drop| tree:
 \begin{code}
 All : (∀ {ys} → P ys → Set) → Drop n P xs → Set
@@ -448,34 +526,30 @@ All Q (  tip p)    = Q p
 All Q    nil       = ⊤
 All Q (  bin t u)  = All Q t × All Q u
 \end{code}
-
-Now the extensional equality between |td| and |bu| follows fairly straightforwardly from a proof of |bu|'s unary parametricity
-\begin{code}
-buParam : UnaryParametricity bu
-\end{code}
-which can be obtained for free, for example using \citeauthor{Bernardy-proofs-for-free}'s translation again or internal parametricity~\citep{Van-Muylder-internal-parametricity}.
-Given |P|~and~|f|, we invoke the parametricity proof with the invariant |λ {ys} p → td P f ys ≡ p| saying that any |p : P ys| can only be the result computed by |td P f ys| (corresponding to our intuition above), and supply an argument |tdComp| proving that |f|~preserves the invariant, which takes only a small amount of work:
+Then a proof of the extensional equality between |td| and |bu| can be obtained similarly from a parametricity proof |buParam : UnaryParametricity bu|.
 \begin{equation}
 |buParam (λ {ys} p → td P f ys ≡ p) tdComp : {xs : List A} → td P f xs ≡ bu P f xs|
 \label{eq:td-equals-bu}
 \end{equation}
 
-We have got the equality we want.
-But if we look at the argument |tdComp| in more detail, we will see that we can refactor the proof to gain a bit more structure and generality.
-The instantiated type of~|tdComp| is
+The argument |tdComp| proving that |f|~preserves the invariant is worth taking a closer look.
+Its type is
 \begin{code}
 ∀ {ys} {ps : Drop 1 P ys} → All (λ {zs} p → td P f zs ≡ p) ps → td P f ys ≡ f ps
 \end{code}
-This says that computing |td P f ys| is the same as applying~|f| to |ps| where every~|p| in |ps| is already a result computed by |td P f| --- this has the same computational content as equation~\cref{eq:spec}, and is a formulation of the \emph{computation rule} of |ImmediateSublistInduction|, satisfied by |td|!
+which says that computing |td P f ys| is the same as applying~|f| to |ps| where every~|p| in |ps| is already a result computed by |td P f| --- this has the same computational content as equation~\cref{eq:spec}, and is a formulation of the \emph{computation rule} of |ImmediateSublistInduction|, satisfied by |td|!
 (That is, computation rules can be formulated as a form of invariant preservation.)
-Therefore we can formulate the computation rule for any implementation |ind| of |ImmediateSublistInduction|,
+Incidentally, this explains why it was easy to discharge similar proof obligations in the proof for |ℕInduction|: |indℕ| satisfies the computation rules of |ℕInduction| definitionally.
+
+Therefore, behind equality~\cref{eq:td-equals-bu} is a theorem with a bit more structure and generality.
+If we formulate the computation rule for any implementation |ind| of |ImmediateSublistInduction|,
 \begin{code}
 ComputationRule : ImmediateSublistInduction → Set₁
 ComputationRule ind =
   {A : Set} {P : List A → Set} {f : ∀ {ys} → Drop 1 P ys → P ys} {xs : List A}
   {ps : Drop 1 P xs} → All (λ {ys} p → ind P f ys ≡ p) ps → ind P f xs ≡ f ps
 \end{code}
-and then generalise equality~\cref{eq:td-equals-bu} to a theorem that equates the extensional behaviour of any two implementations of the induction principle, where one implementation satisfies the computation rule and the other satisfies unary parametricity:
+then we can generalise equality~\cref{eq:td-equals-bu} to a theorem that equates the extensional behaviour of any two implementations of the induction principle, where one implementation satisfies the computation rule and the other satisfies unary parametricity:
 \begin{code}
 uniqueness :
      (ind ind' : ImmediateSublistInduction)
@@ -561,6 +635,7 @@ What is the relationship between Mu's inductive proof and ours based on |UnaryPa
 Mu's induction on~|k| coincides with the looping structure of the bottom-up algorithm.
 On the other hand, while |UnaryParametricity| could in principle be proved mechanically once-and-for-all for all functions having the right type, if one had to prove |UnaryParametricity bu| manually, the proof would also follow the structure of |bu|.
 Therefore the proof of |bu|'s unary parametricity would essentially be the proof of equation~\cref{eq:muLemma1} generalised to all invariants.
+Then the |uniqueness| proof only needs to plug in the key part of the proof (namely the preservation of our chosen invariant) and does not need to go through the definition of |bu|.
 Finally, note that this opportunity to invoke parametricity emerges because we switch to dependent types and reformulate the recursion scheme as an induction principle: knowing that a result~|p| has the indexed type |P ys| allows us to state the invariant |Q {ys} p = td P f ys ≡ p|, whereas the non-indexed result type~|B| in type~\cref{eq:non-dependently-typed-recursion-scheme} does not provide enough information for stating that.
 
 \section*{Acknowledgements}
@@ -572,13 +647,14 @@ This definition of |retabulate| is extremely simple, but does not copy and reuse
 However, this perspective does make the relationship between binomial trees and proofs of universal quantification clear, and leads to the inclusion of the |nil| constructor in |Drop| (which helps to simplify our definition of |retabulate|).
 At the same meeting, Wouter Swierstra asked whether lists could be used instead of vectors in a previous definition of binomial trees~\citep{Ko-BT}.
 There the definition of immediate sublists depends on the length of the input list, so it is more convenient to use vectors.
-However, this question leads us to consider a definition of immediate sublists that does not depend on list length, and ultimately to the simpler definition of |Drop| (which uses lists instead of vectors).%
+However, this question leads us to consider a definition of immediate sublists that does not depend on list length, and ultimately to the simpler definition of |Drop| (which uses lists instead of vectors).
 Yen-Hao Liu previewed and provided feedback on a draft.
+The anonymous reviewers also provided valuable feedback for us to make the presentation more accessible.
 We would like to thank all of them.
 
 The two authors are supported by the National Science and Technology Council of Taiwan under grant numbers NSTC 112-2221-E-001-003-MY3 and NSTC 113-2221-E-001-020-MY2 respectively.
 
-\bibliographystyle{jfplike}
+\bibliographystyle{ACM-Reference-Format}
 \bibliography{../../bib/bib}
 
 \end{document}
