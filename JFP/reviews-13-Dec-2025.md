@@ -8,40 +8,33 @@
 > dangerously close to stopping in this section."  Do you really need to
 > rely on parametricity? (My understanding is that you cannot prove
 > parametricity within Agda but that a suitable rule can be added to the
-> type theory without compromising soundness.)
-
-[TODO]
-
-* Quote Referee 1’s summary (‘instead of a complex calculation-style proof’) and Referee 3’s comment on L332
-* Other proofs are of course possible, but our goal is this particular parametricity-based proof.
-
-> Perhaps you should try
+> type theory without compromising soundness.) Perhaps you should try
 > to identify a (a single) message that you want to get across: (a) the
 > use of dependent types to capture structure that is implicit in the
 > original work; (b) the use of parametricity to show the equivalence of
-> two recursion schemes. For (a): polish the definitions; natural
+> two recursion schemes.
+
+There is one single message: precise types help.  Both (a) and (b) are enabled by precise types; (a) is probably better understood and more expected, whereas (b) —that is, how parametricity can be applied in precisely typed settings— is apparently less known.  (Referee 3 did get the message.  In the beginning of S5 there is a sentence ‘So td and bu have to compute the same results simply because they have the same —and special— type!’  And Referee 3 commented that ‘This is pleasing, and to me is another small example of why it's worth tackling this problem in a depenently typed setting (and what precise types can offer).’)
+
+Since (b) is apparently less known, our answer to the question ‘Do you really need to rely on parametricity?’ is ‘for this paper, yes’, because we want to promote the use of parametricity with precise types in this paper.  Other proofs are of course possible (for example, Ko et al. [2025] gave a more traditional but precisely typed proof in S3.2).
+
+Regarding the status of parametricity support in Agda: you get a parametricity proof either by applying Bernardy et al.’s [2012] parametricity translation (which was formulated for pure type systems and can be instantiated for the kind of type theory that Agda is based on, as noted just before Bernardy et al.’s S2.1) or invoking internal parametricity recently added to Cubical Agda [Van Muylder et al. 2024], as mentioned (and cited) in our paper.  Currently the parametricity translation is performed manually (which we did in the accompanying code), but there shouldn’t be much difficulty implementing the translation as metaprograms to automate it completely.  More broadly speaking, one purpose of this paper is to give an example to demonstrate how parametricity is even more powerful and useful in precisely typed settings, serving as a motivation for providing better parametricity support in dependently typed languages.
+
+> For (a): polish the definitions; natural
 > numbers seem to be over-used.
 
-[TODO]
-
-* (Drop defined only for immediate sublists, and then use reflexive transitive closure) but this complicates the definition (and doesn’t match BT)
-* Natural termination measure for the bottom-up algorithm
-* Input type of retabulate
+As we say at the end of S2, there are definitely other ways to implement the algorithms (and even to formulate the induction principle).  We chose one way, which has its advantages (for example, Drop should be a more direct counterpart to BT compared to Referee 2’s suggested approach using reflexive transitive closure; counting in the direction of dropping elements instead of keeping elements gives us a natural termination measure in the bottom-up algorithm; and you probably need to state the number of dropped elements explicitly to be able to formulate the type of retabulate, whereas a standard definition of reflexive transitive closure doesn’t expose that number), but such discussions do not fit into the paper since we’re not offering multiple solutions and comparing them.  The point is that there are different implementations (and we show that it’s possible to come up with reasonably nice ones thanks to the precise types), and whatever implementations one comes up with, they are all extensionally equal thanks to parametricity.
 
 > For (b): this requires a more careful
 > introduction possibly using a simpler example.
 
-[FIXME]
-
-* Induction principle on natural numbers
+We’ve rewritten S5 to use the induction principle on natural numbers as a first and simpler example.
 
 > Finally, try to avoid
 > jargon (relative monad; codensity representation); instead, explain
 > the concepts and their purpose.
 
-[FIXME]
-
-* Expand the monad definitions
+S2 has been rewritten to give and explain the monadic definitions.  Relative monad is mentioned only in Footnote 4 now.
 
 > Reviewers' Comments to Author:
 > Referee: 1
@@ -67,13 +60,13 @@
 > 1. In the Introduction please give some motivating examples of specific functions that have list
 > arguments and are specified by recursion over all immediate sublists.
 
-We were motivated by the puzzling definition of upgrade (which, at least to Referee 3 as well, is a sufficient motivation), so specific problems have never been our motivation.  That being said, we’ve added Footnote 1 to mention a few kinds of problem (including a reference to a paragraph in Mu’s [2024] paper), but we avoid providing specific detail and distracting the reader.
+We were motivated by the puzzling definition of upgrade (which, at least to Referee 3 as well, is a sufficient motivation), so specific problems have never been our motivation.  That being said, we’ve added Footnote 1 to mention a few kinds of problem (including a reference to a paragraph in Mu’s [2024] paper), but we avoid providing specific detail, which would distract the reader.
 
 > 2. You say on p2 "It may appear that this bottom-up strategy can be implemented
 > by representing each level as a list, but this turns out to be impossible."
 > Please briefly explain why, also making clear what you mean by "impossible".
 
-There was an explanation in our previous paper [Ko et al. 2025, Section 1.2], but it was somewhat involved (and the reviewers didn’t appreciate it).  We think it’s better to omit the remark than include the explanation, or the reader will likely get stuck here.
+There was an explanation in our previous paper [Ko et al. 2025, Section 1.2], but it was somewhat involved.  We think it’s better to omit the remark than include the explanation, or the reader will likely get stuck here.
 
 > 3. You say on p2 that the definition of upgrade "is not valid Agda".
 > Please explain why not, as you do on p5 for the specification (1.1) where the problem is the
@@ -89,9 +82,7 @@ The explanation is not a one-liner and would be too much to include in the main 
 > reader here! --- does this mean it need not actually be a monad either? Perhaps you could make
 > the explanation clearer and simpler.
 
-[FIXME]
-
-* Expand on the codensity representation
+Copied from the reply to the editor:  S2 has been rewritten to give and explain the monadic definitions.  Relative monad is mentioned only in Footnote 4 now.
 
 > 5. On p5 you say "We will prove that the two algorithms are extensionally equal in Section 5, to
 > understand which it will not be necessary to know how the two algorithms are implemented".
@@ -112,10 +103,7 @@ We’ve put your sentence into the paper — thanks!
 > page "We will see in Section 4 why it is beneficial to include nil." Please explain why nil is no
 > good here.
 
-[TODO]
-
-* Basement level as the starting point going up the levels
-* Explain in the response but not in the paper to avoid distraction
+We say the ‘basement level’ so that readers who rely on Figure 2 can find where it is in the figure, which other readers are of course free to ignore.  What’s missing in the paper is probably a more intuitive summary of what Drop trees are about.  So we added the following sentence near the end of S2: ‘paths in BT/Drop trees correspond to computation of sublists of a particular length, so working with BT/Drop trees allows us to figure out which sublist each element in the trees is associated with and put the elements at the right places; the associations are only implicitly assumed in BT, whereas in Drop they are explicitly recorded in the element types of the form P xs.’  With this understanding, we are able to say more about what the base tree is in S4: ‘a proof that all the branches in the nondeterministic computation of drop end with failure’, which should explain why it’s not simply a nil tree.
 
 > 7. On p7 you say "just follow the types, and most of the program writes itself. It is not
 > particularly important to understand the program --- in fact, any program works as long as it is
@@ -126,17 +114,14 @@ We’ve put your sentence into the paper — thanks!
 > the right type is more complicated that one might expect, and (3) it is generally preferable for
 > programmers to understand programs they have written!
 
-[FIXME]
-
-* Depends on the level of abstraction we (currently) want to be: overall structure -> the type sufficees; program detail -> the types help to write and understand the program
-* The paper wants to focus on the overall structure.
+We think it’s more about levels of abstraction.  In the paper we mainly want to present the overall structure of the algorithm by decomposing it into components, using precise types to express their specifications; we do not attempt to *derive* the algorithm from its specification/type, which would indeed require much deliberation about how that specification/type can be decomposed, as your observation (1) says. For (2) and (3), at the abstraction level of overall structure, how the components (such as base and retabulate) are implemented are not important — their precise types already act as mediating specifications describing what they’re supposed to do and guaranteeing that the whole algorithm is correct.  Then you can go down one layer into the implementations of these components and think about how they meet the mediating specifications.  We’ve added a sentence before the definition of retabulate to make our position clearer: ‘We will not go through the construction of the program in detail because we only aim to show the correctness of bu, which depends only on the type of retabulate.’
 
 > 8. Also on p7 you say "We avoid those somewhat tedious conditions by including nil in Drop to
 > represent the empty levels, and in exhange need to deal with these levels, which are easy to deal
 > with though."
 > In view of issues 6 & 7 you might omit the last seven words!
 
-We change ‘easy’ to ‘easier’ since this paragraph intends to compare our solution with Mu’s.
+We change ‘easy to deal with’ to ‘easier to deal with than the conditions’ since this paragraph intends to compare our solution with Mu’s.
 
 > 9. In the abstract, and again on p10, you say that your development in this paper is "more
 > economical" than the previous equational derivation. Please explain what you mean here. Is it,
@@ -144,9 +129,7 @@ We change ‘easy’ to ‘easier’ since this paragraph intends to compare our
 > less difficult work, for the developer --- perhaps because more work is done by the
 > implementation of the dependent-type machinery? Or something else again?
 
-[TODO]
-
-* The purpose of the entire S6.2 is to answer this question (in particular there’s a sentence ‘the proof of bu’s parametricity would essentially be the proof of equation (5) generalised to all invariants’)
+The purpose of the entire S6.2 is to answer this question concretely.  The first sentence says ‘Mu [2024] *took pains* to prove that the two algorithms are extensionally equal, whereas in this pearl the equality seems to follow *almost for free* from parametricity.’  Then we explain why there’s such a big difference in the amount of proof effort.  The second paragraph says one reason is that type-driven development takes much less effort than equational derivation.  And the last paragraph says Mu’s inductive proof is a special case of a parametricity proof.  To make it clearer, after the sentence ‘Therefore the proof of bu's unary parametricity would essentially be the proof of equation (5) generalised to all invariants’ we’ve inserted ‘Then the uniqueness proof only needs to plug in the key part of the proof (namely the preservation of our chosen invariant) and does not need to go through the definition of bu.’
 
 > Rephrasing suggestions:
 >
