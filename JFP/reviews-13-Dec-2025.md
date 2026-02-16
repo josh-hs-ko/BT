@@ -218,7 +218,7 @@ That’s the PACMPL volume number.
 > unicity -- a simpler motivating example might really help drive this
 > point home.
 
-See reply to editor’s comment above.
+See the reply to the editor about there being one single message.  And S5 now uses the induction principle on natural numbers as a first and simpler example.
 
 > In summary, I believe this work may result in a rather nice pearl, but
 > the main results deserve better exposition and motivation.
@@ -269,7 +269,7 @@ Presumably this is about spec (1) in Section 1.  We’ve revised the paragraph.
 >  the reflexive transitive closure of this relation; computing a given
 >  level iterates this relation n-times.
 
-See reply to editor’s comment above.
+See the reply to the editor about ‘other ways to implement the algorithms’.
 
 >  Furthermore, the td algorithm
 >  (Section 3) then amounts to the proof that (the transitive closure of)
@@ -278,22 +278,24 @@ See reply to editor’s comment above.
 >  unneccessary to me. Proving well-foundedness should be relatively
 >  straightforward, as the length of lists decreases in every step.
 
-[TODO]
-
-* Not sure what you mean
+We’re not sure what you mean, sorry.  (It looks like in your proof it’s also important to see length decrease, and you’d have to somehow make the length explicit to allow Agda to see it?  And our length proof argument is one way to do that.)
 
 > - The line of thought starting around line 140 confused me. Don´t you
 >  need a base case for the induction principle?
 
-[TODO]
+This is analogous to strong induction on natural numbers:
 
-* Analogy with strong induction on natural numbers
+    (P : ℕ → Set)
+  → (f : ∀ n → (∀ m → m < n → P m) → P n)
+  → (n : ℕ) → P n
+
+The type of f zero is essentially just P zero because the premise ∀ m → m < zero → P m is vacuous.
 
 >  The introduction of
 >  relative monads and their codensity representation was not well
 >  motivated.
 
-See reply to editor’s comments above.
+Copied from the reply to the editor:  S2 has been rewritten to give and explain the monadic definitions.  Relative monad is mentioned only in Footnote 4 now.
 
 >  The remarks regarding existential/universal quantification
 >  deserve further clarification -- drop n xs {{monoid U bot}} isn't
@@ -304,9 +306,7 @@ See reply to editor’s comments above.
 >  predicate. It wasn't until the end of the section (the definition of
 >  ImmediateSublistInduction) that the point became clear to me.
 
-[FIXME]
-
-* Clarify (conjunction vs disjunction etc)
+The sentence has been revised to ‘drop n xs {{monoid _⊎_ ⊥}} : (List A → Set) → Set amounts to existential quantification over sublists: an input predicate P : List A → Set is only required to hold in one of the branches at every nondeterministic choice (since we instantiate the monoid operation _⊕_ to disjunction _⊎_), so eventually P is only required to hold for one sublist.
 
 > - I find the derivation of Drop from Drop^R rather roundabout via
 >  relative monads, monoids, codensity representations, etc. Once you
@@ -316,19 +316,14 @@ See reply to editor’s comments above.
 >  al.'s Type indexed data types presents the generic (but non-indexed)
 >  construction.
 
-[FIXME]
-
-* Rewrite
-* Hinze et al.’s paper doesn’t seem related
+Our approach is to instantiate everything, including Dropᴿ, from a monadic nondeterministic function that one would naturally write.  Dropᴿ is something an Agda programmer would write instinctively, but seems more difficult to transform to related definitions.  We don’t manage to identify which construction in Hinze et al.’s paper you’re referring to, sorry.
 
 > - At the end of section two, there are several references to formula
 >  2.1. Shouldn't this be 2.2? If so, I'd suggest keeping the two
 >  formulas more similar (leaving out implicit arguments A and P in both
 >  definitions).
 
-[TODO]
-
-* induction hypothesis List B -> B becomes 2.2
+ImmediateSublistInduction is a refinement of type (2.1) (now type (2)), whereas type (2.2) (now type (3)) is just an alternative formulation of induction hypotheses.  S2 has been revised to emphasise that we are refining type (2) to an induction principle.
 
 > - line 214: to understand which - grammar.
 
@@ -341,9 +336,7 @@ The sentence has been revised.
 > being defined; I, for one, need the type of functions like 'retabulate'
 > and 'f' to understand definitions such as bu' (line 266).
 
-[FIXME]
-
-* Really needs a top-down presentation; mark more clearly which are forward references
+The type of f is stated in ImmediateSublistInduction.  The type of retabulate is given proper explanation below.  We’ve added a comment in bu indicating that retabulate is a forward reference.  We need to give the overall structure of bu first, so that it’s possible to explain what retabulate does.
 
 > Contrary to what I'd expect, the 'counting' still happens 'top down'
 > rather than bottom up. For example, the 'base' case tries to drop more
@@ -354,9 +347,7 @@ The sentence has been revised.
 > the same direction, rather than exploiting the symmetric structure
 > in the relation that removes/inserts elements.
 
-[TODO]
-
-* We have a worked solution and the paper reports it
+See the reply to the editor about ‘other ways to implement the algorithms’.
 
 > Section 5
 >
@@ -368,10 +359,7 @@ The sentence has been revised.
 >  would be worth spelling out what parts of the construction are proven
 >  and what postulates exist (if any).
 
-[FIXME]
-
-* Reply to editor
-* Summary in the paper (of the supplementary Agda code)
+This is actually the kind of reaction we expect (and recorded at the end of Ko et al.’s [2025] S2).  This example really demonstrates the power of parametricity, but it’s not magic: we’ve discussed in S6.2 how parametricity helps to avoid most of Mu’s [2024] proof.  And see our reply to the editor about the status of parametricity support in Agda.
 
 >  If an important part of the paper is establishing that induction
 >  principles are unique -- perhaps it might be worth illustrating this
@@ -387,15 +375,12 @@ The sentence has been revised.
 >  explaining the principles and construction on a simpler example first
 >  in greater detail.
 
-See reply to editor’s comments above.
+We now use the induction principle on natural numbers in S5 as a first and simpler example.
 
 > - The formatting around line 340 is quite strange. I struggled to parse
 >  the definition. Why not move the type of g to a new line?
 
-[FIXME]
-
-* Explain layout
-* More arrows
+There’s now a sentence explaining this: ‘The typesetting helps to distinguish the original arguments in ℕInduction on the left column from the entities added by the parametricity translation on the right.’
 
 > Referee: 3
 >
@@ -432,7 +417,7 @@ The paragraph has been revised based on Referee 2’s suggestion.
 
 > 68: Why is it impossible to represent each level as a list?
 
-See reply to the same question from Referee 1.
+Copied from the reply to Referee 1:  There was an explanation in our previous paper [Ko et al. 2025, Section 1.2], but it was somewhat involved.  We think it’s better to omit the remark than include the explanation, or the reader will likely get stuck here.
 
 > 69: Maybe illustrating how one of the levels looks as a BT would be useful.
 
@@ -446,16 +431,13 @@ The kind of reaction we want!
 
 > Why is it not valid Agda though? Is this about termination checking?
 
-See reply to the same question from Referee 1.
+Copied from the reply to Referee 1:  The explanation is not a one-liner and would be too much to include in the main text, so we merge it with other information about upgrade into Footnote 3.
 
 > 90: I looked up the Bird paper, for context, and almost missed the footnote
 > saying that he called it 'cd'. It might help to put that in the main text. I also wonder
 > why it's called 'cd'.
 
-[FIXME]
-
-* Doesn’t really need to read Bird’s paper
-* Presumably inversion of dc (not in our paper)
+Reading Bird’s paper isn’t really a prerequisite, so eventually we still decided to keep it in a footnote.  We guess ‘cd’ is the inversion of ‘dc’ for decompose, a generic name given to problem decomposition strategies such as subs.
 
 > 160: {{ }} marks an instance argument, right?
 
@@ -464,25 +446,19 @@ Yes.  This is now mentioned in the text.
 > 168: I probably wouldn't mention the monoid laws if they're not needed, but
 > perhaps some readers who are more experience Agda users will wonder anyway!
 
-[FIXME]
-
-* Similar question
+Gladly omitting the sentence.
 
 > 185: This definition of DropR could use a bit more explanation. Although
 > I think I might just be being distracted by the Agda instance argument
 > notation.
 
-[FIXME]
-
-* Add a bit of explanation
+There is now some explanation about why this is existential quantification over sublists.
 
 > 203: I found this observation (Drop is an indexed version of BT, with
 > empty trees) interesting (I expect I was supposed to!). Especially to see
 > the number of elements dropped in each branch.
 
-[FIXME]
-
-* Maybe worth foreshadowing (to motivate Drop as a precise version of BT)
+Yes!  We’ve included more explanation about Drop refining BT, hoping to provide more intuition early on: ‘The refinement from BT to Drop gives us a better idea of why Bird [2008] needed to use BT…’
 
 > 220: Does this have the same problem as (1.1) that it recomputes for
 > sublists? It seems that it would.
@@ -498,9 +474,7 @@ Dropped.
 > 300: This is probably a personal preference, but if 'n' needs to be present
 > at runtime, maybe it's clearer as an explicit argument.
 
-[FIXME]
-
-* OK
+Indeed this is a good convention.  We tried, but you’d need to add quite a few explicit arguments, which are quite distracting, so in the end we decide that it’s more important to keep the presentation clean.
 
 > 332: This is pleasing, and to me is another small example of why it's
 > worth tackling this problem in a depenently typed setting (and what precise
