@@ -6,4 +6,8 @@
 *.toc
 *.fdb_latexmk
 *.log
+*.agdai
+*.graffle
 BT.tex
+BT.bbl
+BT.pdf

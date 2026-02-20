@@ -66,7 +66,9 @@ We were motivated by the puzzling definition of upgrade (which, at least to Refe
 > by representing each level as a list, but this turns out to be impossible."
 > Please briefly explain why, also making clear what you mean by "impossible".
 
-There was an explanation in our previous paper [Ko et al. 2025, Section 1.2], but it was somewhat involved.  We think it’s better to omit the remark than include the explanation, or the reader will likely get stuck here.
+There was an explanation in our previous paper [Ko et al. 2025, Section 1.2], but it was somewhat involved.
+We currently wrote "it will turn out that, to build the next level from a current one, we need to maintain more information in the data structure." This is perhaps the right amount of information to be given in an introductory section.
+%We think it’s better to omit the remark than include the explanation, or the reader will likely get stuck here.
 
 > 3. You say on p2 that the definition of upgrade "is not valid Agda".
 > Please explain why not, as you do on p5 for the specification (1.1) where the problem is the
@@ -417,9 +419,7 @@ Copied from the reply to Referee 1:  There was an explanation in our previous pa
 
 > 69: Maybe illustrating how one of the levels looks as a BT would be useful.
 
-[FIXME]
-
-* A figure from Mu [2024] or just an Agda term
+We added a figure depicting level 2.
 
 > 87: "If you feel puzzled by 'upgrade' so were we" - this gave me a chuckle.
 

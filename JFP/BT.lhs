@@ -16,6 +16,8 @@
 \usepackage{xifthen}
 \newcommand{\varcitet}[3][]{{\protect\NoHyper\citeauthor{#2}\protect\endNoHyper}#3~\ifthenelse{\isempty{#1}}{\citeyearpar{#2}}{\citeyearpar[#1]{#2}}}
 
+\usepackage{subcaption}
+
 \setlength{\marginparwidth}{2.2cm}
 \usepackage[obeyFinal,color=yellow,textsize=footnotesize]{todonotes}
 
@@ -36,6 +38,7 @@
 \renewcommand{\textrightarrow}{\mathrel\to}
 
 \newcommand{\ignorenext}[1]{}
+\newcommand{\SCM}[1]{\textcolor{orange}{#1}}
 
 %format →' = "\kern-.345em\mathrlap{\to}"
 %format =' = "\unskip=\ignorenext"
@@ -169,12 +172,13 @@ The problem is derived from \varcitet{Bird-zippy-tabulations}{'s} study of the r
 Equation~\cref{eq:spec} expresses a top-down strategy, which, if executed directly, results in lots of re-computation.
 See \cref{fig:td-call-tree}, for example:
 |h "ab"| is computed twice for |h "abc"| and |h "abd"|, and |h "ac"| twice for |h "abc"| and |h "acd"|.
-A bottom-up strategy that avoids re-computation is shown in \cref{fig:sublists-lattice}.
+A bottom-up strategy that avoids re-computation is shown in \cref{fig:sublists-lattice}\SCM{(a)}.
 Values of~|h| on inputs of length~$n$ are stored in level~$n$ to be reused.
 Each level $n+1$ is computed from level~$n$, until we reach the top.
 %It may appear that this bottom-up strategy can be implemented by representing each level as a list, but this turns out to be impossible.
 %It will turn out that, however, computing the indices needed to fetch the corresponding entries is not pretty, and sometimes impossible without additional information.
 %\todo{JK: seems simpler to just say a list-based implementation is impossible}
+\SCM{One may first attempt to represent each level as a list, but it will turn out that, to build the next level from a current one, we need to maintain more information in the data structure.}
 Bird represented each level using a tip-valued binary tree defined by%
 \footnote{We use Agda in this pearl, while both \citet{Bird-zippy-tabulations} and \citet{Mu-sublists} used Haskell; some of their definitions are quoted in this section but translated into Agda notation for consistency.}
 \begin{spec}
@@ -188,6 +192,7 @@ map      : (A → B) → BT A → BT B
 zipWith  : (A → B → C) → BT A → BT B → BT C
 \end{spec}
 respectively the mapping and zipping functions of |BT| that one would expect.
+\SCM{For example, level 2 in \cref{fig:sublists-lattice}(a) is represented by the tree in \cref{fig:sublists-lattice}(b).}
 Let |t|~be a tree representing level~$n$.
 To compute level $n+1$, we need a function |upgrade : BT A → BT (List A)|, a natural transformation copying and rearranging elements in~|t|, such that |map f (upgrade t)| represents level $n+1$.
 Bird suggested the following definition of |upgrade|:%
@@ -211,17 +216,38 @@ upgrade (bin t        u        ) = bin (upgrade t) (zipWith _∷_ t (upgrade u))
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.75\textwidth]{pics/sublists-lattice.pdf}
-\caption{Computing |h "abcd"| bottom-up.}
+\begin{subfigure}{0.74\textwidth}
+\includegraphics[width=\textwidth]{pics/sublists-lattice.pdf}
+\caption{}
+\end{subfigure}
+\begin{subfigure}{0.24\textwidth}
+\includegraphics[width=\textwidth]{pics/level2-BT.pdf}
+\caption{}
+\end{subfigure}
+\caption{(a) Computing |h "abcd"| bottom-up. (b) Representing level 2 in |BT|.}
 \label{fig:sublists-lattice}
 \end{figure}
+
+% \begin{figure}[t]
+% \centering
+% \includegraphics[width=0.75\textwidth]{pics/sublists-lattice.pdf}
+% \caption{Computing |h "abcd"| bottom-up.}
+% \label{fig:sublists-lattice}
+% \end{figure}
+%
+% \begin{figure}[t]
+% \centering
+% \includegraphics[width=0.3\textwidth]{pics/level2-BT.pdf}
+% \caption{Representing level 2 using |BT|.}
+% \label{fig:level2-BT}
+% \end{figure}
 
 If you feel puzzled by |upgrade|, so were we.
 Being the last example in the paper, Bird did not offer much explanation.
 The function |upgrade| is as concise as it is cryptic.
 The trees appear to obey some shape constraints --- Bird called them \emph{binomial trees}, hence the name |BT|, but neither the constraints nor how |upgrade| maintains them was explicitly stated.
 
-Fascinated by the definition, \citet{Mu-sublists} offered a specification of |upgrade| and a derivation of the definition, and then proved that the bottom-up algorithm is extensionally equal to the top-down specification/algorithm, all using traditional equational reasoning.
+Fascinated by Bird's algorithm, \citet{Mu-sublists} offered a specification of |upgrade| and a derivation of the definition, and then proved that the bottom-up algorithm is extensionally equal to the top-down specification/algorithm, all using traditional equational reasoning.
 As an interlude, Mu also showed (in his Section~4.3) a dependently typed version of |upgrade|, which used an indexed version of |BT| that encoded the shape constraint on binomial trees, although Mu did not explore the direction further.
 In this pearl, we go down the road not (thoroughly) taken and see how far it leads.
 In a dependently typed setting, can we derive the binomial trees by formalising in their types what we intend to compute?
@@ -498,7 +524,7 @@ Given a program |ind : ℕInduction|, we can obtain a proof of its unary paramet
 param : ℕInductionUnaryParametricity ind
 \end{code}
 for example using \citeauthor{Bernardy-proofs-for-free}'s translation again or internal parametricity~\citep{Van-Muylder-internal-parametricity}.
-For any |P|, |pz|, and |ps|, we invoke the parametricity proof with the invariant 
+For any |P|, |pz|, and |ps|, we invoke the parametricity proof with the invariant
 \begin{code}
 λ {n} p → p ≡ indℕ P pz ps n : ∀ {n} → P n → Set
 \end{code}
