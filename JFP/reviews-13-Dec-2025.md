@@ -231,9 +231,7 @@ See the reply to the editor about there being one single message.  And S5 now us
 >  make sense to add directional arrows? One should be read bottom to
 >  top; the other from top to bottom.
 
-[TODO]
-
-* Distracting for Fig. 1
+We have added directional arrows to Figure 1 and 2.
 
 > - 'expected definitions' - perhaps 'definitions you/one would expect'?
 
@@ -244,10 +242,8 @@ Changed.
 >  at the root? Then it is more clear that upgrade adds a new layer of
 >  elements to the leaves of an existing tree.
 
-[TODO]
-
-* That would make the bottom-up algorithm going top-down…
-* Not really a tree…
+Putting h "" at the root would make the bottom-up algorithm go top-down.
+We hope that the directional arrows in Figure 2 are be helpful enough.
 
 > Section 2 & 3
 >
