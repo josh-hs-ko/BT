@@ -423,7 +423,7 @@ and again use~|f| to compute the final result.
 \section{The bottom-up algorithm}
 \label{sec:bu}
 
-Given an input list |xs|, the bottom-up algorithm |bu| first creates a tree representing `level~$-1$' below the lattice in \cref{fig:sublists-lattice}.
+Given an input list |xs|, the bottom-up algorithm |bu| first creates a tree representing `level~$-1$' below the lattice in \cref{fig:sublists-lattice}(a).
 This `basement' level contains results for those sublists obtained by removing |suc (length xs)| elements from |xs|; there are no such sublists, so the tree contains no elements, although the tree itself still exists (representing a proof of a vacuous universal quantification, or more specifically, a proof that all the branches in the nondeterministic computation of |drop| end with failure):
 \begin{code}
 base : (xs : List A) → Drop (suc (length xs)) P xs
@@ -479,7 +479,7 @@ It is a fruitful exercise to trace the constraints assumed and established throu
 %\citeauthor{Ko-BT} also explain how the second clause of |retabulate| subsumes the first and the third clauses of the original program.
 
 The first and third clauses of |retabulate| involve |nil|, and have no counterparts in |upgrade|.
-|Drop| trees containing |nil| correspond to empty levels below the lattice in \cref{fig:sublists-lattice} (which result from dropping too many elements from the input list).
+|Drop| trees containing |nil| correspond to empty levels below the lattice in \cref{fig:sublists-lattice}(a) (which result from dropping too many elements from the input list).
 \citet{Mu-sublists} avoided dealing with such empty levels by imposing conditions throughout his development --- for example, see \citeauthor{Mu-sublists}'s Section~4.3 and Appendix~B for a version of the program (which is named |up| there) with conditions.
 We avoid those somewhat tedious conditions by including |nil| in |Drop| to represent the empty levels, and in exchange need to deal with these levels, which are easier to deal with than the conditions though.
 
