@@ -66,9 +66,7 @@ We were motivated by the puzzling definition of upgrade (which, at least to Refe
 > by representing each level as a list, but this turns out to be impossible."
 > Please briefly explain why, also making clear what you mean by "impossible".
 
-There was an explanation in our previous paper [Ko et al. 2025, Section 1.2], but it was somewhat involved.
-We currently wrote "it will turn out that, to build the next level from a current one, we need to maintain more information in the data structure." This is perhaps the right amount of information to be given in an introductory section.
-%We think it’s better to omit the remark than include the explanation, or the reader will likely get stuck here.
+There was an explanation in our previous paper [Ko et al. 2025, Section 1.2], but it was somewhat involved.  We currently write ‘it will turn out that, to build the next level from a current one, we need to maintain more information in the data structure.’  This is perhaps the right amount of information to be given in an introductory section.
 
 > 3. You say on p2 that the definition of upgrade "is not valid Agda".
 > Please explain why not, as you do on p5 for the specification (1.1) where the problem is the
@@ -233,7 +231,7 @@ See the reply to the editor about there being one single message.  And S5 now us
 >  make sense to add directional arrows? One should be read bottom to
 >  top; the other from top to bottom.
 
-We have added directional arrows to Figure 1 and 2.
+We have added directional arrows to Figures 1 and 2.
 
 > - 'expected definitions' - perhaps 'definitions you/one would expect'?
 
@@ -244,8 +242,7 @@ Changed.
 >  at the root? Then it is more clear that upgrade adds a new layer of
 >  elements to the leaves of an existing tree.
 
-Putting h "" at the root would make the bottom-up algorithm go top-down.
-We hope that the directional arrows in Figure 2 are be helpful enough.
+Putting h "" at the root would make the bottom-up algorithm go top-down.  We hope that the directional arrows in Figure 2 are helpful enough.
 
 > Section 2 & 3
 >
@@ -276,7 +273,7 @@ See the reply to the editor about ‘other ways to implement the algorithms’.
 >  unneccessary to me. Proving well-foundedness should be relatively
 >  straightforward, as the length of lists decreases in every step.
 
-We’re not sure what you mean, sorry.  (It looks like in your proof it’s also important to see length decrease, and you’d have to somehow make the length explicit to allow Agda to see it?  And our length proof argument is one way to do that.)
+We’re not sure what you mean, sorry.  (It looks like in your proof it’s also important to see the length decrease, and you’d have to somehow make the length explicit to allow Agda to see it?  And our length proof argument is one way to do that.)
 
 > - The line of thought starting around line 140 confused me. Don´t you
 >  need a base case for the induction principle?
@@ -415,7 +412,7 @@ The paragraph has been revised based on Referee 2’s suggestion.
 
 > 68: Why is it impossible to represent each level as a list?
 
-Copied from the reply to Referee 1:  There was an explanation in our previous paper [Ko et al. 2025, Section 1.2], but it was somewhat involved.  We think it’s better to omit the remark than include the explanation, or the reader will likely get stuck here.
+Copied from the reply to Referee 1:  There was an explanation in our previous paper [Ko et al. 2025, Section 1.2], but it was somewhat involved.  We currently write ‘it will turn out that, to build the next level from a current one, we need to maintain more information in the data structure.’  This is perhaps the right amount of information to be given in an introductory section.
 
 > 69: Maybe illustrating how one of the levels looks as a BT would be useful.
 

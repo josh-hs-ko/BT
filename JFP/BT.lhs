@@ -172,13 +172,13 @@ The problem is derived from \varcitet{Bird-zippy-tabulations}{'s} study of the r
 Equation~\cref{eq:spec} expresses a top-down strategy, which, if executed directly, results in lots of re-computation.
 See \cref{fig:td-call-tree}, for example:
 |h "ab"| is computed twice for |h "abc"| and |h "abd"|, and |h "ac"| twice for |h "abc"| and |h "acd"|.
-A bottom-up strategy that avoids re-computation is shown in \cref{fig:sublists-lattice}\SCM{(a)}.
+A bottom-up strategy that avoids re-computation is shown in \cref{fig:sublists-lattice}(a).
 Values of~|h| on inputs of length~$n$ are stored in level~$n$ to be reused.
 Each level $n+1$ is computed from level~$n$, until we reach the top.
 %It may appear that this bottom-up strategy can be implemented by representing each level as a list, but this turns out to be impossible.
 %It will turn out that, however, computing the indices needed to fetch the corresponding entries is not pretty, and sometimes impossible without additional information.
 %\todo{JK: seems simpler to just say a list-based implementation is impossible}
-\SCM{One may first attempt to represent each level as a list, but it will turn out that, to build the next level from a current one, we need to maintain more information in the data structure.}
+One may first attempt to represent each level as a list, but it will turn out that, to build the next level from a current one, we need to maintain more information in the data structure.
 Bird represented each level using a tip-valued binary tree defined by%
 \footnote{We use Agda in this pearl, while both \citet{Bird-zippy-tabulations} and \citet{Mu-sublists} used Haskell; some of their definitions are quoted in this section but translated into Agda notation for consistency.}
 \begin{spec}
@@ -192,7 +192,7 @@ map      : (A → B) → BT A → BT B
 zipWith  : (A → B → C) → BT A → BT B → BT C
 \end{spec}
 respectively the mapping and zipping functions of |BT| that one would expect.
-\SCM{For example, level 2 in \cref{fig:sublists-lattice}(a) is represented by the tree in \cref{fig:sublists-lattice}(b).}
+For example, level 2 in \cref{fig:sublists-lattice}(a) is represented by the tree in \cref{fig:sublists-lattice}(b).
 Let |t|~be a tree representing level~$n$.
 To compute level $n+1$, we need a function |upgrade : BT A → BT (List A)|, a natural transformation copying and rearranging elements in~|t|, such that |map f (upgrade t)| represents level $n+1$.
 Bird suggested the following definition of |upgrade|:%
