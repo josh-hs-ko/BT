@@ -1,9 +1,10 @@
-\documentclass[acmsmall,nonacm,fleqn,review]{acmart}
+\documentclass[pearl,fleqn,review]{jfp-epi}
 
 % Build using:
 %  lhs2Tex --agda BT.lhs | pdflatex --jobname=BT
 
-\acmConference{}{}
+\DeclareMathAlphabet{\mathsf}{OT1}{cmss}{m}{n}
+\DeclareMathAlphabet{\mathsfb}{OT1}{cmss}{bx}{n}
 
 \citestyle{acmauthoryear}
 \setcitestyle{nosort}
@@ -14,7 +15,7 @@
 \crefformat{equation}{(#2#1#3)}
 
 \usepackage{xifthen}
-\newcommand{\varcitet}[3][]{{\protect\NoHyper\citeauthor{#2}\protect\endNoHyper}#3~\ifthenelse{\isempty{#1}}{\citeyearpar{#2}}{\citeyearpar[#1]{#2}}}
+\newcommand{\varcitet}[3][]{\citeauthor{#2}#3~\ifthenelse{\isempty{#1}}{\citeyearpar{#2}}{\citeyearpar[#1]{#2}}}
 
 \usepackage{subcaption}
 
@@ -32,6 +33,7 @@
 \DeclareUnicodeCharacter{2983}{\{\kern-2.5pt\{\kern-1.5pt}
 \DeclareUnicodeCharacter{2984}{\kern-1.5pt\}\kern-2.5pt\}}
 
+\renewcommand{\Keyword}{\mathbf}
 \renewcommand{\Varid}{\mathsf}
 \renewcommand{\Conid}{\mathsf}
 
@@ -63,7 +65,7 @@
 %format 0 = "\mathrm 0"
 %format 1 = "\mathrm 1"
 
-\newcommand{\Con}{\mathbf}
+\newcommand{\Con}{\mathsfb}
 
 %format zero = "\Con{zero}"
 %format suc = "\Con{suc}"
@@ -126,8 +128,8 @@
   \institution{Institute of Information Science, Academia Sinica}
   \city{Taipei}
   \country{Taiwan}
+  \authoremail{joshko@@iis.sinica.edu.tw}
 }
-\email{joshko@@iis.sinica.edu.tw}
 
 \author{Shin-Cheng Mu}
 \orcid{0000-0002-4755-601X}
@@ -135,8 +137,8 @@
   \institution{Institute of Information Science, Academia Sinica}
   \city{Taipei}
   \country{Taiwan}
+  \authoremail{scm@@iis.sinica.edu.tw}
 }
-\email{scm@@iis.sinica.edu.tw}
 
 \begin{abstract}
 We revisit the problem of implementing a recursion scheme over immediate sublists studied by \citet{Mu-sublists}, and provide a dependently typed solution in Agda.
@@ -144,7 +146,7 @@ The recursion scheme can be implemented as either a top-down algorithm, which ha
 We show that the types can be made precise to guide and understand the developments of the algorithms.
 In particular, a precisely typed version of the key data structure (binomial trees) can be derived from the problem specification.
 The precise types also allow us to prove that the two algorithms are extensionally equal using parametricity.
-Despite apparent dissimilarities, our proof can be compared to \citeauthor{Mu-sublists}'s equational proof, and be understood as a more economical version of \citeauthor{Mu-sublists}'s proof.
+Despite apparent dissimilarities, our proof can be compared to Mu's equational proof, and be understood as a more economical version of Mu's proof.
 \end{abstract}
 
 \maketitle
@@ -271,7 +273,7 @@ In a dependently typed setting, recursion schemes become \emph{elimination} or \
 The first step is refining |List A → B| to |(xs : List A) → P xs| where |P : List A → Set| is the induction \emph{motive}~\citep{McBride-motive}.
 And then we should refine the premise |List B → B| to an induction \emph{method}, whose type states that the motive should be established and preserved in a way that follows the recursive structure of the computation --- or more specifically, whenever |P|~holds for all the immediate sublists of a list |ys|, |P|~should hold for |ys| as well.
 
-To write down the induction principle formally (in particular the type of the induction method), first we need to define immediate sublists --- in fact we will give a more general definition of sublists, following \varcitet{Mu-sublists}{'s} insight that we will need to refer to all of the sublists during the course of the computation.
+To write down the induction principle formally (in particular the type of the induction method), first we need to define immediate sublists --- in fact we will give a more general definition of all sublists, following \varcitet{Mu-sublists}{'s} insight that we will need to refer to all of the sublists during the course of the computation.
 Recall that an immediate sublist of |xs| is a list obtained by dropping one element from |xs|; more generally, a sublist can be obtained by dropping some number of elements.
 Element dropping can be written as an inductively defined relation:
 \begin{code}
@@ -306,7 +308,8 @@ Then element dropping can be defined monadically by
 drop : ℕ → List A → Nondet (List A)
 drop    zero    xs        = return xs
 drop (  suc n)  []        = mzero
-drop (  suc n)  (x ∷ xs)  = mplus (drop n xs) (drop (suc n) xs >>= λ ys → return (x ∷ ys))
+drop (  suc n)  (x ∷ xs)  = mplus  (drop n xs)
+                                   (drop (suc n) xs >>= λ ys → return (x ∷ ys))
 \end{code}
 To instantiate |Nondet| so that |drop| can compute types (and allow us to derive the indexed data type |Drop| eventually), one way is to instantiate |Nondet| to a continuation monad,%
 \footnote{Technically, |Nondet| is not an endofunctor and thus not a monad, but it is a relative monad~\citep{Altenkirch-relative-monads}, for which return and bind still make sense.}
@@ -322,7 +325,7 @@ return x = λ k → k x
 _>>=_ : Nondet A → (A → Nondet B) → Nondet B
 mx >>= f = λ k → mx (λ x → f x k)
 \end{code}
-In the definition of |Nondet|, there is an additional |⦃ Monoid M ⦄| argument (wrapped in double brackets); this is an instance argument~\citep{Devriese-instance-arguments}, which is comparable to type classes in Haskell.
+In the definition of |Nondet|, there is an additional |Monoid M| argument (wrapped in double brackets); this is an instance argument~\citep{Devriese-instance-arguments}, which is comparable to type classes in Haskell.
 In effect, the result type~|M| is required to support the usual monoid operations:
 \begin{code}
 record Monoid (M : Set ℓ) : Set ℓ where
@@ -480,7 +483,7 @@ It is a fruitful exercise to trace the constraints assumed and established throu
 
 The first and third clauses of |retabulate| involve |nil|, and have no counterparts in |upgrade|.
 |Drop| trees containing |nil| correspond to empty levels below the lattice in \cref{fig:sublists-lattice}(a) (which result from dropping too many elements from the input list).
-\citet{Mu-sublists} avoided dealing with such empty levels by imposing conditions throughout his development --- for example, see \citeauthor{Mu-sublists}'s Section~4.3 and Appendix~B for a version of the program (which is named |up| there) with conditions.
+\citet{Mu-sublists} avoided dealing with such empty levels by imposing conditions throughout his development --- for example, see Mu's Section~4.3 and Appendix~B for a version of the program (which is named |up| there) with conditions.
 We avoid those somewhat tedious conditions by including |nil| in |Drop| to represent the empty levels, and in exchange need to deal with these levels, which are easier to deal with than the conditions though.
 
 \section{Extensional equality between the two algorithms}
@@ -508,7 +511,7 @@ But since |ℕInduction| is parametric in~|P|, on which the only given operation
 For |ImmediateSublistInduction| we can reason similarly, and conclude that |td| and |bu| have to compute the same results simply because they have the same ---and special--- type!
 
 To prove this formally, we use parametricity, first for the simpler |ℕInduction|.
-The following is the unary parametricity statement of |ℕInduction| derived using \varcitet{Bernardy-proofs-for-free}{'s} translation, which becomes a predicate on programs of type |ℕInduction|:
+The following is the unary parametricity statement of |ℕInduction| derived using \varcitet{Bernardy-proofs-for-free}{'s} translation, which is a predicate on programs of type |ℕInduction|:
 \begin{code}
 ℕInductionUnaryParametricity : ℕInduction → Set₁
 ℕInductionUnaryParametricity ind =
@@ -517,13 +520,13 @@ The following is the unary parametricity statement of |ℕInduction| derived usi
   {ps  : ∀ {n} → P n → P (suc n)}  (  qs  : ∀ {n} {p : P n} → Q p → Q (ps p))
   {n   : ℕ}                           {-"\mathllap{\to{}}"-} Q (ind P pz ps n)
 \end{code}
-(The typesetting helps to distinguish the original arguments in |ℕInduction| on the left column from the entities added by the parametricity translation on the right.)
+(The typesetting helps to distinguish the original arguments in |ℕInduction| on the left column from the entities introduced by the parametricity translation on the right.)
 Unary parametricity can be understood in terms of invariant preservation: state an invariant~|Q| on values of type of the form |P n|, prove (by supplying |qz| and |qs|) that |Q|~is satisfied by |pz| and preserved by |ps|, and then the results computed by |ind P pz ps| will satisfy~|Q| (intuitively because |ind| can only construct its result using |pz| and |ps|).
 Given a program |ind : ℕInduction|, we can obtain a proof of its unary parametricity for free,
 \begin{code}
 param : ℕInductionUnaryParametricity ind
 \end{code}
-for example using \citeauthor{Bernardy-proofs-for-free}'s translation again or internal parametricity~\citep{Van-Muylder-internal-parametricity}.
+for example using Bernardy et~al.'s translation again or internal parametricity~\citep{Van-Muylder-internal-parametricity}.
 For any |P|, |pz|, and |ps|, we invoke the parametricity proof with the invariant
 \begin{code}
 λ {n} p → p ≡ indℕ P pz ps n : ∀ {n} → P n → Set
@@ -540,10 +543,11 @@ The unary parametricity statement with respect to~|P| (whereas |A|~is treated me
 \begin{code}
 UnaryParametricity : ImmediateSublistInduction → Set₁
 UnaryParametricity ind =
-  {A : Set}  {P   : List A → Set}                 (  Q  :   ∀ {ys} → P ys → Set)
-             {f   : ∀ {ys} → Drop 1 P ys → P ys}  (  g  :   ∀ {ys} {ps : Drop 1 P ys}
-                                                        →'  All Q ps → Q (f ps))
-             {xs  : List A}                          {-"\mathllap{\to{}}"-} Q (ind P f xs)
+  {A   : Set}
+  {P   : List A → Set}                 (  Q  :   ∀ {ys} → P ys → Set)
+  {f   : ∀ {ys} → Drop 1 P ys → P ys}  (  g  :   ∀ {ys} {ps : Drop 1 P ys}
+                                             →'  All Q ps → Q (f ps))
+  {xs  : List A}                          {-"\mathllap{\to{}}"-} Q (ind P f xs)
 \end{code}
 In the type of~|g|, we need an auxiliary definition to formulate the premise that |Q|~is satisfied by all the elements in a |Drop| tree:
 \begin{code}
@@ -554,7 +558,7 @@ All Q (  bin t u)  = All Q t × All Q u
 \end{code}
 Then a proof of the extensional equality between |td| and |bu| can be obtained similarly from a parametricity proof |buParam : UnaryParametricity bu|.
 \begin{equation}
-|buParam (λ {ys} p → td P f ys ≡ p) tdComp : {xs : List A} → td P f xs ≡ bu P f xs|
+|buParam (λ {ys} p → td P f ys ≡ p) tdComp : ∀ {xs} → td P f xs ≡ bu P f xs|
 \label{eq:td-equals-bu}
 \end{equation}
 
@@ -569,20 +573,22 @@ Incidentally, this explains why it was easy to discharge similar proof obligatio
 
 Therefore, behind equality~\cref{eq:td-equals-bu} is a theorem with a bit more structure and generality.
 If we formulate the computation rule for any implementation |ind| of |ImmediateSublistInduction|,
+%format :0 = "\kern1.25pt{:}\kern1.25pt"
 \begin{code}
 ComputationRule : ImmediateSublistInduction → Set₁
 ComputationRule ind =
-  {A : Set} {P : List A → Set} {f : ∀ {ys} → Drop 1 P ys → P ys} {xs : List A}
+  {A :0 Set} {P :0 List A → Set} {f :0 ∀ {ys} → Drop 1 P ys → P ys} {xs :0 List A}
   {ps : Drop 1 P xs} → All (λ {ys} p → ind P f ys ≡ p) ps → ind P f xs ≡ f ps
 \end{code}
 then we can generalise equality~\cref{eq:td-equals-bu} to a theorem that equates the extensional behaviour of any two implementations of the induction principle, where one implementation satisfies the computation rule and the other satisfies unary parametricity:
+%format :1 = "\kern.65pt{:}\kern.65pt"
 \begin{code}
 uniqueness :
      (ind ind' : ImmediateSublistInduction)
   →  ComputationRule ind → UnaryParametricity ind'
-  →  {A : Set} (P : List A → Set) (f : ∀ {ys} → Drop 1 P ys → P ys) (xs : List A)
+  →  {A :1 Set} (P :1 List A → Set) (f :1 ∀ {ys} → Drop 1 P ys → P ys) (xs :1 List A)
   →  ind P f xs ≡ ind' P f xs
-uniqueness ind ind' comp param' P f xs = param' (λ {ys} p → ind P f ys ≡ p) comp
+uniqueness ind _ comp param' P f _ = param' (λ {ys} p → ind P f ys ≡ p) comp
 \end{code}
 
 \section{Methodological discussions}
@@ -591,10 +597,11 @@ uniqueness ind ind' comp param' P f xs = param' (λ {ys} p → ind P f ys ≡ p)
 
 Usually, we prove two implementations |ind| and |ind'| of an induction principle to be equal assuming that both |ind| and |ind'| satisfy the set of computation rules coming with the induction principle.
 For example, for |ImmediateSublistInduction| we can prove
+%format :2 = "\kern1.9pt{:}\kern1.9pt"
 \begin{code}
    (ind ind' : ImmediateSublistInduction)
 →  ComputationRule ind → ComputationRule ind'
-→  {A : Set} (P : List A → Set) (f : ∀ {ys} → Drop 1 P ys → P ys) (xs : List A)
+→  {A :2 Set} (P :2 List A → Set) (f :2 ∀ {ys} → Drop 1 P ys → P ys) (xs :2 List A)
 →  ind P f xs ≡ ind' P f xs
 \end{code}
 The |uniqueness| theorem in \cref{sec:equality} demonstrates (in terms of |ImmediateSublistInduction|) that we can alternatively assume that one implementation, say |ind'|, satisfies unary parametricity instead, and we will still have a proof.
@@ -612,7 +619,7 @@ In general, this trick may be useful for porting recursion schemes or inventing 
 \citet{Mu-sublists} took pains to prove that the two algorithms are extensionally equal, whereas in this pearl the equality seems to follow almost for free from parametricity.
 The trick is that the necessary properties are either enforced by types or established by parametricity.
 Recall that in \cref{sec:introduction} the top-down algorithm is computed by |h : List A -> B| given |f : List B -> B|.
-The main property \citeauthor{Mu-sublists} needed was his Lemma~1, which can be roughly translated into our setting as%
+The main property Mu needed was his Lemma~1, which can be roughly translated into our setting as%
 %\footnote{Shown here are functions used in \citet{Mu-sublists}, thus non-dependently typed,
 %\todo{simple-typed? non-dependently typed?}
 %with some names changed to their counterparts in this pearl.
@@ -643,15 +650,16 @@ By contrast, this pearl uses (i)~the indexed data type |Drop| to enforce tree sh
 
 Using indexed data types to enforce shape constraints is a well known technique, which in particular was briefly employed by \citet[Section~4.3]{Mu-sublists}.
 But program specifications are often not just about shapes.
-For example, to prove equation~\cref{eq:muLemma1}, Mu gave a specification of |upgrade|, from which the derivation of |upgrade|'s definition was the main challenge for Mu:
+For example, to prove equation~\cref{eq:muLemma1}, Mu gave a specification of |upgrade|:
 \begin{equation*}
    |upgrade (dropBT (suc k) xs) = map subs (dropBT k xs)| \label{eq:muUpgrade}
 \end{equation*}
+from which the derivation of |upgrade|'s definition was the main challenge for Mu.
 Shape-wise, this equation says that given a tree having the shape computed by |dropBT (suc k) xs|, |upgrade| produces a tree having the shape computed by |dropBT k xs|.
 But the equation also specifies how the natural transformation should rearrange the tree elements by saying what it should do in particular to the trees of sublists computed by |dropBT (suc k) xs|.
 This pearl demonstrates that it is possible to go beyond shapes and encode the full specification in the type of |retabulate|~(\cref{sec:bu}) using the indexed data type |Drop|.
 The key is that the element types in |Drop| trees are indexed by sublists and therefore distinct in general, so the elements need to be placed at the right positions to be type-correct.
-Subsequently, the definition of |retabulate| can be developed in a type-driven manner, which is more economical than Mu's equational derivation.
+Subsequently, the definition of |retabulate| can be developed in a type-driven manner, which is more economical than Mu's equational derivation since the type checker takes over a large part of the work.
 
 %\todo{SCM: simple type? non-dependent type? There is also a "simple-typed" in the footnote.
 %JK: Let's use `non-dependently typed', since you pointed out that Haskell doesn't use merely simple types (in the sense of STLC) when we wrote the short story.}

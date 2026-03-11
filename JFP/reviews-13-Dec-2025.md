@@ -129,7 +129,9 @@ We change ‘easy to deal with’ to ‘easier to deal with than the conditions�
 > less difficult work, for the developer --- perhaps because more work is done by the
 > implementation of the dependent-type machinery? Or something else again?
 
-The purpose of the entire S6.2 is to answer this question concretely.  The first sentence says ‘Mu [2024] *took pains* to prove that the two algorithms are extensionally equal, whereas in this pearl the equality seems to follow *almost for free* from parametricity.’  Then we explain why there’s such a big difference in the amount of proof effort.  The second paragraph says one reason is that type-driven development takes much less effort than equational derivation.  And the last paragraph says Mu’s inductive proof is a special case of a parametricity proof.  To make it clearer, after the sentence ‘Therefore the proof of bu's unary parametricity would essentially be the proof of equation (5) generalised to all invariants’ we’ve inserted ‘Then the uniqueness proof only needs to plug in the key part of the proof (namely the preservation of our chosen invariant) and does not need to go through the definition of bu.’
+The purpose of the entire S6.2 is to answer this question concretely.  The first sentence says ‘Mu [2024] *took pains* to prove that the two algorithms are extensionally equal, whereas in this pearl the equality seems to follow *almost for free* from parametricity.’  Then we explain why there’s such a big difference in the amount of proof effort.  The second paragraph says one reason is that type-driven development takes much less effort than equational derivation.  And the last paragraph says Mu’s inductive proof is a special case of a parametricity proof.
+
+To make it clearer, after the sentence ‘the definition of retabulate can be developed in a type-driven manner, which is more economical than Mu’s equational derivation’ we’ve added ‘since the type checker takes over a large part of the work’; and after the sentence ‘Therefore the proof of bu's unary parametricity would essentially be the proof of equation (5) generalised to all invariants.’ we’ve inserted ‘Then the uniqueness proof only needs to plug in the key part of the proof (namely the preservation of our chosen invariant) and does not need to go through the definition of bu.’.
 
 > Rephrasing suggestions:
 >
@@ -146,7 +148,7 @@ Changed to a sentence in Footnote 3.
 
 > p3 "will [just] give a more general definition of /all/ sublists"
 
-Deleted.
+Deleted; inserted.
 
 > p4 "If [this implies that] P holds"
 

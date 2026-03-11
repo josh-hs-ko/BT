@@ -42,7 +42,7 @@
 \bibfield{author}{\bibinfo{person}{Thorsten Altenkirch}, \bibinfo{person}{James
   Chapman}, {and} \bibinfo{person}{Tarmo Uustalu}.}
   \bibinfo{year}{2010}\natexlab{}.
-\newblock \showarticletitle{Monads Need Not Be Endofunctors}. In
+\newblock \showarticletitle{Monads need not be endofunctors}. In
   \bibinfo{booktitle}{\emph{International Conference on Foundations of Software
   Science and Computational Structures (FoSSaCS)}}
   \emph{(\bibinfo{series}{Lecture Notes in Computer Science},
@@ -59,8 +59,8 @@
 \bibfield{author}{\bibinfo{person}{Jean-Philippe Bernardy},
   \bibinfo{person}{Patrik Jansson}, {and} \bibinfo{person}{Ross Paterson}.}
   \bibinfo{year}{2012}\natexlab{}.
-\newblock \showarticletitle{Proofs for Free: Parametricity for Dependent
-  Types}.
+\newblock \showarticletitle{Proofs for free: Parametricity for dependent
+  types}.
 \newblock \bibinfo{journal}{\emph{Journal of Functional Programming}}
   \bibinfo{volume}{22}, \bibinfo{number}{2} (\bibinfo{year}{2012}),
   \bibinfo{pages}{107--152}.
@@ -74,7 +74,7 @@
         {Bird-zippy-tabulations}
 \bibfield{author}{\bibinfo{person}{Richard~S. Bird}.}
   \bibinfo{year}{2008}\natexlab{}.
-\newblock \showarticletitle{Zippy Tabulations of Recursive Functions}. In
+\newblock \showarticletitle{Zippy tabulations of recursive functions}. In
   \bibinfo{booktitle}{\emph{International Conference on Mathematics of Program
   Construction (MPC)}} \emph{(\bibinfo{series}{Lecture Notes in Computer
   Science}, Vol.~\bibinfo{volume}{5133})}. \bibinfo{publisher}{Springer},
@@ -89,8 +89,8 @@
         {Devriese-instance-arguments}
 \bibfield{author}{\bibinfo{person}{Dominique Devriese} {and}
   \bibinfo{person}{Frank Piessens}.} \bibinfo{year}{2011}\natexlab{}.
-\newblock \showarticletitle{On the Bright Side of Type Classes: Instance
-  Arguments in {A}gda}. In \bibinfo{booktitle}{\emph{International Conference
+\newblock \showarticletitle{On the bright side of type classes: Instance
+  arguments in {A}gda}. In \bibinfo{booktitle}{\emph{International Conference
   on Functional Programming (ICFP)}}. \bibinfo{publisher}{ACM},
   \bibinfo{pages}{143--155}.
 \newblock
@@ -103,7 +103,7 @@
         {Filinski-representing-monads}
 \bibfield{author}{\bibinfo{person}{Andrzej Filinski}.}
   \bibinfo{year}{1994}\natexlab{}.
-\newblock \showarticletitle{Representing Monads}. In
+\newblock \showarticletitle{Representing monads}. In
   \bibinfo{booktitle}{\emph{Symposium on Principles of Programming Languages
   (POPL)}}. \bibinfo{publisher}{ACM}, \bibinfo{pages}{446--457}.
 \newblock
@@ -116,8 +116,8 @@
         {Hinze-Kan-extensions}
 \bibfield{author}{\bibinfo{person}{Ralf Hinze}.}
   \bibinfo{year}{2012}\natexlab{}.
-\newblock \showarticletitle{{Kan} Extensions for Program Optimisation --- Or:
-  {Art} and {Dan} Explain an Old Trick}. In
+\newblock \showarticletitle{{Kan} extensions for program optimisation --- or:
+  {Art} and {Dan} explain an old trick}. In
   \bibinfo{booktitle}{\emph{International Conference on Mathematics of Program
   Construction (MPC)}} \emph{(\bibinfo{series}{Lecture Notes in Computer
   Science}, \bibinfo{number}{7342})}. \bibinfo{publisher}{Springer},
@@ -133,7 +133,7 @@
 \bibfield{author}{\bibinfo{person}{Hsiang-Shang Ko},
   \bibinfo{person}{Shin-Cheng Mu}, {and} \bibinfo{person}{Jeremy Gibbons}.}
   \bibinfo{year}{2025}\natexlab{}.
-\newblock \bibinfo{title}{Binomial Tabulation: A Short Story}.
+\newblock \bibinfo{title}{Binomial tabulation: A short story}.
 \newblock \bibinfo{howpublished}{arXiv:2503.04001}.
 \newblock
 \urldef\tempurl%
@@ -145,7 +145,7 @@
         {McBride-motive}
 \bibfield{author}{\bibinfo{person}{Conor McBride}.}
   \bibinfo{year}{2002}\natexlab{}.
-\newblock \showarticletitle{Elimination with a Motive}. In
+\newblock \showarticletitle{Elimination with a motive}. In
   \bibinfo{booktitle}{\emph{International Workshop on Types for Proofs and
   Programs (TYPES)}} \emph{(\bibinfo{series}{Lecture Notes in Computer
   Science}, Vol.~\bibinfo{volume}{2277})}. \bibinfo{publisher}{Springer},
@@ -160,7 +160,7 @@
         {Mu-sublists}
 \bibfield{author}{\bibinfo{person}{Shin-Cheng Mu}.}
   \bibinfo{year}{2024}\natexlab{}.
-\newblock \showarticletitle{Bottom-Up Computation Using Trees of Sublists}.
+\newblock \showarticletitle{Bottom-up computation using trees of sublists}.
 \newblock \bibinfo{journal}{\emph{Journal of Functional Programming}}
   \bibinfo{volume}{34} (\bibinfo{year}{2024}), \bibinfo{pages}{e14:1--16}.
 \newblock
@@ -174,7 +174,7 @@
 \bibfield{author}{\bibinfo{person}{Antoine Van~Muylder},
   \bibinfo{person}{Andreas Nuyts}, {and} \bibinfo{person}{Dominique Devriese}.}
   \bibinfo{year}{2024}\natexlab{}.
-\newblock \showarticletitle{Internal and Observational Parametricity for
+\newblock \showarticletitle{Internal and observational parametricity for
   {Cubical Agda}}.
 \newblock \bibinfo{journal}{\emph{Proceedings of the ACM on Programming
   Languages}} \bibinfo{volume}{8}, \bibinfo{number}{POPL}
@@ -189,8 +189,8 @@
         {Yang-recursion-schemes}
 \bibfield{author}{\bibinfo{person}{Zhixuan Yang} {and} \bibinfo{person}{Nicolas
   Wu}.} \bibinfo{year}{2022}\natexlab{}.
-\newblock \showarticletitle{Fantastic Morphisms and Where to Find Them: A Guide
-  to Recursion Schemes}. In \bibinfo{booktitle}{\emph{International Conference
+\newblock \showarticletitle{Fantastic morphisms and where to find them: A guide
+  to recursion schemes}. In \bibinfo{booktitle}{\emph{International Conference
   on Mathematics of Program Construction (MPC)}}
   \emph{(\bibinfo{series}{Lecture Notes in Computer Science},
   Vol.~\bibinfo{volume}{13544})}. \bibinfo{publisher}{Springer},
