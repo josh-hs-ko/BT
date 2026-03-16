@@ -1,3 +1,5 @@
+We thank the reviewers for their effort and suggestions.  First we reply to the editor’s message, and then to individual reviews.
+
 > Although this work may potentially be published in Journal of
 > Functional Programming, the reviewers have suggested some major
 > revisions to your manuscript.  Therefore, I invite you to respond to
@@ -16,9 +18,9 @@
 
 There is one single message: precise types help.  Both (a) and (b) are enabled by precise types; (a) is probably better understood and more expected, whereas (b) —that is, how parametricity can be applied in precisely typed settings— is apparently less known.  (Referee 3 did get the message.  In the beginning of S5 there is a sentence ‘So td and bu have to compute the same results simply because they have the same —and special— type!’  And Referee 3 commented that ‘This is pleasing, and to me is another small example of why it's worth tackling this problem in a depenently typed setting (and what precise types can offer).’)
 
-Since (b) is apparently less known, our answer to the question ‘Do you really need to rely on parametricity?’ is ‘for this paper, yes’, because we want to promote the use of parametricity with precise types in this paper.  Other proofs are of course possible (for example, Ko et al. [2025] gave a more traditional but precisely typed proof in S3.2).
+Since (b) is apparently less known, our answer to the question ‘Do you really need to rely on parametricity?’ is ‘for this paper, yes’, because we want to promote the use of parametricity with precise types in this paper.  Other proofs are of course possible (for example, Ko et al. (2025) gave a more traditional but precisely typed proof in S3.2).
 
-Regarding the status of parametricity support in Agda: you get a parametricity proof either by applying Bernardy et al.’s [2012] parametricity translation (which was formulated for pure type systems and can be instantiated for the kind of type theory that Agda is based on, as noted just before Bernardy et al.’s S2.1) or invoking internal parametricity recently added to Cubical Agda [Van Muylder et al. 2024], as mentioned (and cited) in our paper.  Currently the parametricity translation is performed manually (which we did in the accompanying code), but there shouldn’t be much difficulty implementing the translation as metaprograms to automate it completely.  More broadly speaking, one purpose of this paper is to give an example to demonstrate how parametricity is even more powerful and useful in precisely typed settings, serving as a motivation for providing better parametricity support in dependently typed languages.
+Regarding the status of parametricity support in Agda: you get a parametricity proof either by applying Bernardy et al.’s (2012) parametricity translation (which was formulated for pure type systems and can be instantiated for the kind of type theory that Agda is based on, as noted just before Bernardy et al.’s S2.1) or invoking internal parametricity recently added to Cubical Agda (Van Muylder et al. 2024), as mentioned (and cited) in our paper.  Currently the parametricity translation is performed manually (which we did in the accompanying code; at the top of the file we enable the --safe option, which in particular does not allow postulates), but there shouldn’t be much difficulty implementing the translation as metaprograms to automate it completely.  More broadly speaking, one purpose of this paper is to give an example to demonstrate how parametricity is even more powerful and useful in precisely typed settings, serving as a motivation for providing better parametricity support in dependently typed languages.
 
 > For (a): polish the definitions; natural
 > numbers seem to be over-used.
@@ -60,13 +62,13 @@ S2 has been rewritten to give and explain the monadic definitions.  Relative mon
 > 1. In the Introduction please give some motivating examples of specific functions that have list
 > arguments and are specified by recursion over all immediate sublists.
 
-We were motivated by the puzzling definition of upgrade (which, at least to Referee 3 as well, is a sufficient motivation), so specific problems have never been our motivation.  That being said, we’ve added Footnote 1 to mention a few kinds of problem (including a reference to a paragraph in Mu’s [2024] paper), but we avoid providing specific detail, which would distract the reader.
+We were motivated by the puzzling definition of upgrade (which, at least to Referee 3 as well, is a sufficient motivation), so specific problems have never been our motivation.  That being said, we’ve added Footnote 1 to mention a few kinds of problem (including a reference to a paragraph in Mu’s (2024) paper), but we avoid providing specific detail, which would distract the reader.
 
 > 2. You say on p2 "It may appear that this bottom-up strategy can be implemented
 > by representing each level as a list, but this turns out to be impossible."
 > Please briefly explain why, also making clear what you mean by "impossible".
 
-There was an explanation in our previous paper [Ko et al. 2025, Section 1.2], but it was somewhat involved.  We currently write ‘it will turn out that, to build the next level from a current one, we need to maintain more information in the data structure.’  This is perhaps the right amount of information to be given in an introductory section.
+There was an explanation in our previous paper (Ko et al. 2025, Section 1.2), but it was somewhat involved.  We currently write ‘it will turn out that, to build the next level from a current one, we need to maintain more information in the data structure.’  This is perhaps the right amount of information to be given in an introductory section.
 
 > 3. You say on p2 that the definition of upgrade "is not valid Agda".
 > Please explain why not, as you do on p5 for the specification (1.1) where the problem is the
@@ -129,7 +131,7 @@ We change ‘easy to deal with’ to ‘easier to deal with than the conditions�
 > less difficult work, for the developer --- perhaps because more work is done by the
 > implementation of the dependent-type machinery? Or something else again?
 
-The purpose of the entire S6.2 is to answer this question concretely.  The first sentence says ‘Mu [2024] *took pains* to prove that the two algorithms are extensionally equal, whereas in this pearl the equality seems to follow *almost for free* from parametricity.’  Then we explain why there’s such a big difference in the amount of proof effort.  The second paragraph says one reason is that type-driven development takes much less effort than equational derivation.  And the last paragraph says Mu’s inductive proof is a special case of a parametricity proof.
+The purpose of the entire S6.2 is to answer this question concretely.  The first sentence says ‘Mu (2024) *took pains* to prove that the two algorithms are extensionally equal, whereas in this pearl the equality seems to follow *almost for free* from parametricity.’  Then we explain why there’s such a big difference in the amount of proof effort.  The second paragraph says one reason is that type-driven development takes much less effort than equational derivation.  And the last paragraph says Mu’s inductive proof is a special case of a parametricity proof.
 
 To make it clearer, after the sentence ‘the definition of retabulate can be developed in a type-driven manner, which is more economical than Mu’s equational derivation’ we’ve added ‘since the type checker takes over a large part of the work’; and after the sentence ‘Therefore the proof of bu's unary parametricity would essentially be the proof of equation (5) generalised to all invariants.’ we’ve inserted ‘Then the uniqueness proof only needs to plug in the key part of the proof (namely the preservation of our chosen invariant) and does not need to go through the definition of bu.’.
 
@@ -176,7 +178,7 @@ Presumably that’s JFP’s numbering scheme for electronically published articl
 
 > p12 (in Van Muylder ref.) "[8](POPL)"
 
-That’s the PACMPL volume number.
+That’s the PACMPL volume number (which happens to coincide with the article number, so there are two 8s).
 
 > Referee: 2
 >
@@ -356,7 +358,7 @@ See the reply to the editor about ‘other ways to implement the algorithms’.
 >  would be worth spelling out what parts of the construction are proven
 >  and what postulates exist (if any).
 
-This is actually the kind of reaction we expect (and recorded at the end of Ko et al.’s [2025] S2).  This example really demonstrates the power of parametricity, but it’s not magic: we’ve discussed in S6.2 how parametricity helps to avoid most of Mu’s [2024] proof.  And see our reply to the editor about the status of parametricity support in Agda.
+This is actually the kind of reaction we expect (and recorded at the end of Ko et al.’s (2025) S2).  This example really demonstrates the power of parametricity, but it’s not magic: we’ve discussed in S6.2 how parametricity helps to avoid most of Mu’s (2024) proof.  And see our reply to the editor about the status of parametricity support in Agda.
 
 >  If an important part of the paper is establishing that induction
 >  principles are unique -- perhaps it might be worth illustrating this
@@ -414,7 +416,7 @@ The paragraph has been revised based on Referee 2’s suggestion.
 
 > 68: Why is it impossible to represent each level as a list?
 
-Copied from the reply to Referee 1:  There was an explanation in our previous paper [Ko et al. 2025, Section 1.2], but it was somewhat involved.  We currently write ‘it will turn out that, to build the next level from a current one, we need to maintain more information in the data structure.’  This is perhaps the right amount of information to be given in an introductory section.
+Copied from the reply to Referee 1:  There was an explanation in our previous paper (Ko et al. 2025, Section 1.2), but it was somewhat involved.  We currently write ‘it will turn out that, to build the next level from a current one, we need to maintain more information in the data structure.’  This is perhaps the right amount of information to be given in an introductory section.
 
 > 69: Maybe illustrating how one of the levels looks as a BT would be useful.
 
@@ -453,7 +455,7 @@ There is now some explanation about why this is existential quantification over 
 > empty trees) interesting (I expect I was supposed to!). Especially to see
 > the number of elements dropped in each branch.
 
-Yes!  We’ve included more explanation about Drop refining BT, hoping to provide more intuition early on: ‘The refinement from BT to Drop gives us a better idea of why Bird [2008] needed to use BT…’
+Yes!  We’ve included more explanation about Drop refining BT, hoping to provide more intuition early on: ‘The refinement from BT to Drop gives us a better idea of why Bird (2008) needed to use BT…’
 
 > 220: Does this have the same problem as (1.1) that it recomputes for
 > sublists? It seems that it would.

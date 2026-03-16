@@ -1,4 +1,4 @@
--- Checked with Agda 2.7.0.1 and Standard Library 2.2
+-- Checked with Agda 2.8.0 and Standard Library 2.3
 
 {-# OPTIONS --safe --with-K --large-indices --no-forced-argument-recursion #-}
 
